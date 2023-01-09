@@ -10,7 +10,7 @@ const client = new Client({
 
 client.connect();
 
-client.query(`Select * from users`, (err, res)=>{
+client.query(`Select * from users`, (err, res)=>{ //query to select all from a table
     if(!err){
         console.log(res.rows);
     } else{
@@ -18,3 +18,4 @@ client.query(`Select * from users`, (err, res)=>{
     }
     client.end;
 })
+
