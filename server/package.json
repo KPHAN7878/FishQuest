@@ -1,0 +1,42 @@
+{
+  "name": "quick-start_onnxruntime-node",
+  "private": true,
+  "version": "1.0.0",
+  "description": "This example is a demonstration of basic usage of ONNX Runtime Node.js binding.",
+  "main": "index.js",
+  "dependencies": {
+    "@nestjs/passport": "^9.0.0",
+    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/typeorm": "^9.0.1",
+    "@types/argon2": "^0.15.0",
+    "@types/express-session": "^1.17.5",
+    "@types/multer": "^1.4.7",
+    "@types/uuid": "^9.0.0",
+    "argon2": "^0.30.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "connect-typeorm": "^2.0.0",
+    "express-session": "^1.17.3",
+    "jimp": "^0.16.2",
+    "lodash": "^4.17.21",
+    "multer": "^1.4.5-lts.1",
+    "ndarray": "^1.0.19",
+    "ndarray-ops": "^1.2.2",
+    "nestjs": "^0.0.1",
+    "onnxruntime-node": "^1.13.1",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.8.0",
+    "typeorm": "^0.3.11",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.176",
+    "@types/node": "^18.11.18",
+    "@types/passport-local": "^1.0.35",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "start:dev": "npx nodemon"
+  }
+}
