@@ -26,9 +26,9 @@ export class UserController {
     return result;
   }
 
-  // @UseGuards(UserAuthGuard)
-  // @Post("changePassword")
-  // changePassword(@Req() req: Request) {}
+  @UseGuards(UserAuthGuard)
+  @Post("changePassword")
+  changePassword(@Req() req: Request) {}
 
   @UseGuards(LocalAuthGuard)
   @Post("login")
