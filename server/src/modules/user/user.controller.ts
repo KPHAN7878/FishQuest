@@ -43,8 +43,8 @@ export class UserController {
   }
 
   @Post("forgotPassword")
-  forgotPassword(@Body("email") email: string) {
-    return this.userService.forgotPassword(email);
+  forgotPassword(@Body("username") username: string) {
+    return this.userService.forgotPassword(username);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -65,7 +65,7 @@ export class UserController {
           return;
         }
         resolve(true);
-        res.redirect("");
+        res.send(true);
       })
     );
   }
@@ -84,7 +84,6 @@ export class UserController {
 
   @Get()
   async getAuthSession(@Session() session: Record<string, any>) {
-    console.log(session);
     session.authorized = true;
     return session;
   }

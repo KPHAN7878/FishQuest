@@ -5,10 +5,10 @@ import { UserEntity } from "../user/user.entity";
 @Entity()
 export class TokenEntity extends BaseEntity {
   @PrimaryColumn()
-  creatorId!: number;
+  userId!: number;
 
   @PrimaryColumn()
-  tokenId!: number; // 0 forgot username, 1 forgot password
+  tokenId!: number; //  0 forgot password
 
   @Column()
   code!: number;

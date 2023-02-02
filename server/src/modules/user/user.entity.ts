@@ -34,6 +34,6 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
   catches: CatchEntity[];
 
-  @OneToMany(() => TokenEntity, (userToken) => userToken.creatorId)
+  @OneToMany(() => TokenEntity, (userToken) => userToken.userId)
   tokens: TokenEntity[];
 }
