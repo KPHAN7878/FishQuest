@@ -6,10 +6,11 @@ import { AuthService } from "./auth.service";
 import { UserService } from "../user/user.service";
 import { LocalStrategy } from "./LocalStrategy";
 import { SessionSerializer } from "./SessionSerializer";
+import { TokenEntity } from "./token.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, TokenEntity]),
     PassportModule.register({ session: true }),
   ],
   providers: [AuthService, UserService, LocalStrategy, SessionSerializer],

@@ -21,3 +21,8 @@ export const dataSource = new DataSource({
 });
 
 export const COOKIE_NAME = "FISH_QUEST";
+
+export const DEV_EMAIL_ACC = {
+  user: "conner.kessler@ethereal.email", // generated ethereal user
+  pass: "m2t5Pcv4CTmUCEWfDu", // generated ethereal password
+};
