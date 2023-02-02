@@ -21,9 +21,11 @@ const main = async () => {
   app.use(
     session({
       name: COOKIE_NAME,
-      store: new TypeormStore().connect(sessionRepository),
+      store: new TypeormStore({
+        cleanupLimit: 1,
+      }).connect(sessionRepository),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 3,
       },
       saveUninitialized: false,
       secret: "f412FE23shf982hqf78",

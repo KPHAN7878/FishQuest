@@ -39,16 +39,34 @@ export class UserService {
     return this.userRepository.findOneBy({ id });
   }
 
-  async findUserByUsername(
+  async loginByUsername(
     username: string,
     password: string
   ): Promise<UserEntity | null> {
     const user = await this.userRepository.findOneBy({ username });
     if (!user) {
-      return user;
+      return null;
     }
 
     const valid = await argon2.verify(user.password, password);
     return valid ? user : null;
   }
+
+  async forgotUsername(email: string): Promise<boolean> {
+    const userEntries = await this.userRepository.findBy({ email });
+    if (!userEntries) {
+      return true;
+    }
+
+    const usernames =
+      userEntries.reduce((prev, { username }: UserEntity) => {
+        return `<div>${prev + username}</div>`;
+      }, "<div>") + `</div>`;
+
+    return true;
+  }
+
+  async forgotPassword(username: string) {}
+
+  async changePassword(userId: number, newPassword: string) {}
 }
