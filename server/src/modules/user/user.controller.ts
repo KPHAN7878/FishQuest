@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -15,6 +16,7 @@ import { HashPwdPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
 import { COOKIE_NAME } from "../../constants";
+import { Ctx } from "../../types";
 
 @Controller("user")
 export class UserController {
@@ -26,14 +28,29 @@ export class UserController {
     return result;
   }
 
-  @UseGuards(UserAuthGuard)
-  @Post("changePassword")
-  changePassword(@Req() req: Request) {}
+  // @UseGuards(UserAuthGuard)
+  // @Post("changePassword/:token")
+  // changePassword(
+  //   @Param("token") token: number,
+  //   @Body("newPassword") newPassword: string
+  // ) {
+  //   return this.userService.changePassword(number, newPassword);
+  // }
+
+  @Post("forgotUsername")
+  forgotUsername(@Body("email") email: string) {
+    return this.userService.forgotUsername(email);
+  }
+
+  @Post("forgotPassword")
+  forgotPassword(@Body("email") email: string) {
+    return this.userService.forgotPassword(email);
+  }
 
   @UseGuards(LocalAuthGuard)
   @Post("login")
-  async login(@Req() req: Request) {
-    return req.user;
+  async login(@Req() { user }: Ctx) {
+    return user;
   }
 
   @UseGuards(UserAuthGuard)
@@ -61,7 +78,7 @@ export class UserController {
 
   @UseGuards(UserAuthGuard)
   @Get("profile")
-  getProfile(@Req() { user }: Request) {
+  getProfile(@Req() { user }: Ctx) {
     return user;
   }
 

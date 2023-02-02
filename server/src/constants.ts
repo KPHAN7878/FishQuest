@@ -8,7 +8,7 @@ export const __prod__ = false;
 export const MODEL_PATH = `${__dirname}/classifier/model.onnx`;
 
 // FILES
-export const IMG_FILE_LIMIT = 1024 * 1024 * 16;
+export const IMG_FILE_LIMIT = 1024 * 1024 * 8;
 
 export const dataSource = new DataSource({
   type: "postgres",

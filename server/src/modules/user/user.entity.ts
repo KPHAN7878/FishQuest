@@ -3,10 +3,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { TokenEntity } from "../auth/token.entity";
 import { CatchEntity } from "../catch/catch.entity";
 
 @Entity()
@@ -31,4 +33,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
   catches: CatchEntity[];
+
+  @OneToMany(() => TokenEntity, (userToken) => userToken.creatorId)
+  tokens: TokenEntity[];
 }

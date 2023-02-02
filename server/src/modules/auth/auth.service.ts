@@ -9,6 +9,6 @@ export class AuthService {
     username: string,
     password: string
   ): Promise<UserEntity | null> {
-    return await this.userService.findUserByUsername(username, password);
+    return await this.userService.loginByUsername(username, password);
   }
 }

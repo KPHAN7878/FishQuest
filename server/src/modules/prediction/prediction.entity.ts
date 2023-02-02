@@ -1,8 +1,17 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity()
 export class Prediction extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column()
   creatorId!: number;
 
   @Column({ type: "int", default: 0 })
