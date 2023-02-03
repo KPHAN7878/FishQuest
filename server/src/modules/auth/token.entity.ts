@@ -1,4 +1,5 @@
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Tokens } from "../../types";
 import { UserEntity } from "../user/user.entity";
 
 // user can only have one token for each type
@@ -8,14 +9,14 @@ export class TokenEntity extends BaseEntity {
   userId!: number;
 
   @PrimaryColumn()
-  tokenId!: number; //  0 forgot password
+  tokenType!: Tokens; //  0 forgot password
 
   @Column()
-  code!: number;
+  code!: string;
 
   @Column()
   expiresAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.tokens)
+  @ManyToOne(() => UserEntity, (user) => user.tokens, { cascade: true })
   user: UserEntity;
 }
