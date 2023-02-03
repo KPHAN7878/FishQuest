@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { Password, RegisterInput, PasswordToken } from "./user.dto";
+import { RegisterInput, PasswordToken } from "./user.dto";
 import { HashPasswordPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
@@ -33,7 +33,7 @@ export class UserController {
   // Checks to see if a token submission is valid
   // for a user. Provide username, code, and token type
   @UseInterceptors(TokenInterceptor)
-  @Post("submitToken")
+  @Post("submit_token")
   submitToken(@Req() req: Ctx) {
     return req.token;
   }
