@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { UserEntity } from "./user.entity";
 import { Repository } from "typeorm";
-import { Register } from "./user.dto";
+import { Register, TokenInput } from "./user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError } from "../../types";
 import argon2 from "argon2";
@@ -75,25 +75,32 @@ export class UserService {
 
   // secure
   async forgotPassword(username: string): Promise<boolean> {
-    const user = await this.userRepository.findOneBy({ username });
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ["tokens"],
+    });
     if (!user) {
       return true;
     }
 
     const rng = seedrandom();
-    const code = +rng().toString().substring(3, 9);
-    const html = `<div>Code to reset ${user.username}'s password: ${code}</div>`;
+    const code = rng().toString().substring(3, 9);
+    const html = `<div>
+                  Code to reset ${user.username}'s password:
+                  <div style="font-weight: bold;">${code}</div>
+                  </div>`;
 
     const expireDate = new Date();
     expireDate.setDate(expireDate.getDate() + 1);
 
     const token = await this.tokenRepository.findOne({
-      where: { userId: user.id, tokenId: 0 },
+      where: { userId: user.id, tokenType: "password" },
     });
 
     if (token) {
+      console.log("updating");
       await this.tokenRepository.update(
-        { tokenId: token.tokenId, userId: token.userId },
+        { tokenType: token.tokenType, userId: token.userId },
         {
           expiresAt: expireDate,
           code,
@@ -102,12 +109,17 @@ export class UserService {
     } else {
       const tokenEntry = TokenEntity.create({
         userId: user.id,
-        tokenId: 0,
+        tokenType: "password",
         expiresAt: expireDate,
         code,
       });
+      console.log(tokenEntry);
 
-      this.tokenRepository.save(tokenEntry);
+      await this.tokenRepository.save(tokenEntry);
+      user.tokens.push(tokenEntry);
+      console.log(user);
+
+      this.userRepository.save(user);
     }
 
     sendEmail(user.email, html, "Change Password");
@@ -115,5 +127,51 @@ export class UserService {
     return true;
   }
 
-  async changePassword(userId: number, newPassword: string) {}
+  async findToken({
+    username,
+    code,
+    tokenType,
+  }: TokenInput): Promise<TokenEntity | ErrorRes> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ["tokens"],
+    });
+    const today = new Date();
+
+    const token = user!.tokens.find((token: TokenEntity) => {
+      return token.tokenType === tokenType;
+    });
+
+    let errors: FieldError[] = [];
+    if (!token) {
+      errors.push({
+        message: "no password reset code",
+        field: "code",
+      });
+    } else if (code !== token!.code) {
+      errors.push({
+        message: "invalid code",
+        field: "code",
+      });
+    } else if (today > token!.expiresAt) {
+      errors.push({
+        message: "token expired",
+        field: "expiresAt",
+      });
+    }
+    if (errors.length) {
+      return { errors };
+    }
+
+    return token!;
+  }
+
+  async changePassword(userId: number, newPassword: string) {
+    await this.userRepository.update(
+      { id: userId },
+      {
+        password: newPassword,
+      }
+    );
+  }
 }

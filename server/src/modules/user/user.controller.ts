@@ -11,12 +11,13 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { Register } from "./user.dto";
+import { Password, Register } from "./user.dto";
 import { HashPwdPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
 import { COOKIE_NAME } from "../../constants";
-import { Ctx } from "../../types";
+import { Ctx, ErrorRes } from "../../types";
+import { TokenInterceptor } from "../auth/token.interceptor";
 
 @Controller("user")
 export class UserController {
@@ -28,14 +29,26 @@ export class UserController {
     return result;
   }
 
-  // @UseGuards(UserAuthGuard)
-  // @Post("changePassword/:token")
-  // changePassword(
-  //   @Param("token") token: number,
-  //   @Body("newPassword") newPassword: string
-  // ) {
-  //   return this.userService.changePassword(number, newPassword);
-  // }
+  // Checks to see if a token submission is valid
+  // for a user. Provide username, code, and token type
+  @UseInterceptors(TokenInterceptor)
+  @Post("submitToken")
+  submitToken(@Req() req: Ctx) {
+    return req.token;
+  }
+
+  @UseInterceptors(TokenInterceptor)
+  @Post("changePassword")
+  changePassword(
+    @Body(HashPwdPipe<Password>) newPassword: string,
+    @Req() { token }: Ctx
+  ) {
+    if ((token && "errors" in token) || !token) {
+      return;
+    } else {
+      return this.userService.changePassword(token.userId, newPassword);
+    }
+  }
 
   @Post("forgotUsername")
   forgotUsername(@Body("email") email: string) {
@@ -70,6 +83,7 @@ export class UserController {
     );
   }
 
+  // Checks if user is logged in
   @UseGuards(UserAuthGuard)
   @Get("status")
   async getAuthStatus(@Req() req: Request) {
