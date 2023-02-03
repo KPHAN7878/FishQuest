@@ -162,9 +162,6 @@ export class UserService {
   }
 
   async changePassword(userId: number, newPassword: string) {
-    console.log("from changePassword");
-    console.log(userId);
-    console.log(newPassword);
     await this.userRepository.update(
       { id: userId },
       {
