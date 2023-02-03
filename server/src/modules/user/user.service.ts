@@ -36,10 +36,6 @@ export class UserService {
     return userEntry;
   }
 
-  async getAllUsers(): Promise<UserEntity[]> {
-    return await UserEntity.find();
-  }
-
   findUserById(id: number) {
     return this.userRepository.findOneBy({ id });
   }
@@ -145,20 +141,24 @@ export class UserService {
     let errors: FieldError[] = [];
     if (!token) {
       errors.push({
-        message: "no password reset code",
+        message: `no code for ${tokenType}`,
         field: "code",
       });
-    } else if (code !== token!.code) {
-      errors.push({
-        message: "invalid code",
-        field: "code",
-      });
-    } else if (today > token!.expiresAt) {
-      errors.push({
-        message: "token expired",
-        field: "expiresAt",
-      });
+    } else {
+      if (code !== token!.code) {
+        errors.push({
+          message: "invalid code",
+          field: "code",
+        });
+      }
+      if (today > token!.expiresAt) {
+        errors.push({
+          message: "token expired",
+          field: "expiresAt",
+        });
+      }
     }
+
     if (errors.length) {
       return { errors };
     }
