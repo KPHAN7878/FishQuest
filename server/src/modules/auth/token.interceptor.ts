@@ -6,16 +6,23 @@ import {
   Inject,
 } from "@nestjs/common";
 import { map, Observable } from "rxjs";
+import { TokenInput } from "../user/user.dto";
 import { AuthService } from "./auth.service";
 
 @Injectable()
 export class TokenInterceptor implements NestInterceptor {
   constructor(@Inject(AuthService) private readonly authService: AuthService) {}
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler
+  ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    const token = this.authService.validateToken(request.body);
+    const token = await this.authService.validateToken(
+      request.body as TokenInput
+    );
 
     request.token = token;
+
     return next.handle().pipe(map((value: any) => value));
   }
 }
