@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { UserEntity } from "./user.entity";
 import { Repository } from "typeorm";
-import { Register, TokenInput } from "./user.dto";
+import { RegisterInput, TokenInput } from "./user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError } from "../../types";
 import argon2 from "argon2";
@@ -18,7 +18,7 @@ export class UserService {
     private readonly tokenRepository: Repository<TokenEntity>
   ) {}
 
-  async insert(regInfo: Register): Promise<UserEntity | ErrorRes> {
+  async insert(regInfo: RegisterInput): Promise<UserEntity | ErrorRes> {
     const userEntry = UserEntity.create(regInfo as UserEntity);
 
     try {
@@ -69,7 +69,6 @@ export class UserService {
     return true;
   }
 
-  // secure
   async forgotPassword(username: string): Promise<boolean> {
     const user = await this.userRepository.findOne({
       where: { username },
@@ -94,7 +93,6 @@ export class UserService {
     });
 
     if (token) {
-      console.log("updating");
       await this.tokenRepository.update(
         { tokenType: token.tokenType, userId: token.userId },
         {
@@ -109,12 +107,9 @@ export class UserService {
         expiresAt: expireDate,
         code,
       });
-      console.log(tokenEntry);
 
       await this.tokenRepository.save(tokenEntry);
       user.tokens.push(tokenEntry);
-      console.log(user);
-
       this.userRepository.save(user);
     }
 
@@ -167,6 +162,9 @@ export class UserService {
   }
 
   async changePassword(userId: number, newPassword: string) {
+    console.log("from changePassword");
+    console.log(userId);
+    console.log(newPassword);
     await this.userRepository.update(
       { id: userId },
       {

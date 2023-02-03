@@ -5,6 +5,7 @@ import {
   IsStrongPassword,
   Length,
   IsEmail,
+  IsString,
 } from "class-validator";
 
 const passwordOptions = {
@@ -31,7 +32,7 @@ export class Password {
   password: string;
 }
 
-export class Register extends Password {
+export class RegisterInput extends Password {
   @Length(3, 16)
   username: string;
 
@@ -44,13 +45,17 @@ export class User {
   id: number;
 }
 
-export class UserResponse {
-  entry?: UserEntity;
-  errors?: ErrorRes[];
-}
-
-export class TokenInput {
+export interface TokenInput {
   username: string;
   code: string;
+  tokenType: Tokens;
+}
+
+export class PasswordToken extends Password implements TokenInput {
+  @IsString()
+  username: string;
+  @IsString()
+  code: string;
+  @IsString()
   tokenType: Tokens;
 }

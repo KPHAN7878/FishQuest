@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Req,
   Res,
@@ -11,12 +10,12 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { Password, Register } from "./user.dto";
-import { HashPwdPipe } from "./user.pipe";
+import { Password, RegisterInput, PasswordToken } from "./user.dto";
+import { HashPasswordPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
 import { COOKIE_NAME } from "../../constants";
-import { Ctx, ErrorRes } from "../../types";
+import { Ctx } from "../../types";
 import { TokenInterceptor } from "../auth/token.interceptor";
 
 @Controller("user")
@@ -24,7 +23,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post("register")
-  async registerUser(@Body(HashPwdPipe<Register>) regInfo: Register) {
+  async registerUser(
+    @Body(HashPasswordPipe<RegisterInput>) regInfo: RegisterInput
+  ) {
     const result = await this.userService.insert(regInfo);
     return result;
   }
@@ -40,13 +41,16 @@ export class UserController {
   @UseInterceptors(TokenInterceptor)
   @Post("changePassword")
   changePassword(
-    @Body(HashPwdPipe<Password>) newPassword: string,
+    @Body(HashPasswordPipe<PasswordToken>)
+    { password }: PasswordToken,
     @Req() { token }: Ctx
   ) {
     if ((token && "errors" in token) || !token) {
+      console.log(token);
       return;
     } else {
-      return this.userService.changePassword(token.userId, newPassword);
+      console.log(token);
+      return this.userService.changePassword(token.userId, password);
     }
   }
 
