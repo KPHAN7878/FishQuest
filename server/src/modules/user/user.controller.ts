@@ -46,10 +46,8 @@ export class UserController {
     @Req() { token }: Ctx
   ) {
     if ((token && "errors" in token) || !token) {
-      console.log(token);
       return;
     } else {
-      console.log(token);
       return this.userService.changePassword(token.userId, password);
     }
   }
