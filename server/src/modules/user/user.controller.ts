@@ -33,7 +33,7 @@ export class UserController {
   // Checks to see if a token submission is valid
   // for a user. Provide username, code, and token type
   @UseInterceptors(TokenInterceptor)
-  @Post("submit_token")
+  @Post("submitToken")
   submitToken(@Req() req: Ctx) {
     return req.token;
   }
