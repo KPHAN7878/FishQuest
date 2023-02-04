@@ -98,6 +98,15 @@ export class UserController {
     return user;
   }
 
+  @UseGuards(UserAuthGuard)
+  @Post("change-username")
+  changeUsername(
+    @Req() { user }: Ctx,
+    @Body("newUsername") newUsername: string
+  ) {
+    return this.userService.changeUsername(user!, newUsername);
+  }
+
   @Get()
   async getAuthSession(@Session() session: Record<string, any>) {
     session.authorized = true;

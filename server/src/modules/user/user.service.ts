@@ -161,6 +161,28 @@ export class UserService {
     return token!;
   }
 
+  async changeUsername(
+    user: UserEntity,
+    newUsername: string
+  ): Promise<UserEntity | ErrorRes> {
+    const userEntry = await this.userRepository.findOne({
+      where: { username: newUsername },
+    });
+
+    if (userEntry) {
+      const error: FieldError = {
+        message: "username taken",
+        field: "username",
+      };
+      return { errors: [error] };
+    }
+
+    user.username = newUsername;
+    this.userRepository.save(user);
+
+    return user;
+  }
+
   async changePassword(userId: number, newPassword: string) {
     await this.userRepository.update(
       { id: userId },
@@ -168,5 +190,7 @@ export class UserService {
         password: newPassword,
       }
     );
+
+    this.tokenRepository.delete({ userId, tokenType: "password" });
   }
 }
