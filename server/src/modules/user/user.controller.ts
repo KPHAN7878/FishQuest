@@ -33,13 +33,13 @@ export class UserController {
   // Checks to see if a token submission is valid
   // for a user. Provide username, code, and token type
   @UseInterceptors(TokenInterceptor)
-  @Post("submitToken")
+  @Post("submit-token")
   submitToken(@Req() req: Ctx) {
     return req.token;
   }
 
   @UseInterceptors(TokenInterceptor)
-  @Post("changePassword")
+  @Post("change-password")
   changePassword(
     @Body(HashPasswordPipe<PasswordToken>)
     { password }: PasswordToken,
@@ -52,12 +52,12 @@ export class UserController {
     }
   }
 
-  @Post("forgotUsername")
+  @Post("forgot-username")
   forgotUsername(@Body("email") email: string) {
     return this.userService.forgotUsername(email);
   }
 
-  @Post("forgotPassword")
+  @Post("forgot-password")
   forgotPassword(@Body("username") username: string) {
     return this.userService.forgotPassword(username);
   }
