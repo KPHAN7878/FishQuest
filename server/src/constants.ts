@@ -12,9 +12,9 @@ export const IMG_FILE_LIMIT = 1024 * 1024 * 8;
 
 export const dataSource = new DataSource({
   type: "postgres",
-  username: "admin",
-  password: "",
-  database: "FishQuest",
+  username: "postgres", //username: "admin",
+  password: "DataDolphin973", //password: "",
+  database: "fishquest", //database: "FishQuest",
   entities: [__dirname + "/**/*.entity.{ts,js}"],
   logging: false,
   synchronize: !__prod__,
