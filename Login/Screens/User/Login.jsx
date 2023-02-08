@@ -193,8 +193,9 @@ const Login = (props) => {
         style={styles.textInput}
         onChangeText={(text) => setPassword(text)}
       />
-      <Animated.View style={[styles.formButton, formButtonAnimatedStyle]}>
+      <Animated.View style={[formButtonAnimatedStyle]}>
         <Pressable
+          style={styles.formButton}
           onPress={() => {
             formButtonScale.value = withSequence(
               withSpring(1.5),
