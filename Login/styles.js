@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   },
 
   bottomContainer: {
-    marginBottom: height * 0.1,
+    marginBottom: height * 0.05,
     postition: "absolute",
     bottom: 0,
   },

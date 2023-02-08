@@ -36,8 +36,8 @@ const Login = (props) => {
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
       isInitialScreen,
-      [0, 1],
-      [-height / 1.55, 0]
+      [0, 1, 2],
+      [-height * 0.55, 0, -height * 1.0]
     );
     return {
       transform: [
@@ -67,9 +67,17 @@ const Login = (props) => {
   });
 
   const formAnimatedStyle = useAnimatedStyle(() => {
+    const interpolation = interpolate(
+      isInitialScreen,
+      [0, 2],
+      [0, -height * 0.35]
+    );
     return {
+      transform: [
+        { translateY: withTiming(interpolation, { duration: 1000 }) },
+      ],
       opacity:
-        isInitialScreen === 0
+        isInitialScreen !== 1
           ? withDelay(400, withTiming(1, { duration: 800 }))
           : withTiming(0, { duration: 300 }),
     };
@@ -142,9 +150,9 @@ const Login = (props) => {
   const initialScreen = (
     <View
       style={{
-        marginBottom: height * 0.1,
-        display: isInitialScreen ? "block" : "none",
-        visibility: isInitialScreen ? "hidden" : "visible",
+        marginBottom: height * 0.05,
+        display: isInitialScreen === 1 ? "block" : "none",
+        visibility: isInitialScreen === 1 ? "hidden" : "visible",
       }}
     >
       <View>
@@ -162,13 +170,14 @@ const Login = (props) => {
     </View>
   );
 
+
   const formScreen = (
     <Animated.View
       style={[
         {
-          marginBottom: height * 0.1,
-          display: isInitialScreen ? "none" : "block",
-          visibility: isInitialScreen ? "visible" : "hidden",
+          marginBottom: height * 0.05,
+          display: isInitialScreen === 1 ? "none" : "block",
+          visibility: isInitialScreen === 1 ? "visible" : "hidden",
         },
         formAnimatedStyle,
       ]}
@@ -179,6 +188,12 @@ const Login = (props) => {
           placeholderTextColor="black"
           style={styles.textInput}
           onChangeText={(text) => setEmail(text)}
+          onFocus={() => {
+            setInitialScreen(2);
+          }}
+          onSubmitEditing={() => {
+            setInitialScreen(0);
+          }}
         />
       )}
       <TextInput
@@ -186,12 +201,24 @@ const Login = (props) => {
         placeholderTextColor="black"
         style={styles.textInput}
         onChangeText={(text) => setUsername(text)}
+        onFocus={() => {
+          setInitialScreen(2);
+        }}
+        onSubmitEditing={() => {
+          setInitialScreen(0);
+        }}
       />
       <TextInput
         placeholder="Password"
         placeholderTextColor="black"
         style={styles.textInput}
         onChangeText={(text) => setPassword(text)}
+        onFocus={() => {
+          setInitialScreen(2);
+        }}
+        onSubmitEditing={() => {
+          setInitialScreen(0);
+        }}
       />
       <Animated.View style={[formButtonAnimatedStyle]}>
         <Pressable
