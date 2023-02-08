@@ -1,6 +1,3 @@
-//import React from 'react'
-
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -28,7 +25,7 @@ import Animated, {
 
 const Login = (props) => {
   const { height, width } = Dimensions.get("window");
-  const imagePosition = useSharedValue(1);
+  const [isInitialScreen, setInitialScreen] = useState(1);
   const formButtonScale = useSharedValue(1);
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -38,7 +35,7 @@ const Login = (props) => {
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
-      imagePosition.value,
+      isInitialScreen,
       [0, 1],
       [-height / 1.55, 0]
     );
@@ -50,9 +47,9 @@ const Login = (props) => {
   });
 
   const buttonsAnimatedStyle = useAnimatedStyle(() => {
-    const interpolation = interpolate(imagePosition.value, [0, 1], [250, 0]);
+    const interpolation = interpolate(isInitialScreen, [0, 1], [250, 0]);
     return {
-      opacity: withTiming(imagePosition.value, { duration: 500 }),
+      opacity: withTiming(isInitialScreen, { duration: 500 }),
       transform: [
         { translateY: withTiming(interpolation, { duration: 1000 }) },
       ],
@@ -60,9 +57,9 @@ const Login = (props) => {
   });
 
   const closeButtonContainerStyle = useAnimatedStyle(() => {
-    const interpolation = interpolate(imagePosition.value, [0, 1], [180, 360]);
+    const interpolation = interpolate(isInitialScreen, [0, 1], [180, 360]);
     return {
-      opacity: withTiming(imagePosition.value === 1 ? 0 : 1, { duration: 800 }),
+      opacity: withTiming(isInitialScreen === 1 ? 0 : 1, { duration: 800 }),
       transform: [
         { rotate: withTiming(interpolation + "deg", { duration: 1000 }) },
       ],
@@ -72,14 +69,14 @@ const Login = (props) => {
   const formAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity:
-        imagePosition.value === 0
+        isInitialScreen === 0
           ? withDelay(400, withTiming(1, { duration: 800 }))
           : withTiming(0, { duration: 300 }),
     };
   });
 
   const loginHandler = () => {
-    imagePosition.value = 0;
+    setInitialScreen(0);
     if (isRegistering) {
       setIsRegistering(false);
     }
@@ -92,7 +89,7 @@ const Login = (props) => {
   });
 
   const registerHandler = () => {
-    imagePosition.value = 0;
+    setInitialScreen(0);
     if (!isRegistering) {
       setIsRegistering(true);
     }
@@ -157,28 +154,46 @@ const Login = (props) => {
             clipPath="url(#clipPathId)"
           />
         </Svg>
-        <TouchableOpacity onPress={() => (imagePosition.value = 1)}>
-          <Animated.View
-            style={[styles.closeButtonContainer, closeButtonContainerStyle]}
-          >
+        <TouchableOpacity
+          style={[styles.closeButtonContainer]}
+          onPress={() => {
+            setInitialScreen(1);
+          }}
+        >
+          <Animated.View style={[closeButtonContainerStyle]}>
             <Text>X</Text>
           </Animated.View>
         </TouchableOpacity>
       </Animated.View>
 
-      <View style={styles.bottomContainer}>
-        <Animated.View style={buttonsAnimatedStyle}>
-          <Pressable style={styles.button} onPress={loginHandler}>
-            <Text style={styles.buttonText}>LOG IN</Text>
-          </Pressable>
-        </Animated.View>
-        <Animated.View style={buttonsAnimatedStyle}>
-          <Pressable style={styles.button} onPress={registerHandler}>
-            <Text style={styles.buttonText}>REGISTER</Text>
-          </Pressable>
-        </Animated.View>
-
-        <Animated.View style={[styles.formInputContainer, formAnimatedStyle]}>
+      {isInitialScreen ? (
+        <View
+          style={{
+            marginBottom: height * 0.1,
+          }}
+        >
+          <View>
+            <Animated.View style={buttonsAnimatedStyle}>
+              <Pressable style={styles.button} onPress={loginHandler}>
+                <Text style={styles.buttonText}>LOG IN</Text>
+              </Pressable>
+            </Animated.View>
+            <Animated.View style={buttonsAnimatedStyle}>
+              <Pressable style={styles.button} onPress={registerHandler}>
+                <Text style={styles.buttonText}>REGISTER</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </View>
+      ) : (
+        <Animated.View
+          style={[
+            {
+              marginBottom: height * 0.1,
+            },
+            formAnimatedStyle,
+          ]}
+        >
           {isRegistering && (
             <TextInput
               placeholder="Email"
@@ -215,7 +230,7 @@ const Login = (props) => {
             </Pressable>
           </Animated.View>
         </Animated.View>
-      </View>
+      )}
     </Animated.View>
   );
 };

@@ -5,6 +5,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-end",
+    borderBottomWidth: 2,
+  },
+
+  bottomContainer: {
+    marginBottom: height * 0.1,
+    postition: "absolute",
+    bottom: 0,
   },
 
   button: {
@@ -24,11 +31,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
     letterSpacing: 0.5,
-  },
-
-  bottemContainer: {
-    justifyContent: "center",
-    height: height / 3,
   },
 
   textInput: {
@@ -61,16 +63,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
-  formInputContainer: {
-    marginBottom: 45,
-    // ...StyleSheet.absoluteFill,
-    // zIndex: -1,
-    // justifyContent: 'center',
-  },
-
   closeButtonContainer: {
-    height: 40,
-    width: 40,
+    minHeight: 40,
+    minWidth: 40,
     justifyContent: "center",
     alignSelf: "center",
     shadowColor: "#000",
