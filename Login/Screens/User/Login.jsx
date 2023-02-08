@@ -75,18 +75,18 @@ const Login = (props) => {
     };
   });
 
+  const formButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: formButtonScale.value }],
+    };
+  });
+
   const loginHandler = () => {
     setInitialScreen(0);
     if (isRegistering) {
       setIsRegistering(false);
     }
   };
-
-  const formButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: formButtonScale.value }],
-    };
-  });
 
   const registerHandler = () => {
     setInitialScreen(0);
@@ -139,6 +139,78 @@ const Login = (props) => {
     }
   };
 
+  const initialScreen = (
+    <View
+      style={{
+        marginBottom: height * 0.1,
+        display: isInitialScreen ? "block" : "none",
+        visibility: isInitialScreen ? "hidden" : "visible",
+      }}
+    >
+      <View>
+        <Animated.View style={buttonsAnimatedStyle}>
+          <Pressable style={styles.button} onPress={loginHandler}>
+            <Text style={styles.buttonText}>LOG IN</Text>
+          </Pressable>
+        </Animated.View>
+        <Animated.View style={buttonsAnimatedStyle}>
+          <Pressable style={styles.button} onPress={registerHandler}>
+            <Text style={styles.buttonText}>REGISTER</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </View>
+  );
+
+  const formScreen = (
+    <Animated.View
+      style={[
+        {
+          marginBottom: height * 0.1,
+          display: isInitialScreen ? "none" : "block",
+          visibility: isInitialScreen ? "visible" : "hidden",
+        },
+        formAnimatedStyle,
+      ]}
+    >
+      {isRegistering && (
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="black"
+          style={styles.textInput}
+          onChangeText={(text) => setEmail(text)}
+        />
+      )}
+      <TextInput
+        placeholder="Username"
+        placeholderTextColor="black"
+        style={styles.textInput}
+        onChangeText={(text) => setUsername(text)}
+      />
+      <TextInput
+        placeholder="Password"
+        placeholderTextColor="black"
+        style={styles.textInput}
+        onChangeText={(text) => setPassword(text)}
+      />
+      <Animated.View style={[styles.formButton, formButtonAnimatedStyle]}>
+        <Pressable
+          onPress={() => {
+            formButtonScale.value = withSequence(
+              withSpring(1.5),
+              withSpring(1)
+            );
+            registerOrLogin(isRegistering);
+          }}
+        >
+          <Text style={styles.buttonText}>
+            {isRegistering ? "REGISTER" : "LOG IN"}
+          </Text>
+        </Pressable>
+      </Animated.View>
+    </Animated.View>
+  );
+
   return (
     <Animated.View style={styles.container}>
       <Animated.View style={[StyleSheet.absoluteFill, imageAnimatedStyle]}>
@@ -165,72 +237,8 @@ const Login = (props) => {
           </Animated.View>
         </TouchableOpacity>
       </Animated.View>
-
-      {isInitialScreen ? (
-        <View
-          style={{
-            marginBottom: height * 0.1,
-          }}
-        >
-          <View>
-            <Animated.View style={buttonsAnimatedStyle}>
-              <Pressable style={styles.button} onPress={loginHandler}>
-                <Text style={styles.buttonText}>LOG IN</Text>
-              </Pressable>
-            </Animated.View>
-            <Animated.View style={buttonsAnimatedStyle}>
-              <Pressable style={styles.button} onPress={registerHandler}>
-                <Text style={styles.buttonText}>REGISTER</Text>
-              </Pressable>
-            </Animated.View>
-          </View>
-        </View>
-      ) : (
-        <Animated.View
-          style={[
-            {
-              marginBottom: height * 0.1,
-            },
-            formAnimatedStyle,
-          ]}
-        >
-          {isRegistering && (
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="black"
-              style={styles.textInput}
-              onChangeText={(text) => setEmail(text)}
-            />
-          )}
-          <TextInput
-            placeholder="Username"
-            placeholderTextColor="black"
-            style={styles.textInput}
-            onChangeText={(text) => setUsername(text)}
-          />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="black"
-            style={styles.textInput}
-            onChangeText={(text) => setPassword(text)}
-          />
-          <Animated.View style={[styles.formButton, formButtonAnimatedStyle]}>
-            <Pressable
-              onPress={() => {
-                formButtonScale.value = withSequence(
-                  withSpring(1.5),
-                  withSpring(1)
-                );
-                registerOrLogin(isRegistering);
-              }}
-            >
-              <Text style={styles.buttonText}>
-                {isRegistering ? "REGISTER" : "LOG IN"}
-              </Text>
-            </Pressable>
-          </Animated.View>
-        </Animated.View>
-      )}
+      {initialScreen}
+      {formScreen}
     </Animated.View>
   );
 };
