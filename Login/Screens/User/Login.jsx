@@ -7,6 +7,7 @@ import {
   TextInput,
   Pressable,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 
 import styles from "../../styles";
@@ -25,7 +26,7 @@ import Animated, {
 
 const Login = (props) => {
   const { height, width } = Dimensions.get("window");
-  const [isInitialScreen, setInitialScreen] = useState(1);
+  const [screenState, setScreenState] = useState(1);
   const formButtonScale = useSharedValue(1);
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -35,7 +36,7 @@ const Login = (props) => {
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
-      isInitialScreen,
+      screenState,
       [0, 1, 2],
       [-height * 0.55, 0, -height * 1.0]
     );
@@ -47,9 +48,9 @@ const Login = (props) => {
   });
 
   const buttonsAnimatedStyle = useAnimatedStyle(() => {
-    const interpolation = interpolate(isInitialScreen, [0, 1], [250, 0]);
+    const interpolation = interpolate(screenState, [0, 1, 2], [250, 0, 250]);
     return {
-      opacity: withTiming(isInitialScreen, { duration: 500 }),
+      opacity: withTiming(screenState, { duration: 500 }),
       transform: [
         { translateY: withTiming(interpolation, { duration: 1000 }) },
       ],
@@ -57,9 +58,9 @@ const Login = (props) => {
   });
 
   const closeButtonContainerStyle = useAnimatedStyle(() => {
-    const interpolation = interpolate(isInitialScreen, [0, 1], [180, 360]);
+    const interpolation = interpolate(screenState, [0, 1], [180, 360]);
     return {
-      opacity: withTiming(isInitialScreen === 1 ? 0 : 1, { duration: 800 }),
+      opacity: withTiming(screenState === 1 ? 0 : 1, { duration: 800 }),
       transform: [
         { rotate: withTiming(interpolation + "deg", { duration: 1000 }) },
       ],
@@ -67,17 +68,13 @@ const Login = (props) => {
   });
 
   const formAnimatedStyle = useAnimatedStyle(() => {
-    const interpolation = interpolate(
-      isInitialScreen,
-      [0, 2],
-      [0, -height * 0.35]
-    );
+    const interpolation = interpolate(screenState, [0, 2], [0, -height * 0.35]);
     return {
       transform: [
         { translateY: withTiming(interpolation, { duration: 1000 }) },
       ],
       opacity:
-        isInitialScreen !== 1
+        screenState !== 1
           ? withDelay(400, withTiming(1, { duration: 800 }))
           : withTiming(0, { duration: 300 }),
     };
@@ -90,14 +87,14 @@ const Login = (props) => {
   });
 
   const loginHandler = () => {
-    setInitialScreen(0);
+    setScreenState(0);
     if (isRegistering) {
       setIsRegistering(false);
     }
   };
 
   const registerHandler = () => {
-    setInitialScreen(0);
+    setScreenState(0);
     if (!isRegistering) {
       setIsRegistering(true);
     }
@@ -151,8 +148,8 @@ const Login = (props) => {
     <View
       style={{
         marginBottom: height * 0.05,
-        display: isInitialScreen === 1 ? "block" : "none",
-        visibility: isInitialScreen === 1 ? "hidden" : "visible",
+        display: screenState === 1 ? "block" : "none",
+        visibility: screenState === 1 ? "hidden" : "visible",
       }}
     >
       <View>
@@ -170,14 +167,13 @@ const Login = (props) => {
     </View>
   );
 
-
   const formScreen = (
     <Animated.View
       style={[
         {
           marginBottom: height * 0.05,
-          display: isInitialScreen === 1 ? "none" : "block",
-          visibility: isInitialScreen === 1 ? "visible" : "hidden",
+          display: screenState === 1 ? "none" : "block",
+          visibility: screenState === 1 ? "visible" : "hidden",
         },
         formAnimatedStyle,
       ]}
@@ -189,10 +185,10 @@ const Login = (props) => {
           style={styles.textInput}
           onChangeText={(text) => setEmail(text)}
           onFocus={() => {
-            setInitialScreen(2);
+            setScreenState(2);
           }}
           onSubmitEditing={() => {
-            setInitialScreen(0);
+            setScreenState(0);
           }}
         />
       )}
@@ -202,10 +198,10 @@ const Login = (props) => {
         style={styles.textInput}
         onChangeText={(text) => setUsername(text)}
         onFocus={() => {
-          setInitialScreen(2);
+          setScreenState(2);
         }}
         onSubmitEditing={() => {
-          setInitialScreen(0);
+          setScreenState(0);
         }}
       />
       <TextInput
@@ -214,10 +210,10 @@ const Login = (props) => {
         style={styles.textInput}
         onChangeText={(text) => setPassword(text)}
         onFocus={() => {
-          setInitialScreen(2);
+          setScreenState(2);
         }}
         onSubmitEditing={() => {
-          setInitialScreen(0);
+          setScreenState(0);
         }}
       />
       <Animated.View style={[formButtonAnimatedStyle]}>
@@ -257,7 +253,8 @@ const Login = (props) => {
         <TouchableOpacity
           style={[styles.closeButtonContainer]}
           onPress={() => {
-            setInitialScreen(1);
+            Keyboard.dismiss();
+            setScreenState(1);
           }}
         >
           <Animated.View style={[closeButtonContainerStyle]}>
