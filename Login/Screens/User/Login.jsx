@@ -4,7 +4,6 @@ import {
   Text,
   View,
   Dimensions,
-  TextInput,
   Pressable,
   TouchableOpacity,
   Keyboard,
@@ -12,7 +11,8 @@ import {
 
 import styles from "../../styles";
 import Svg, { Image, Ellipse, ClipPath } from "react-native-svg";
-import axios from "axios";
+import { FishQuestClient } from "../../utils/connection";
+import { InputField } from "../Components/InputField";
 
 import Animated, {
   useSharedValue,
@@ -23,8 +23,9 @@ import Animated, {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
+import { toErrorMap } from "../../utils/toErrorMap";
 
-const Login = (props) => {
+const Login = () => {
   const { height, width } = Dimensions.get("window");
   const [screenState, setScreenState] = useState(1);
   const formButtonScale = useSharedValue(1);
@@ -33,12 +34,13 @@ const Login = (props) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
       screenState,
       [0, 1, 2],
-      [-height * 0.55, 0, -height * 1.0]
+      [-height * 0.6, 0, -height * 1.0]
     );
     return {
       transform: [
@@ -108,39 +110,13 @@ const Login = (props) => {
         password: password,
       };
 
-      await axios
-        .post("http://YOUR IP ADDRESS:3000/user/register", newUser)
-        .then((res) => {
-          console.log(res);
-          // if (res.status == 200) {
-          //     Toast.show({
-          //         topOffset: 60,
-          //         type: "success",
-          //         text1: "Registration Succeeded",
-          //         text2: "Please Login into your account",
-          //     })
-          //     setTimeout(() => {
-          //         props.navigation.navigate("Login");
-          //     }, 500)
-          // }
+      const res = await FishQuestClient.post("user/register", newUser);
 
-          if (res.status == 201) {
-            Toast.show({
-              topOffset: 60,
-              type: "success",
-              text1: "Registration Succeeded",
-              text2: "Please Login into your account",
-            });
-          }
-        })
-        .catch((error) => {
-          Toast.show({
-            topOffset: 60,
-            type: "error",
-            text1: "Something went wrong",
-            text2: "Please try again",
-          });
-        });
+      if (res.data?.errors) {
+        const errors = toErrorMap(res.data.errors);
+        console.log(errors);
+        setErrorMessage(errors);
+      }
     }
   };
 
@@ -179,43 +155,35 @@ const Login = (props) => {
       ]}
     >
       {isRegistering && (
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="black"
-          style={styles.textInput}
-          onChangeText={(text) => setEmail(text)}
-          onFocus={() => {
-            setScreenState(2);
+        <InputField
+          name="email"
+          label="Email"
+          setValue={(text) => setEmail(text)}
+          setScreenState={(val) => {
+            setScreenState(val);
           }}
-          onSubmitEditing={() => {
-            setScreenState(0);
-          }}
+          error={errorMessage}
         />
       )}
-      <TextInput
-        placeholder="Username"
-        placeholderTextColor="black"
-        style={styles.textInput}
-        onChangeText={(text) => setUsername(text)}
-        onFocus={() => {
-          setScreenState(2);
+      <InputField
+        name="username"
+        label="Username"
+        setValue={(text) => setUsername(text)}
+        setScreenState={(val) => {
+          setScreenState(val);
         }}
-        onSubmitEditing={() => {
-          setScreenState(0);
-        }}
+        error={errorMessage}
       />
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="black"
-        style={styles.textInput}
-        onChangeText={(text) => setPassword(text)}
-        onFocus={() => {
-          setScreenState(2);
+      <InputField
+        name="password"
+        label="Password"
+        setValue={(text) => setPassword(text)}
+        setScreenState={(val) => {
+          setScreenState(val);
         }}
-        onSubmitEditing={() => {
-          setScreenState(0);
-        }}
+        error={errorMessage}
       />
+
       <Animated.View style={[formButtonAnimatedStyle]}>
         <Pressable
           style={styles.formButton}
