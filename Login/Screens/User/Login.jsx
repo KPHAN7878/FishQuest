@@ -110,12 +110,18 @@ const Login = () => {
         password: password,
       };
 
-      const res = await FishQuestClient.post("user/register", newUser);
+      const res = await FishQuestClient.post("user/register", newUser).catch(
+        (err) => {
+          console.log(err.response.data);
+        }
+      );
 
       if (res.data?.errors) {
         const errors = toErrorMap(res.data.errors);
         console.log(errors);
         setErrorMessage(errors);
+      } else {
+        setErrorMessage(null);
       }
     }
   };

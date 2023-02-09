@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Req,
   Res,
@@ -27,6 +28,7 @@ export class UserController {
     @Body(HashPasswordPipe<RegisterInput>) regInfo: RegisterInput
   ) {
     const result = await this.userService.insert(regInfo);
+
     return result;
   }
 

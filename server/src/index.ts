@@ -8,7 +8,7 @@ import { AppModule } from "./app.module";
 import session from "express-session";
 import { SessionEntity } from "./modules/auth/session.entity";
 import { TypeormStore } from "connect-typeorm";
-import { ValidationPipe } from "@nestjs/common";
+import ClassValidationPipe from "./utils/ClassValidatorPipe";
 
 const main = async () => {
   const server = express();
@@ -34,7 +34,8 @@ const main = async () => {
   );
 
   const passport = require("passport");
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  // app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ClassValidationPipe({ whitelist: true }));
   app.use(passport.initialize());
   app.use(passport.session());
 

@@ -33,6 +33,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+  fieldError: {
+    color: "#FF3333",
+    marginHorizontal: 20,
+    paddingLeft: 10,
+  },
+
   textInput: {
     height: 50,
     borderWidth: 1,
