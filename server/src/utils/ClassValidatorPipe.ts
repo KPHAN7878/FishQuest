@@ -23,8 +23,7 @@ export default class ClassValidatorPipe extends ValidationPipe {
     if (errors.length > 0) {
       throw new HttpException(
         { errors: this.mapErrors(errors) },
-        // `validation failed: ${this.mapErrors(errors)}`,
-        HttpStatus.BAD_REQUEST
+        HttpStatus.OK
       );
     }
 

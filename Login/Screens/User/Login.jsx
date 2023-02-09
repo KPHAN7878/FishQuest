@@ -118,7 +118,6 @@ const Login = () => {
 
       if (res.data?.errors) {
         const errors = toErrorMap(res.data.errors);
-        console.log(errors);
         setErrorMessage(errors);
       } else {
         setErrorMessage(null);
