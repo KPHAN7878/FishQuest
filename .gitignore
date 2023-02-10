@@ -1,6 +1,6 @@
 node_modules
 package-lock.json
 .expo
-imgs_dev/*
+**/imgs_dev/*.jpg
 build
 

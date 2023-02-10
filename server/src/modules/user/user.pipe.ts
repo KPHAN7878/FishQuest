@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import { ArgumentMetadata, Injectable, PipeTransform } from "@nestjs/common";
 
 @Injectable()
-export class HashPwdPipe<T extends { password: string }>
+export class HashPasswordPipe<T extends { password: string }>
   implements PipeTransform<T, Promise<T>>
 {
   async transform(regInfo: T, _: ArgumentMetadata): Promise<T> {

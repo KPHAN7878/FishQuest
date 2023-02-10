@@ -10,9 +10,9 @@ import { UserModule } from "./modules/user/user.module";
   imports: [
     TypeOrmModule.forRoot({
       type: "postgres",
-      username: "admin",
-      password: "",
-      database: "FishQuest",
+      username: "postgres", //username: "admin",
+      password: "DataDolphin973", //password: "",
+      database: "fishquest", //database: "FishQuest",
       synchronize: !__prod__,
       autoLoadEntities: true,
       entities: [__dirname + "/**/*.entity.{ts,js}"],

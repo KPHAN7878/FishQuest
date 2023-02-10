@@ -8,7 +8,7 @@ import { AppModule } from "./app.module";
 import session from "express-session";
 import { SessionEntity } from "./modules/auth/session.entity";
 import { TypeormStore } from "connect-typeorm";
-import { ValidationPipe } from "@nestjs/common";
+import ClassValidationPipe from "./utils/ClassValidatorPipe";
 
 const main = async () => {
   const server = express();
@@ -21,9 +21,11 @@ const main = async () => {
   app.use(
     session({
       name: COOKIE_NAME,
-      store: new TypeormStore().connect(sessionRepository),
+      store: new TypeormStore({
+        cleanupLimit: 1,
+      }).connect(sessionRepository),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 3,
       },
       saveUninitialized: false,
       secret: "f412FE23shf982hqf78",
@@ -32,7 +34,8 @@ const main = async () => {
   );
 
   const passport = require("passport");
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  // app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ClassValidationPipe({ whitelist: true }));
   app.use(passport.initialize());
   app.use(passport.session());
 
