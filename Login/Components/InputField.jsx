@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Text, View, TextInput } from "react-native";
-import styles from "../../styles";
+import styles from "../styles";
 
 export const InputField = (props) => {
   const [field, setField] = useState(props);

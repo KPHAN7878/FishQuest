@@ -9,10 +9,10 @@ import {
   Keyboard,
 } from "react-native";
 
-import styles from "../../styles";
+import styles, { width, height } from "../../styles";
 import Svg, { Image, Ellipse, ClipPath } from "react-native-svg";
 import { Client } from "../../utils/connection";
-import { InputField } from "../Components/InputField";
+import { InputField } from "../../Components/InputField";
 
 import Animated, {
   useSharedValue,
@@ -25,8 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { toErrorMap } from "../../utils/toErrorMap";
 
-const Login = () => {
-  const { height, width } = Dimensions.get("window");
+const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
   const formButtonScale = useSharedValue(1);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -123,6 +122,7 @@ const Login = () => {
     await Client.post("user/login", user)
       .then((res) => {
         // Navigate to homepage here
+        navigation.navigate("Profile");
       })
       .catch((err) => {
         if (err.response.status === 401) {
