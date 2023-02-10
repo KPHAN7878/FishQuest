@@ -18,9 +18,15 @@ export default class ClassValidatorPipe extends ValidationPipe {
     const { metatype }: any = metaData;
 
     const object = plainToClass(metatype, value);
-    const errors = await this.validate(object);
+    let errors: ValidationError[];
 
-    if (errors.length > 0) {
+    try {
+      errors = await this.validate(object);
+    } catch (err) {
+      return value;
+    }
+
+    if (errors && errors.length > 0) {
       throw new HttpException(
         { errors: this.mapErrors(errors) },
         HttpStatus.OK

@@ -61,6 +61,7 @@ export class UserController {
 
   @Post("forgot-password")
   forgotPassword(@Body("username") username: string) {
+    console.log(username);
     return this.userService.forgotPassword(username);
   }
 
