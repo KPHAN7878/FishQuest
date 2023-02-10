@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
 import { Prediction } from "../prediction/prediction.entity";
+import { PostEntity } from "../post/post.entity";
 
 @Entity()
 export class CatchEntity extends BaseEntity {
@@ -34,6 +35,9 @@ export class CatchEntity extends BaseEntity {
   @OneToOne(() => Prediction) // info gathered after processing catch
   @JoinColumn()
   predData: Prediction;
+
+  @OneToOne(() => PostEntity)
+  post?: PostEntity;
 
   @Column()
   dataUri: string; // cloud storage | local fs

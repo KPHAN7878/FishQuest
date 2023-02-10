@@ -5,6 +5,8 @@ import { __prod__ } from "./constants";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CatchModule } from "./modules/catch/catch.module";
 import { UserModule } from "./modules/user/user.module";
+// import { PostEntity } from "./modules/post/post.entity";
+// TypeOrmModule.forFeature([PostEntity]),
 
 @Module({
   imports: [

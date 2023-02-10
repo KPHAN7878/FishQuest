@@ -4,13 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
 import { CatchEntity } from "../catch/catch.entity";
-
 
 @Entity()
 export class PostEntity extends BaseEntity {
@@ -21,7 +21,7 @@ export class PostEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.id)
   userId!: number;
 
-  @Column({ unique: true }) //only one post per catch to prevent spamming
+  @OneToOne(() => CatchEntity)
   catch!: CatchEntity;
 
   @Column()
@@ -32,7 +32,4 @@ export class PostEntity extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-
-
 }
