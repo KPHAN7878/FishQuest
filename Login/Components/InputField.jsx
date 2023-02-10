@@ -19,10 +19,11 @@ export const InputField = (props) => {
       <TextInput
         placeholder={field.label}
         placeholderTextColor="black"
-        style={styles.textInput}
+        style={[styles.textInput, field.style]}
         onChangeText={(text) => field.setValue(text)}
         secureTextEntry={field.secureTextEntry}
         keyboardType={field.keyboardType}
+        editable={field.editable}
         onFocus={() => {
           field.setScreenState(2);
         }}

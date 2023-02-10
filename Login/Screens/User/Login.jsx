@@ -88,16 +88,30 @@ const Login = ({ navigation }) => {
     };
   });
 
-  const loginHandler = () => {
+  const flushInputs = () => {
+    setEmail("");
+    setUsername("");
+    setPassword("");
     setisForgotPwd(false);
     setScreenState(0);
+    console.log("HERE");
+  };
+
+  const loginHandler = () => {
+    // flushInputs();
+    setisForgotPwd(false);
+    setScreenState(0);
+
     if (isRegistering) {
       setIsRegistering(false);
     }
   };
 
   const registerHandler = () => {
+    // flushInputs();
+    setisForgotPwd(false);
     setScreenState(0);
+
     if (!isRegistering) {
       setIsRegistering(true);
     }
@@ -138,13 +152,10 @@ const Login = ({ navigation }) => {
   };
 
   const createPasswordToken = async () => {
-    const req = {
-      username: username,
-    };
-
-    Client.post("user/forgot-password", req).catch((err) => {
+    Client.post("user/forgot-password", { username }).catch((err) => {
       console.log(err);
     });
+    // go to token token code submission screen...
   };
 
   const initialScreen = (
@@ -172,18 +183,6 @@ const Login = ({ navigation }) => {
 
   const forgotPassword = (
     <View>
-      {isForgotPwd && (
-        <InputField
-          name="token"
-          label="Token"
-          keyboardType={"number-pad"}
-          setValue={(text) => setPassword(text)}
-          setScreenState={(val) => {
-            setScreenState(val);
-          }}
-          error={errorMessage}
-        />
-      )}
       <Pressable
         onPress={() => {
           setisForgotPwd(!isForgotPwd);
@@ -195,18 +194,20 @@ const Login = ({ navigation }) => {
       </Pressable>
 
       {isForgotPwd && (
-        <Pressable
-          style={styles.formButton}
-          onPress={() => {
-            formButtonScale.value = withSequence(
-              withSpring(1.5),
-              withSpring(1)
-            );
-            createPasswordToken();
-          }}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </Pressable>
+        <Animated.View style={[formButtonAnimatedStyle]}>
+          <Pressable
+            style={styles.formButton}
+            onPress={() => {
+              formButtonScale.value = withSequence(
+                withSpring(1.5),
+                withSpring(1)
+              );
+              createPasswordToken();
+            }}
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </Pressable>
+        </Animated.View>
       )}
     </View>
   );
@@ -248,18 +249,21 @@ const Login = ({ navigation }) => {
           }}
           error={errorMessage}
         />
-        {!isForgotPwd && (
-          <InputField
-            name="password"
-            label="Password"
-            secureTextEntry={true}
-            setValue={(text) => setPassword(text)}
-            setScreenState={(val) => {
-              setScreenState(val);
-            }}
-            error={errorMessage}
-          />
-        )}
+
+        <InputField
+          name="password"
+          label="Password"
+          secureTextEntry={true}
+          setValue={(text) => setPassword(text)}
+          setScreenState={(val) => {
+            setScreenState(val);
+          }}
+          error={errorMessage}
+          editable={!isForgotPwd}
+          style={{
+            opacity: isForgotPwd ? 0 : 1,
+          }}
+        />
       </View>
       {!isRegistering && forgotPassword}
       {!isForgotPwd && (
@@ -317,4 +321,20 @@ const Login = ({ navigation }) => {
   );
 };
 
+// {isForgotPwd && (
+//   <InputField
+//     name="token"
+//     label="Token"
+//     keyboardType={"number-pad"}
+//     setValue={(text) => setPassword(text)}
+//     setScreenState={(val) => {
+//       setScreenState(val);
+//     }}
+//     error={errorMessage}
+//     editable={false}
+//     style={{
+//       opacity: 0,
+//     }}
+//   />
+// )}
 export default Login;
