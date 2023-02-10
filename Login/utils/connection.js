@@ -8,4 +8,4 @@ export const Client = axios.create({
   responseType: "json",
 });
 
-configure({ axios });
+// configure({ axios });

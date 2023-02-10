@@ -72,7 +72,7 @@ export class UserController {
 
   @UseGuards(UserAuthGuard)
   @Post("logout")
-  async logout(@Req() { session }: Request, @Res() res: Response) {
+  async logout(@Req() { session }: Ctx, @Res() res: Response) {
     return new Promise((resolve) =>
       session.destroy((err) => {
         res.clearCookie(COOKIE_NAME);

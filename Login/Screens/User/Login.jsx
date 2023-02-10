@@ -113,15 +113,16 @@ const Login = ({ navigation }) => {
       if (res?.data.errors) {
         const errors = toErrorMap(res.data.errors);
         setErrorMessage(errors);
+        return;
       } else {
         setErrorMessage(null);
       }
-      return;
     }
 
     await Client.post("user/login", user)
       .then((res) => {
-        // Navigate to homepage here
+        Keyboard.dismiss();
+        setScreenState(1);
         navigation.navigate("Profile");
       })
       .catch((err) => {
