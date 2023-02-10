@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -21,7 +22,7 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ unique: true })
+  @PrimaryColumn({ unique: true })
   username!: string;
 
   @Column()
