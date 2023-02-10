@@ -29,6 +29,7 @@ const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
   const formButtonScale = useSharedValue(1);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isForgotPwd, setisForgotPwd] = useState(false);
 
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -135,6 +136,23 @@ const Login = ({ navigation }) => {
       });
   };
 
+  const forgotPassword = isForgotPwd ? (
+    <InputField
+      name="token"
+      label="Token"
+      keyboardType={"number-pad"}
+      setValue={(text) => setPassword(text)}
+      setScreenState={(val) => {
+        setScreenState(val);
+      }}
+      error={errorMessage}
+    />
+  ) : (
+    <Pressable>
+      <Text style={styles.forgotPassword}>Forgot Password</Text>
+    </Pressable>
+  );
+
   const initialScreen = (
     <View
       style={{
@@ -180,25 +198,30 @@ const Login = ({ navigation }) => {
           error={errorMessage}
         />
       )}
-      <InputField
-        name="username"
-        label="Username"
-        setValue={(text) => setUsername(text)}
-        setScreenState={(val) => {
-          setScreenState(val);
-        }}
-        error={errorMessage}
-      />
-      <InputField
-        name="password"
-        label="Password"
-        secureTextEntry={true}
-        setValue={(text) => setPassword(text)}
-        setScreenState={(val) => {
-          setScreenState(val);
-        }}
-        error={errorMessage}
-      />
+      <View>
+        <InputField
+          name="username"
+          label="Username"
+          setValue={(text) => setUsername(text)}
+          setScreenState={(val) => {
+            setScreenState(val);
+          }}
+          error={errorMessage}
+        />
+        {!isForgotPwd && (
+          <InputField
+            name="password"
+            label="Password"
+            secureTextEntry={true}
+            setValue={(text) => setPassword(text)}
+            setScreenState={(val) => {
+              setScreenState(val);
+            }}
+            error={errorMessage}
+          />
+        )}
+      </View>
+      {!isRegistering && forgotPassword}
 
       <Animated.View style={[formButtonAnimatedStyle]}>
         <Pressable

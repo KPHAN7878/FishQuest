@@ -19,6 +19,7 @@ export const InputField = (props) => {
         style={styles.textInput}
         onChangeText={(text) => field.setValue(text)}
         secureTextEntry={field.secureTextEntry}
+        keyboardType={field.keyboardType}
         onFocus={() => {
           field.setScreenState(2);
         }}

@@ -40,6 +40,14 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
 
+  forgotPassword: {
+    marginHorizontal: 20,
+    paddingLeft: 10,
+    marginBottom: 10,
+    color: "rgba(123,104,238,0.8)",
+    fontWeight: "bold",
+  },
+
   textInput: {
     height: 50,
     borderWidth: 1,
