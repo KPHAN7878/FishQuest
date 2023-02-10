@@ -18,6 +18,7 @@ export const InputField = (props) => {
         placeholderTextColor="black"
         style={styles.textInput}
         onChangeText={(text) => field.setValue(text)}
+        secureTextEntry={field.secureTextEntry}
         onFocus={() => {
           field.setScreenState(2);
         }}

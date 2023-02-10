@@ -103,26 +103,32 @@ const Login = () => {
   };
 
   const registerOrLogin = async (isRegistering) => {
-    if (isRegistering) {
-      let newUser = {
-        username: username,
-        email: email,
-        password: password,
-      };
+    let newUser = {
+      username: username,
+      email: email,
+      password: password,
+    };
 
-      const res = await FishQuestClient.post("user/register", newUser).catch(
-        (err) => {
-          console.log(err.response.data);
+    const endpoint = isRegistering ? "register" : "login";
+    FishQuestClient.post(`user/${endpoint}`, newUser)
+      .then((res) => {
+        if (res?.data.errors) {
+          const errors = toErrorMap(res.data.errors);
+          setErrorMessage(errors);
+        } else {
+          setScreenState(0);
+          Keyboard.dismiss();
+          setErrorMessage(null);
         }
-      );
-
-      if (res.data?.errors) {
-        const errors = toErrorMap(res.data.errors);
-        setErrorMessage(errors);
-      } else {
-        setErrorMessage(null);
-      }
-    }
+      })
+      .catch((err) => {
+        if (err.response.status === 401) {
+          const badCredentials = {};
+          badCredentials["password"] =
+            "Your username or password may be incorrect";
+          setErrorMessage(badCredentials);
+        }
+      });
   };
 
   const initialScreen = (
@@ -182,6 +188,7 @@ const Login = () => {
       <InputField
         name="password"
         label="Password"
+        secureTextEntry={true}
         setValue={(text) => setPassword(text)}
         setScreenState={(val) => {
           setScreenState(val);
@@ -228,6 +235,7 @@ const Login = () => {
           onPress={() => {
             Keyboard.dismiss();
             setScreenState(1);
+            setErrorMessage(null);
           }}
         >
           <Animated.View style={[closeButtonContainerStyle]}>
