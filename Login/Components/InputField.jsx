@@ -13,6 +13,9 @@ export const InputField = (props) => {
 
   return (
     <View>
+      {field.pretext !== undefined && (
+        <Text style={styles.pretext}>{field.pretext}</Text>
+      )}
       <TextInput
         placeholder={field.label}
         placeholderTextColor="black"

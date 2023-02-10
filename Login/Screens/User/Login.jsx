@@ -89,6 +89,7 @@ const Login = ({ navigation }) => {
   });
 
   const loginHandler = () => {
+    setisForgotPwd(false);
     setScreenState(0);
     if (isRegistering) {
       setIsRegistering(false);
@@ -136,22 +137,15 @@ const Login = ({ navigation }) => {
       });
   };
 
-  const forgotPassword = isForgotPwd ? (
-    <InputField
-      name="token"
-      label="Token"
-      keyboardType={"number-pad"}
-      setValue={(text) => setPassword(text)}
-      setScreenState={(val) => {
-        setScreenState(val);
-      }}
-      error={errorMessage}
-    />
-  ) : (
-    <Pressable>
-      <Text style={styles.forgotPassword}>Forgot Password</Text>
-    </Pressable>
-  );
+  const createPasswordToken = async () => {
+    const req = {
+      username: username,
+    };
+
+    Client.post("user/forgot-password", req).catch((err) => {
+      console.log(err);
+    });
+  };
 
   const initialScreen = (
     <View
@@ -173,6 +167,47 @@ const Login = ({ navigation }) => {
           </Pressable>
         </Animated.View>
       </View>
+    </View>
+  );
+
+  const forgotPassword = (
+    <View>
+      {isForgotPwd && (
+        <InputField
+          name="token"
+          label="Token"
+          keyboardType={"number-pad"}
+          setValue={(text) => setPassword(text)}
+          setScreenState={(val) => {
+            setScreenState(val);
+          }}
+          error={errorMessage}
+        />
+      )}
+      <Pressable
+        onPress={() => {
+          setisForgotPwd(!isForgotPwd);
+        }}
+      >
+        <Text style={styles.interactiveText}>
+          {isForgotPwd ? "Cancel" : "Forgot password"}
+        </Text>
+      </Pressable>
+
+      {isForgotPwd && (
+        <Pressable
+          style={styles.formButton}
+          onPress={() => {
+            formButtonScale.value = withSequence(
+              withSpring(1.5),
+              withSpring(1)
+            );
+            createPasswordToken();
+          }}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </Pressable>
+      )}
     </View>
   );
 
@@ -202,6 +237,11 @@ const Login = ({ navigation }) => {
         <InputField
           name="username"
           label="Username"
+          pretext={
+            isForgotPwd
+              ? "Enter the username you use to sign in with"
+              : undefined
+          }
           setValue={(text) => setUsername(text)}
           setScreenState={(val) => {
             setScreenState(val);
@@ -222,23 +262,24 @@ const Login = ({ navigation }) => {
         )}
       </View>
       {!isRegistering && forgotPassword}
-
-      <Animated.View style={[formButtonAnimatedStyle]}>
-        <Pressable
-          style={styles.formButton}
-          onPress={() => {
-            formButtonScale.value = withSequence(
-              withSpring(1.5),
-              withSpring(1)
-            );
-            registerOrLogin(isRegistering);
-          }}
-        >
-          <Text style={styles.buttonText}>
-            {isRegistering ? "REGISTER" : "LOG IN"}
-          </Text>
-        </Pressable>
-      </Animated.View>
+      {!isForgotPwd && (
+        <Animated.View style={[formButtonAnimatedStyle]}>
+          <Pressable
+            style={styles.formButton}
+            onPress={() => {
+              formButtonScale.value = withSequence(
+                withSpring(1.5),
+                withSpring(1)
+              );
+              registerOrLogin(isRegistering);
+            }}
+          >
+            <Text style={styles.buttonText}>
+              {isRegistering ? "REGISTER" : "LOG IN"}
+            </Text>
+          </Pressable>
+        </Animated.View>
+      )}
     </Animated.View>
   );
 
