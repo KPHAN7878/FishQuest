@@ -11,7 +11,7 @@ import {
 
 import styles from "../../styles";
 import Svg, { Image, Ellipse, ClipPath } from "react-native-svg";
-import { FishQuestClient } from "../../utils/connection";
+import { Client } from "../../utils/connection";
 import { InputField } from "../Components/InputField";
 
 import Animated, {
@@ -103,23 +103,26 @@ const Login = () => {
   };
 
   const registerOrLogin = async (isRegistering) => {
-    let newUser = {
+    let user = {
       username: username,
       email: email,
       password: password,
     };
 
-    const endpoint = isRegistering ? "register" : "login";
-    FishQuestClient.post(`user/${endpoint}`, newUser)
+    if (isRegistering) {
+      const res = await Client.post("user/register", user);
+      if (res?.data.errors) {
+        const errors = toErrorMap(res.data.errors);
+        setErrorMessage(errors);
+      } else {
+        setErrorMessage(null);
+      }
+      return;
+    }
+
+    await Client.post("user/login", user)
       .then((res) => {
-        if (res?.data.errors) {
-          const errors = toErrorMap(res.data.errors);
-          setErrorMessage(errors);
-        } else {
-          setScreenState(0);
-          Keyboard.dismiss();
-          setErrorMessage(null);
-        }
+        // Navigate to homepage here
       })
       .catch((err) => {
         if (err.response.status === 401) {
