@@ -129,7 +129,7 @@ export class UserService {
     });
     const today = new Date();
 
-    const token = user!.tokens.find((token: TokenEntity) => {
+    const token = user?.tokens.find((token: TokenEntity) => {
       return token.tokenType === tokenType;
     });
 
@@ -149,7 +149,7 @@ export class UserService {
       if (today > token!.expiresAt) {
         errors.push({
           message: "token expired",
-          field: "expiresAt",
+          field: "code",
         });
       }
     }

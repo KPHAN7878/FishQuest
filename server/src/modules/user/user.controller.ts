@@ -16,8 +16,9 @@ import { HashPasswordPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
 import { COOKIE_NAME } from "../../constants";
-import { Ctx } from "../../types";
+import { Ctx, ErrorRes } from "../../types";
 import { TokenInterceptor } from "../auth/token.interceptor";
+import { TokenEntity } from "../auth/token.entity";
 
 @Controller("user")
 export class UserController {
@@ -32,12 +33,10 @@ export class UserController {
     return result;
   }
 
-  // Checks to see if a token submission is valid
-  // for a user. Provide username, code, and token type
   @UseInterceptors(TokenInterceptor)
   @Post("submit-token")
-  submitToken(@Req() req: Ctx) {
-    return req.token;
+  submitToken(@Req() req: Ctx): ErrorRes | TokenEntity {
+    return req.token!;
   }
 
   @UseInterceptors(TokenInterceptor)

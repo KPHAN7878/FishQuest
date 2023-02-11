@@ -20,16 +20,24 @@ export const InputField = (props) => {
         placeholder={field.label}
         placeholderTextColor="black"
         style={[styles.textInput, field.style]}
-        onChangeText={(text) => field.setValue(text)}
+        onChangeText={(val) => field.setValue(val)}
         secureTextEntry={field.secureTextEntry}
         keyboardType={field.keyboardType}
         editable={field.editable}
-        onFocus={() => {
-          field.setScreenState(2);
-        }}
-        onSubmitEditing={() => {
-          field.setScreenState(0);
-        }}
+        onFocus={
+          "setScreenState" in field
+            ? () => {
+                field.setScreenState(2);
+              }
+            : undefined
+        }
+        onSubmitEditing={
+          "setScreenState" in field
+            ? () => {
+                field.setScreenState[1](0);
+              }
+            : undefined
+        }
       />
       <Text style={styles.fieldError}>
         {!!field.error && field.error[field.name]}

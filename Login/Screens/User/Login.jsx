@@ -155,7 +155,12 @@ const Login = ({ navigation }) => {
     Client.post("user/forgot-password", { username }).catch((err) => {
       console.log(err);
     });
+
     // go to token token code submission screen...
+    navigation.navigate("SecureToken", {
+      tokenInput: { tokenType: "password", username },
+      endpoint: "change-password",
+    });
   };
 
   const initialScreen = (
@@ -321,20 +326,4 @@ const Login = ({ navigation }) => {
   );
 };
 
-// {isForgotPwd && (
-//   <InputField
-//     name="token"
-//     label="Token"
-//     keyboardType={"number-pad"}
-//     setValue={(text) => setPassword(text)}
-//     setScreenState={(val) => {
-//       setScreenState(val);
-//     }}
-//     error={errorMessage}
-//     editable={false}
-//     style={{
-//       opacity: 0,
-//     }}
-//   />
-// )}
 export default Login;

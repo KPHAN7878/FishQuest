@@ -1,5 +1,6 @@
 import Login from "./Screens/User/Login";
 import Profile from "./Screens/User/Profile";
+import SecureToken from "./Screens/User/SecureToken";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StartScreen } from "./Screens/StartScreen";
@@ -15,6 +16,8 @@ export default function App() {
         <Stack.Screen name="StartScreen" component={StartScreen} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Profile" component={Profile} />
+
+        <Stack.Screen name="SecureToken" component={SecureToken} />
       </Stack.Navigator>
     </NavigationContainer>
   );
