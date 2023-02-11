@@ -118,6 +118,7 @@ const Login = ({ navigation }) => {
   };
 
   const registerOrLogin = async (isRegistering) => {
+    const badCredentials = {};
     let user = {
       username: username,
       email: email,
@@ -143,7 +144,6 @@ const Login = ({ navigation }) => {
       })
       .catch((err) => {
         if (err.response.status === 401) {
-          const badCredentials = {};
           badCredentials["password"] =
             "Your username or password may be incorrect";
           setErrorMessage(badCredentials);
@@ -160,6 +160,9 @@ const Login = ({ navigation }) => {
     navigation.navigate("SecureToken", {
       tokenInput: { tokenType: "password", username },
       endpoint: "change-password",
+      pretext:
+        `If the username provided matches an existing account,` +
+        ` you will receive an email with a password reset code`,
     });
   };
 

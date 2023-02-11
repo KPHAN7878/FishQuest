@@ -24,6 +24,7 @@ export const InputField = (props) => {
         secureTextEntry={field.secureTextEntry}
         keyboardType={field.keyboardType}
         editable={field.editable}
+        maxLength={field.maxLength}
         onFocus={
           "setScreenState" in field
             ? () => {

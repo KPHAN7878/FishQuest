@@ -1,4 +1,4 @@
-import { Text, View, Pressable } from "react-native";
+import { Text, View, Pressable, ScrollView } from "react-native";
 import styles, { width, height } from "../../styles";
 import { Client } from "../../utils/connection";
 import React, { useState } from "react";
@@ -18,21 +18,33 @@ export const SecureToken = ({ route, navigation }) => {
     code: "",
     ...route.params.tokenInput,
   });
-  const { endpoint } = route.params.endpoint;
+  const { endpoint, pretext } = route.params;
   const [errorMessage, setErrorMessage] = useState(null);
   const formButtonScale = useSharedValue(1);
 
   const submitToken = async () => {
+    const badCode = {};
+
     if (tokenInput.code.length !== 6) {
-      const badCode = ({}["code"] = "Code must be 6 digits");
+      badCode["code"] = "Code must be 6 digits";
       setErrorMessage(badCode);
       return;
+    } else {
+      setErrorMessage(null);
     }
-    const res = await Client.post(`user/submit-token`, tokenInput);
 
-    // Client.post(`user/${endpoint}`, tokenInput).catch((err) => {
-    //   console.log(err);
-    // });
+    const res = await Client.post(`user/submit-token`, tokenInput);
+    if (res) {
+      if (res?.data.errors) {
+        const errors = toErrorMap(res.data.errors);
+        setErrorMessage(errors);
+        return;
+      } else {
+        setErrorMessage(null);
+      }
+    }
+
+    // const token = await Client.post(`user/${endpoint}`, tokenInput);
   };
 
   const formButtonAnimatedStyle = useAnimatedStyle(() => {
@@ -42,49 +54,57 @@ export const SecureToken = ({ route, navigation }) => {
   });
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
+    <ScrollView
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
     >
-      <Text
+      <View
         style={{
+          flex: 1,
           marginTop: height * 0.4,
-          textAlign: "center",
         }}
       >
-        Secure Token
-      </Text>
-      <InputField
-        name="code"
-        label="Code"
-        keyboardType={"number-pad"}
-        error={errorMessage}
-        setValue={(text) => {
-          setTokenInput({ ...tokenInput, code: text });
-        }}
-      />
+        <InputField
+          name="code"
+          label="_ _ _ _ _ _"
+          pretext={pretext}
+          keyboardType={"number-pad"}
+          error={errorMessage}
+          setValue={(text) => {
+            setTokenInput({ ...tokenInput, code: text });
+          }}
+          style={{
+            fontWeight: "bold",
+            fontSize: 32,
+            textAlign: "center",
+            letterSpacing: 8,
+          }}
+          maxLength={6}
+        />
 
-      <Animated.View
-        style={formButtonAnimatedStyle}
-        // style={{
-        //   transform: [{ scale: formButtonScale.value }],
-        // }}
-      >
         <Pressable
-          style={styles.formButton}
           onPress={() => {
-            formButtonScale.value = withSequence(
-              withSpring(1.5),
-              withSpring(1)
-            );
-            submitToken();
+            navigation.goBack();
           }}
         >
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.interactiveText}>Cancel</Text>
         </Pressable>
-      </Animated.View>
-    </View>
+        <Animated.View style={formButtonAnimatedStyle}>
+          <Pressable
+            style={styles.formButton}
+            onPress={() => {
+              formButtonScale.value = withSequence(
+                withSpring(1.5),
+                withSpring(1)
+              );
+              submitToken();
+            }}
+          >
+            <Text style={styles.buttonText}>Submit</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </ScrollView>
   );
 };
 

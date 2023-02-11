@@ -17,7 +17,11 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Profile" component={Profile} />
 
-        <Stack.Screen name="SecureToken" component={SecureToken} />
+        <Stack.Screen
+          name="SecureToken"
+          component={SecureToken}
+          screenOptions={{ gestureEnabled: true }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

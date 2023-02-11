@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { RegisterInput, PasswordToken } from "./user.dto";
-import { HashPasswordPipe } from "./user.pipe";
+import { HashPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
 import { COOKIE_NAME } from "../../constants";
@@ -25,9 +25,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post("register")
-  async registerUser(
-    @Body(HashPasswordPipe<RegisterInput>) regInfo: RegisterInput
-  ) {
+  async registerUser(@Body(HashPipe<RegisterInput>) regInfo: RegisterInput) {
     const result = await this.userService.insert(regInfo);
 
     return result;
@@ -42,7 +40,7 @@ export class UserController {
   @UseInterceptors(TokenInterceptor)
   @Post("change-password")
   changePassword(
-    @Body(HashPasswordPipe<PasswordToken>)
+    @Body(HashPipe<PasswordToken>)
     { password }: PasswordToken,
     @Req() { token }: Ctx
   ) {
@@ -60,7 +58,6 @@ export class UserController {
 
   @Post("forgot-password")
   forgotPassword(@Body("username") username: string) {
-    console.log(username);
     return this.userService.forgotPassword(username);
   }
 

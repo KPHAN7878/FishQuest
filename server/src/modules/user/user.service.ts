@@ -88,6 +88,8 @@ export class UserService {
     const expireDate = new Date();
     expireDate.setDate(expireDate.getDate() + 1);
 
+    const hashCode = await argon2.hash(code);
+
     const token = await this.tokenRepository.findOne({
       where: { userId: user.id, tokenType: "password" },
     });
@@ -97,7 +99,7 @@ export class UserService {
         { tokenType: token.tokenType, userId: token.userId },
         {
           expiresAt: expireDate,
-          code,
+          code: hashCode,
         }
       );
     } else {
@@ -105,7 +107,7 @@ export class UserService {
         userId: user.id,
         tokenType: "password",
         expiresAt: expireDate,
-        code,
+        code: hashCode,
       });
 
       await this.tokenRepository.save(tokenEntry);
@@ -140,7 +142,8 @@ export class UserService {
         field: "code",
       });
     } else {
-      if (code !== token!.code) {
+      const valid = await argon2.verify(token!.code, code);
+      if (!valid) {
         errors.push({
           message: "invalid code",
           field: "code",
