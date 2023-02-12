@@ -27,7 +27,6 @@ import { toErrorMap } from "../../utils/toErrorMap";
 
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
-  const formButtonScale = useSharedValue(1);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isForgotPwd, setisForgotPwd] = useState(false);
 
@@ -40,11 +39,14 @@ const Login = ({ navigation }) => {
   const passwordRef = createRef();
   const emailRef = createRef();
 
+  const formButtonScale = useSharedValue(1);
+  const buttonOpacity = useSharedValue(1);
+
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
       screenState,
       [0, 1, 2],
-      [-height * 0.6, 0, -height * 1.0]
+      [-height * 0.65, 0, -height * 1.0]
     );
     return {
       transform: [
@@ -56,7 +58,7 @@ const Login = ({ navigation }) => {
   const buttonsAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(screenState, [0, 1, 2], [250, 0, 250]);
     return {
-      opacity: withTiming(screenState, { duration: 500 }),
+      opacity: withTiming(buttonOpacity.value, { duration: 500 }),
       transform: [
         { translateY: withTiming(interpolation, { duration: 1000 }) },
       ],
@@ -66,7 +68,7 @@ const Login = ({ navigation }) => {
   const closeButtonContainerStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(screenState, [0, 1], [180, 360]);
     return {
-      opacity: withTiming(screenState === 1 ? 0 : 1, { duration: 800 }),
+      opacity: withTiming(buttonOpacity.value === 1 ? 0 : 1, { duration: 800 }),
       transform: [
         { rotate: withTiming(interpolation + "deg", { duration: 1000 }) },
       ],
@@ -80,7 +82,7 @@ const Login = ({ navigation }) => {
         { translateY: withTiming(interpolation, { duration: 1000 }) },
       ],
       opacity:
-        screenState !== 1
+        buttonOpacity.value === 0
           ? withDelay(400, withTiming(1, { duration: 800 }))
           : withTiming(0, { duration: 300 }),
     };
@@ -96,11 +98,13 @@ const Login = ({ navigation }) => {
     setEmail("");
     setUsername("");
     setPassword("");
+    setisForgotPwd(false);
+
     usernameRef.current?.setNativeProps({ text: "" });
     passwordRef.current?.setNativeProps({ text: "" });
     emailRef.current?.setNativeProps({ text: "" });
 
-    setisForgotPwd(false);
+    buttonOpacity.value = 0;
     setScreenState(0);
   };
 
@@ -140,7 +144,7 @@ const Login = ({ navigation }) => {
     }
 
     await Client.post("user/login", user)
-      .then((res) => {
+      .then(() => {
         Keyboard.dismiss();
         setScreenState(1);
         setErrorMessage(null);
@@ -227,6 +231,22 @@ const Login = ({ navigation }) => {
     </View>
   );
 
+  const inputProps = (label, setter, ref) => {
+    return {
+      onFocus: () => {
+        setScreenState(2);
+      },
+      onSubmitEditing: () => {
+        setScreenState(0);
+      },
+      error: errorMessage,
+      placeholder: label,
+      name: label.toLowerCase(),
+      onChangeText: (text) => setter(text),
+      ref,
+    };
+  };
+
   const formScreen = (
     <Animated.View
       style={[
@@ -239,50 +259,25 @@ const Login = ({ navigation }) => {
       ]}
     >
       {isRegistering && (
-        <InputField
-          ref={emailRef}
-          name="email"
-          label="Email"
-          setValue={(text) => setEmail(text)}
-          setScreenState={(val) => {
-            setScreenState(val);
-          }}
-          error={errorMessage}
-        />
+        <InputField {...inputProps("Email", setEmail, emailRef)} />
       )}
-      <View>
-        <InputField
-          ref={usernameRef}
-          name="username"
-          label="Username"
-          pretext={
-            isForgotPwd
-              ? "Enter the username you use to sign in with"
-              : undefined
-          }
-          setValue={(text) => setUsername(text)}
-          setScreenState={(val) => {
-            setScreenState(val);
-          }}
-          error={errorMessage}
-        />
+      <InputField
+        {...inputProps("Username", setUsername, usernameRef)}
+        pretext={
+          isForgotPwd ? "Enter the username you use to sign in with" : undefined
+        }
+      />
+      <InputField
+        {...inputProps("Password", setPassword, passwordRef)}
+        secureTextEntry={true}
+        editable={!isForgotPwd}
+        style={{
+          ...styles.textInput,
+          opacity: isForgotPwd ? 0 : 1,
+          marginVertial: 3,
+        }}
+      />
 
-        <InputField
-          ref={passwordRef}
-          name="password"
-          label="Password"
-          secureTextEntry={true}
-          setValue={(text) => setPassword(text)}
-          setScreenState={(val) => {
-            setScreenState(val);
-          }}
-          error={errorMessage}
-          editable={!isForgotPwd}
-          style={{
-            opacity: isForgotPwd ? 0 : 1,
-          }}
-        />
-      </View>
       {!isRegistering && forgotPassword}
       {!isForgotPwd && (
         <Animated.View style={[formButtonAnimatedStyle]}>
@@ -326,6 +321,7 @@ const Login = ({ navigation }) => {
             Keyboard.dismiss();
             setScreenState(1);
             setErrorMessage(null);
+            buttonOpacity.value = 1;
           }}
         >
           <Animated.View style={[closeButtonContainerStyle]}>
