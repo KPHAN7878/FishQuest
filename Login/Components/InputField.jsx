@@ -27,29 +27,3 @@ export const InputField = React.forwardRef((props, ref) => {
     </View>
   );
 });
-
-// <TextInput
-//   placeholder={field.label}
-//   placeholderTextColor="black"
-//   style={[styles.textInput, field.style, { marginVertical: 3 }]}
-//   onChangeText={(val) => field.setValue(val)}
-//   secureTextEntry={field.secureTextEntry}
-//   keyboardType={field.keyboardType}
-//   editable={field.editable}
-//   maxLength={field.maxLength}
-//   onFocus={
-//     "setScreenState" in field
-//       ? () => {
-//           field.setScreenState(2);
-//         }
-//       : undefined
-//   }
-//   onSubmitEditing={
-//     "setScreenState" in field
-//       ? () => {
-//           field.setScreenState(0);
-//         }
-//       : undefined
-//   }
-//   ref={ref}
-// />;

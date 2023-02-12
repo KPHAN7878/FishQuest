@@ -149,6 +149,7 @@ const Login = ({ navigation }) => {
         setScreenState(1);
         setErrorMessage(null);
         navigation.navigate("Profile");
+        buttonOpacity.value = 1;
       })
       .catch((err) => {
         if (err.response.status === 401) {
@@ -164,7 +165,6 @@ const Login = ({ navigation }) => {
       console.log(err);
     });
 
-    // go to token token code submission screen...
     navigation.navigate("SecureToken", {
       pretext:
         `If the username provided matches an existing account,` +
@@ -239,10 +239,10 @@ const Login = ({ navigation }) => {
       onSubmitEditing: () => {
         setScreenState(0);
       },
+      onChangeText: (text) => setter(text),
       error: errorMessage,
       placeholder: label,
       name: label.toLowerCase(),
-      onChangeText: (text) => setter(text),
       ref,
     };
   };
@@ -259,10 +259,14 @@ const Login = ({ navigation }) => {
       ]}
     >
       {isRegistering && (
-        <InputField {...inputProps("Email", setEmail, emailRef)} />
+        <InputField
+          {...inputProps("Email", setEmail, emailRef)}
+          onSubmitEditing={() => usernameRef.current.focus()}
+        />
       )}
       <InputField
         {...inputProps("Username", setUsername, usernameRef)}
+        onSubmitEditing={() => passwordRef.current.focus()}
         pretext={
           isForgotPwd ? "Enter the username you use to sign in with" : undefined
         }

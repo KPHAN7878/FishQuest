@@ -74,21 +74,23 @@ export const SecureToken = ({ route, navigation }) => {
 
   const tokenField = (
     <InputField
-      name="code"
-      label="_ _ _ _ _ _"
       pretext={pretext}
       keyboardType={"number-pad"}
+      maxLength={6}
+      name={"code"}
+      placeholder={"_ _ _ _ _ _"}
       error={errorMessage}
-      setValue={(text) => {
+      onChangeText={(text) => {
         setTokenInput({ ...tokenInput, code: text });
       }}
       style={{
+        ...styles.textInput,
         fontWeight: "bold",
         fontSize: 32,
         textAlign: "center",
         letterSpacing: 8,
+        marginVertical: 3,
       }}
-      maxLength={6}
     />
   );
 
@@ -96,9 +98,9 @@ export const SecureToken = ({ route, navigation }) => {
     <View>
       <InputField
         name={tokenType}
-        label={`Enter new ${tokenType}`}
+        placeholder={`Enter new ${tokenType}`}
         error={errorMessage}
-        setValue={(text) => {
+        onChangeText={(text) => {
           setField(text);
         }}
       />
