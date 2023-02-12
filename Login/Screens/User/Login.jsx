@@ -27,8 +27,10 @@ import { toErrorMap } from "../../utils/toErrorMap";
 
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
+
   const [isRegistering, setIsRegistering] = useState(false);
   const [isForgotPwd, setisForgotPwd] = useState(false);
+  const [isForgotUsr, setisForgotUsr] = useState(false);
 
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -40,7 +42,18 @@ const Login = ({ navigation }) => {
   const emailRef = createRef();
 
   const formButtonScale = useSharedValue(1);
+  const fUserScale = useSharedValue(1);
+  const fPassScale = useSharedValue(1);
   const buttonOpacity = useSharedValue(1);
+
+  React.useEffect(() => {
+    if (usernameRef && isForgotPwd) {
+      usernameRef.current.focus();
+    }
+    if (emailRef && isForgotUsr) {
+      emailRef.current.focus();
+    }
+  }, [usernameRef, emailRef]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
@@ -94,11 +107,25 @@ const Login = ({ navigation }) => {
     };
   });
 
+  const fUserScaleAnimated = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: fUserScale.value }],
+    };
+  });
+
+  const fPassScaleAnimated = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: fPassScale.value }],
+    };
+  });
+
   const flushInputs = () => {
     setEmail("");
     setUsername("");
     setPassword("");
+
     setisForgotPwd(false);
+    setisForgotUsr(false);
 
     usernameRef.current?.setNativeProps({ text: "" });
     passwordRef.current?.setNativeProps({ text: "" });
@@ -174,6 +201,7 @@ const Login = ({ navigation }) => {
       goBack: "Login",
       username,
     });
+    setScreenState(0);
     setisForgotPwd(false);
   };
 
@@ -200,19 +228,50 @@ const Login = ({ navigation }) => {
     </View>
   );
 
-  const forgotPassword = (
+  const sendUsernames = () => {};
+
+  const forgot = (
     <View>
-      <Pressable
-        onPress={() => {
-          setisForgotPwd(!isForgotPwd);
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: isForgotPwd || isForgotUsr ? "" : "center",
         }}
       >
-        <Text style={styles.interactiveText}>
-          {isForgotPwd ? "Cancel" : "Forgot password"}
-        </Text>
-      </Pressable>
+        <Animated.View style={fPassScaleAnimated}>
+          {!isForgotUsr && (
+            <Pressable
+              onPress={() => {
+                fPassScale.value = withSequence(withSpring(1.5), withSpring(1));
+                setisForgotPwd(!isForgotPwd);
+              }}
+            >
+              <Text style={styles.interactiveText}>
+                {isForgotPwd ? "Cancel" : "Forgot password"}
+              </Text>
+            </Pressable>
+          )}
+        </Animated.View>
+        <Animated.View style={fUserScaleAnimated}>
+          {!isForgotPwd && (
+            <Pressable
+              onPress={() => {
+                fUserScale.value = withSequence(withSpring(1.5), withSpring(1));
+                if (isForgotUsr) {
+                  setScreenState(0);
+                }
+                setisForgotUsr(!isForgotUsr);
+              }}
+            >
+              <Text style={styles.interactiveText}>
+                {isForgotUsr ? "Cancel" : "Forgot username"}
+              </Text>
+            </Pressable>
+          )}
+        </Animated.View>
+      </View>
 
-      {isForgotPwd && (
+      {(isForgotPwd || isForgotUsr) && (
         <Animated.View style={[formButtonAnimatedStyle]}>
           <Pressable
             style={styles.formButton}
@@ -221,10 +280,12 @@ const Login = ({ navigation }) => {
                 withSpring(1.5),
                 withSpring(1)
               );
-              createPasswordToken();
+              isForgotPwd ? createPasswordToken() : sendUsernames();
             }}
           >
-            <Text style={styles.buttonText}>Next</Text>
+            <Text style={styles.buttonText}>
+              {isForgotPwd ? "Next" : "Submit"}
+            </Text>
           </Pressable>
         </Animated.View>
       )}
@@ -247,6 +308,64 @@ const Login = ({ navigation }) => {
     };
   };
 
+  const usernameField = (
+    <InputField
+      {...inputProps("Username", setUsername, usernameRef)}
+      onSubmitEditing={
+        isForgotPwd
+          ? () => createPasswordToken()
+          : () => passwordRef.current.focus()
+      }
+      pretext={
+        isForgotPwd ? "Enter the username you use to sign in with" : undefined
+      }
+    />
+  );
+
+  const passwordField = (
+    <InputField
+      {...inputProps("Password", setPassword, passwordRef)}
+      secureTextEntry={true}
+      style={{
+        ...styles.textInput,
+        marginVertial: 3,
+      }}
+      onSubmitEditing={() => {
+        Keyboard.dismiss();
+        setScreenState(0);
+      }}
+    />
+  );
+
+  const emailField = (
+    <View>
+      <InputField
+        {...inputProps("Email", setEmail, emailRef)}
+        onSubmitEditing={
+          isForgotUsr
+            ? () => sendUsernames()
+            : () => usernameRef.current.focus()
+        }
+      />
+    </View>
+  );
+
+  const submitForm = (
+    <Animated.View style={[formButtonAnimatedStyle]}>
+      <Pressable
+        style={styles.formButton}
+        onPress={() => {
+          formButtonScale.value = withSequence(withSpring(1.5), withSpring(1));
+          registerOrLogin(isRegistering);
+        }}
+      >
+        <Text style={styles.buttonText}>
+          {isRegistering ? "REGISTER" : "LOG IN"}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+
   const formScreen = (
     <Animated.View
       style={[
@@ -258,53 +377,12 @@ const Login = ({ navigation }) => {
         formAnimatedStyle,
       ]}
     >
-      {isRegistering && (
-        <InputField
-          {...inputProps("Email", setEmail, emailRef)}
-          onSubmitEditing={() => usernameRef.current.focus()}
-        />
-      )}
-      <InputField
-        {...inputProps("Username", setUsername, usernameRef)}
-        onSubmitEditing={() => passwordRef.current.focus()}
-        pretext={
-          isForgotPwd ? "Enter the username you use to sign in with" : undefined
-        }
-      />
-      <InputField
-        {...inputProps("Password", setPassword, passwordRef)}
-        secureTextEntry={true}
-        editable={!isForgotPwd}
-        style={{
-          ...styles.textInput,
-          opacity: isForgotPwd ? 0 : 1,
-          marginVertial: 3,
-        }}
-        onSubmitEditing={() => {
-          Keyboard.dismiss()
-          setScreenState(0);
-        }}
-      />
+      {(isRegistering || isForgotUsr) && emailField}
+      {!isForgotUsr && usernameField}
+      {!(isForgotPwd || isForgotUsr) && passwordField}
 
-      {!isRegistering && forgotPassword}
-      {!isForgotPwd && (
-        <Animated.View style={[formButtonAnimatedStyle]}>
-          <Pressable
-            style={styles.formButton}
-            onPress={() => {
-              formButtonScale.value = withSequence(
-                withSpring(1.5),
-                withSpring(1)
-              );
-              registerOrLogin(isRegistering);
-            }}
-          >
-            <Text style={styles.buttonText}>
-              {isRegistering ? "REGISTER" : "LOG IN"}
-            </Text>
-          </Pressable>
-        </Animated.View>
-      )}
+      {!isRegistering && forgot}
+      {!(isForgotPwd || isForgotUsr) && submitForm}
     </Animated.View>
   );
 
