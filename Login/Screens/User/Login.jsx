@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, createRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -35,6 +35,10 @@ const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+
+  const usernameRef = createRef();
+  const passwordRef = createRef();
+  const emailRef = createRef();
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
@@ -92,15 +96,16 @@ const Login = ({ navigation }) => {
     setEmail("");
     setUsername("");
     setPassword("");
+    usernameRef.current?.setNativeProps({ text: "" });
+    passwordRef.current?.setNativeProps({ text: "" });
+    emailRef.current?.setNativeProps({ text: "" });
+
     setisForgotPwd(false);
     setScreenState(0);
-    console.log("HERE");
   };
 
   const loginHandler = () => {
-    // flushInputs();
-    setisForgotPwd(false);
-    setScreenState(0);
+    flushInputs();
 
     if (isRegistering) {
       setIsRegistering(false);
@@ -108,9 +113,7 @@ const Login = ({ navigation }) => {
   };
 
   const registerHandler = () => {
-    // flushInputs();
-    setisForgotPwd(false);
-    setScreenState(0);
+    flushInputs();
 
     if (!isRegistering) {
       setIsRegistering(true);
@@ -237,6 +240,7 @@ const Login = ({ navigation }) => {
     >
       {isRegistering && (
         <InputField
+          ref={emailRef}
           name="email"
           label="Email"
           setValue={(text) => setEmail(text)}
@@ -248,6 +252,7 @@ const Login = ({ navigation }) => {
       )}
       <View>
         <InputField
+          ref={usernameRef}
           name="username"
           label="Username"
           pretext={
@@ -263,6 +268,7 @@ const Login = ({ navigation }) => {
         />
 
         <InputField
+          ref={passwordRef}
           name="password"
           label="Password"
           secureTextEntry={true}

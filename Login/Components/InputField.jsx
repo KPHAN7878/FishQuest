@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Text, View, TextInput } from "react-native";
 import styles from "../styles";
 
-export const InputField = (props) => {
+export const InputField = React.forwardRef((props, ref) => {
   const [field, setField] = useState(props);
 
   React.useEffect(() => {
@@ -35,15 +35,15 @@ export const InputField = (props) => {
         onSubmitEditing={
           "setScreenState" in field
             ? () => {
-                field.setScreenState[1](0);
+                field.setScreenState(0);
               }
             : undefined
         }
-        ref={field.ref}
+        ref={ref}
       />
       <Text style={styles.fieldError}>
         {!!field.error && field.error[field.name]}
       </Text>
     </View>
   );
-};
+});
