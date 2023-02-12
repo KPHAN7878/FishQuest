@@ -7,6 +7,7 @@ import {
   Pressable,
   TouchableOpacity,
   Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 
 import styles, { width, height } from "../../styles";
@@ -331,8 +332,9 @@ const Login = ({ navigation }) => {
         marginVertial: 3,
       }}
       onSubmitEditing={() => {
-        Keyboard.dismiss();
-        setScreenState(0);
+        // Keyboard.dismiss();
+        // setScreenState(0);
+        registerOrLogin(isRegistering);
       }}
     />
   );
@@ -387,37 +389,47 @@ const Login = ({ navigation }) => {
   );
 
   return (
-    <Animated.View style={styles.container}>
-      <Animated.View style={[StyleSheet.absoluteFill, imageAnimatedStyle]}>
-        <Svg height={height + 100} width={width}>
-          <ClipPath id="clipPathId">
-            <Ellipse cx={width / 2} rx={height} ry={height + 100} />
-          </ClipPath>
-          <Image
-            href={require("../../assets/Fish.jpg")}
-            width={width + 100}
-            height={height + 100}
-            preserveAspectRatio="xMidYMid slice"
-            clipPath="url(#clipPathId)"
-          />
-        </Svg>
-        <TouchableOpacity
-          style={[styles.closeButtonContainer]}
-          onPress={() => {
-            Keyboard.dismiss();
-            setScreenState(1);
-            setErrorMessage(null);
-            buttonOpacity.value = 1;
-          }}
-        >
-          <Animated.View style={[closeButtonContainerStyle]}>
-            <Text>X</Text>
-          </Animated.View>
-        </TouchableOpacity>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        setScreenState(screenState === 1 ? 1 : 0);
+        Keyboard.dismiss();
+      }}
+      accessible={false}
+    >
+      <Animated.View style={styles.container}>
+        <Animated.View style={[StyleSheet.absoluteFill, imageAnimatedStyle]}>
+          <Svg height={height + 100} width={width}>
+            <ClipPath id="clipPathId">
+              <Ellipse cx={width / 2} rx={height} ry={height + 100} />
+            </ClipPath>
+            <Image
+              href={require("../../assets/Fish.jpg")}
+              width={width + 100}
+              height={height + 100}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#clipPathId)"
+            />
+          </Svg>
+          <TouchableOpacity
+            style={[styles.closeButtonContainer]}
+            onPress={() => {
+              Keyboard.dismiss();
+              setScreenState(1);
+              setErrorMessage(null);
+              buttonOpacity.value = 1;
+            }}
+          >
+            <Animated.View style={[closeButtonContainerStyle]}>
+              <Text>X</Text>
+            </Animated.View>
+          </TouchableOpacity>
+        </Animated.View>
+        <View>
+          {initialScreen}
+          {formScreen}
+        </View>
       </Animated.View>
-      {initialScreen}
-      {formScreen}
-    </Animated.View>
+    </TouchableWithoutFeedback>
   );
 };
 
