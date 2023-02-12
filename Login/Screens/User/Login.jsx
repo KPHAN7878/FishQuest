@@ -54,7 +54,7 @@ const Login = ({ navigation }) => {
     if (emailRef && isForgotUsr) {
       emailRef.current.focus();
     }
-  }, [usernameRef, emailRef]);
+  }, [isForgotUsr, isForgotPwd]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const interpolation = interpolate(
@@ -229,7 +229,9 @@ const Login = ({ navigation }) => {
     </View>
   );
 
-  const sendUsernames = () => {};
+  const sendUsernames = async () => {
+    const res = await Client.post("user/forgot-username", { email });
+  };
 
   const forgot = (
     <View>
@@ -332,8 +334,6 @@ const Login = ({ navigation }) => {
         marginVertial: 3,
       }}
       onSubmitEditing={() => {
-        // Keyboard.dismiss();
-        // setScreenState(0);
         registerOrLogin(isRegistering);
       }}
     />
