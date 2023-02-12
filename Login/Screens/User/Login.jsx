@@ -280,6 +280,10 @@ const Login = ({ navigation }) => {
           opacity: isForgotPwd ? 0 : 1,
           marginVertial: 3,
         }}
+        onSubmitEditing={() => {
+          Keyboard.dismiss()
+          setScreenState(0);
+        }}
       />
 
       {!isRegistering && forgotPassword}

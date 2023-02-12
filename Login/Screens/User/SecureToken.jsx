@@ -1,7 +1,7 @@
 import { Text, View, Pressable, ScrollView, Keyboard } from "react-native";
 import styles, { width, height } from "../../styles";
 import { Client } from "../../utils/connection";
-import React, { useState } from "react";
+import React, { useState, createRef, useEffect } from "react";
 import { InputField } from "../../Components/InputField";
 
 import Animated, {
@@ -25,6 +25,17 @@ export const SecureToken = ({ route, navigation }) => {
   const [field, setField] = useState("");
   const formButtonScale = useSharedValue(1);
 
+  const passwordRef = createRef();
+  const tokenRef = createRef();
+
+  useEffect(() => {
+    if (tokenRef && !isSecure) {
+      tokenRef.current.focus();
+    } else if (passwordRef) {
+      passwordRef.current.focus();
+    }
+  }, [tokenRef, passwordRef]);
+
   const submitToken = async () => {
     const badCode = {};
 
@@ -46,6 +57,7 @@ export const SecureToken = ({ route, navigation }) => {
         setErrorMessage(null);
         setIsSecure(true);
       }
+      passwordRef.current?.focus();
     }
   };
 
@@ -91,6 +103,7 @@ export const SecureToken = ({ route, navigation }) => {
         letterSpacing: 8,
         marginVertical: 3,
       }}
+      ref={tokenRef}
     />
   );
 
@@ -103,6 +116,7 @@ export const SecureToken = ({ route, navigation }) => {
         onChangeText={(text) => {
           setField(text);
         }}
+        ref={passwordRef}
       />
     </View>
   );

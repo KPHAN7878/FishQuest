@@ -7,6 +7,7 @@ export const InputField = React.forwardRef((props, ref) => {
   const defaultProps = {
     placeholderTextColor: "black",
     style: [styles.textInput, { marginVertical: 3 }],
+    blurOnSubmit: false,
   };
 
   React.useEffect(() => {
