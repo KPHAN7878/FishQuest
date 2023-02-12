@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
   },
 
   fieldError: {
+    minHeight: 35,
     textAlign: "center",
     color: "#FF3333",
     marginHorizontal: 20,

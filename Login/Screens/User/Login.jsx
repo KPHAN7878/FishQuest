@@ -140,6 +140,7 @@ const Login = ({ navigation }) => {
       .then((res) => {
         Keyboard.dismiss();
         setScreenState(1);
+        setErrorMessage(null);
         navigation.navigate("Profile");
       })
       .catch((err) => {
@@ -158,12 +159,15 @@ const Login = ({ navigation }) => {
 
     // go to token token code submission screen...
     navigation.navigate("SecureToken", {
-      tokenInput: { tokenType: "password", username },
-      endpoint: "change-password",
       pretext:
         `If the username provided matches an existing account,` +
         ` you will receive an email with a password reset code`,
+      endpoint: "change-password",
+      tokenType: "password",
+      goBack: "Login",
+      username,
     });
+    setisForgotPwd(false);
   };
 
   const initialScreen = (

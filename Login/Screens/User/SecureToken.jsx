@@ -1,4 +1,4 @@
-import { Text, View, Pressable, ScrollView } from "react-native";
+import { Text, View, Pressable, ScrollView, Keyboard } from "react-native";
 import styles, { width, height } from "../../styles";
 import { Client } from "../../utils/connection";
 import React, { useState } from "react";
@@ -14,12 +14,15 @@ import Animated, {
 import { toErrorMap } from "../../utils/toErrorMap";
 
 export const SecureToken = ({ route, navigation }) => {
+  const { pretext, endpoint, username, tokenType } = route.params;
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isSecure, setIsSecure] = useState(false);
   const [tokenInput, setTokenInput] = useState({
     code: "",
-    ...route.params.tokenInput,
+    tokenType,
+    username,
   });
-  const { endpoint, pretext } = route.params;
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [field, setField] = useState("");
   const formButtonScale = useSharedValue(1);
 
   const submitToken = async () => {
@@ -41,10 +44,26 @@ export const SecureToken = ({ route, navigation }) => {
         return;
       } else {
         setErrorMessage(null);
+        setIsSecure(true);
       }
     }
+  };
 
-    // const token = await Client.post(`user/${endpoint}`, tokenInput);
+  const submitChange = async () => {
+    const fieldWithToken = {
+      ...tokenInput,
+      [tokenType]: field,
+    };
+
+    const res = await Client.post(`user/${endpoint}`, fieldWithToken);
+    if (res?.data.errors) {
+      const errors = toErrorMap(res.data.errors);
+      setErrorMessage(errors);
+      return;
+    } else {
+      setErrorMessage(null);
+      navigation.navigate(route.params.goBack);
+    }
   };
 
   const formButtonAnimatedStyle = useAnimatedStyle(() => {
@@ -52,6 +71,39 @@ export const SecureToken = ({ route, navigation }) => {
       transform: [{ scale: formButtonScale.value }],
     };
   });
+
+  const tokenField = (
+    <InputField
+      name="code"
+      label="_ _ _ _ _ _"
+      pretext={pretext}
+      keyboardType={"number-pad"}
+      error={errorMessage}
+      setValue={(text) => {
+        setTokenInput({ ...tokenInput, code: text });
+      }}
+      style={{
+        fontWeight: "bold",
+        fontSize: 32,
+        textAlign: "center",
+        letterSpacing: 8,
+      }}
+      maxLength={6}
+    />
+  );
+
+  const secureChange = (
+    <View>
+      <InputField
+        name={tokenType}
+        label={`Enter new ${tokenType}`}
+        error={errorMessage}
+        setValue={(text) => {
+          setField(text);
+        }}
+      />
+    </View>
+  );
 
   return (
     <ScrollView
@@ -61,34 +113,25 @@ export const SecureToken = ({ route, navigation }) => {
       <View
         style={{
           flex: 1,
-          marginTop: height * 0.4,
+          marginTop: height * 0.35,
         }}
       >
-        <InputField
-          name="code"
-          label="_ _ _ _ _ _"
-          pretext={pretext}
-          keyboardType={"number-pad"}
-          error={errorMessage}
-          setValue={(text) => {
-            setTokenInput({ ...tokenInput, code: text });
-          }}
-          style={{
-            fontWeight: "bold",
-            fontSize: 32,
-            textAlign: "center",
-            letterSpacing: 8,
-          }}
-          maxLength={6}
-        />
-
         <Pressable
           onPress={() => {
             navigation.goBack();
           }}
         >
-          <Text style={styles.interactiveText}>Cancel</Text>
+          {isSecure ? secureChange : tokenField}
+          <Text
+            onPress={() => {
+              navigation.goBack();
+            }}
+            style={styles.interactiveText}
+          >
+            Cancel
+          </Text>
         </Pressable>
+
         <Animated.View style={formButtonAnimatedStyle}>
           <Pressable
             style={styles.formButton}
@@ -97,10 +140,12 @@ export const SecureToken = ({ route, navigation }) => {
                 withSpring(1.5),
                 withSpring(1)
               );
-              submitToken();
+              isSecure ? submitChange() : submitToken();
             }}
           >
-            <Text style={styles.buttonText}>Submit</Text>
+            <Text style={styles.buttonText}>
+              {isSecure ? `Submit ${tokenType}` : "Submit token"}
+            </Text>
           </Pressable>
         </Animated.View>
       </View>
