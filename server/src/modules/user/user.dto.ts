@@ -25,14 +25,24 @@ export const passwordMessage = (args: ValidationArguments): string => {
   return msg;
 };
 
-export class Password {
+export class PasswordInput {
   @IsStrongPassword(passwordOptions, {
     message: passwordMessage,
   })
   password: string;
 }
 
-export class RegisterInput extends Password {
+export class UsernameInput {
+  @Length(3, 16)
+  username: string;
+}
+
+export class EmailInput {
+  @IsEmail()
+  email: string;
+}
+
+export class RegisterInput extends PasswordInput {
   @Length(3, 16)
   username: string;
 
@@ -51,7 +61,7 @@ export interface TokenInput {
   tokenType: Tokens;
 }
 
-export class PasswordToken extends Password implements TokenInput {
+export class PasswordToken extends PasswordInput implements TokenInput {
   @IsString()
   username: string;
   @IsString()

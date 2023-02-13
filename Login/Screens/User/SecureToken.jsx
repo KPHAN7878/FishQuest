@@ -129,15 +129,17 @@ export const SecureToken = ({ route, navigation }) => {
       <View
         style={{
           flex: 1,
+          justifyContent: "flex-end",
           marginTop: height * 0.35,
         }}
       >
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
+        {isSecure ? secureChange : tokenField}
+        <View
+          style={{
+            flexDirection: "row",
+            alignSelf: "flex-start",
           }}
         >
-          {isSecure ? secureChange : tokenField}
           <Text
             onPress={() => {
               navigation.goBack();
@@ -146,7 +148,7 @@ export const SecureToken = ({ route, navigation }) => {
           >
             Cancel
           </Text>
-        </Pressable>
+        </View>
 
         <Animated.View style={formButtonAnimatedStyle}>
           <Pressable

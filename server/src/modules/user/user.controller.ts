@@ -11,7 +11,12 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { RegisterInput, PasswordToken } from "./user.dto";
+import {
+  RegisterInput,
+  PasswordToken,
+  EmailInput,
+  UsernameInput,
+} from "./user.dto";
 import { HashPipe } from "./user.pipe";
 import { Request, Response } from "express";
 import { LocalAuthGuard, UserAuthGuard } from "../auth/auth.guard";
@@ -52,12 +57,12 @@ export class UserController {
   }
 
   @Post("forgot-username")
-  forgotUsername(@Body("email") email: string) {
+  forgotUsername(@Body() { email }: EmailInput) {
     return this.userService.forgotUsername(email);
   }
 
   @Post("forgot-password")
-  forgotPassword(@Body("username") username: string) {
+  forgotPassword(@Body() { username }: UsernameInput) {
     return this.userService.forgotPassword(username);
   }
 

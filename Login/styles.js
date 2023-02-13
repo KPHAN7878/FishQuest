@@ -47,6 +47,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  footer: {
+    marginHorizontal: 20,
+    paddingLeft: 10,
+    fontWeight: "bold",
+  },
+
   interactiveText: {
     marginHorizontal: 20,
     paddingLeft: 10,

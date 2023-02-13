@@ -22,6 +22,9 @@ export const InputField = React.forwardRef((props, ref) => {
         <Text style={styles.pretext}>{field.pretext}</Text>
       )}
       <TextInput {...defaultProps} {...field} ref={ref} />
+      {field.footer !== undefined && (
+        <Text style={styles.footer}>{field.footer}</Text>
+      )}
       <Text style={styles.fieldError}>
         {!!field.error && field.error[field.name]}
       </Text>

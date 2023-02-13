@@ -37,6 +37,7 @@ const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [sentEmail, setSentEmail] = useState(false);
 
   const usernameRef = createRef();
   const passwordRef = createRef();
@@ -127,6 +128,7 @@ const Login = ({ navigation }) => {
 
     setisForgotPwd(false);
     setisForgotUsr(false);
+    setSentEmail(false);
 
     usernameRef.current?.setNativeProps({ text: "" });
     passwordRef.current?.setNativeProps({ text: "" });
@@ -189,13 +191,24 @@ const Login = ({ navigation }) => {
   };
 
   const createPasswordToken = async () => {
-    Client.post("user/forgot-password", { username }).catch((err) => {
-      console.log(err);
-    });
+    const res = await Client.post("user/forgot-password", { username }).catch(
+      (err) => {
+        console.log(err);
+      }
+    );
+    console.log(res.data.errors);
+
+    if (res?.data.errors) {
+      const errors = toErrorMap(res.data.errors);
+      setErrorMessage(errors);
+      return;
+    } else {
+      setErrorMessage(null);
+    }
 
     navigation.navigate("SecureToken", {
       pretext:
-        `If the username provided matches an existing account,` +
+        `If the username provided matches an existing account` +
         ` you will receive an email with a password reset code`,
       endpoint: "change-password",
       tokenType: "password",
@@ -231,6 +244,18 @@ const Login = ({ navigation }) => {
 
   const sendUsernames = async () => {
     const res = await Client.post("user/forgot-username", { email });
+    if (res?.data.errors) {
+      const errors = toErrorMap(res.data.errors);
+      setErrorMessage(errors);
+      setSentEmail(false);
+      return;
+    } else {
+      setErrorMessage(null);
+    }
+
+    setSentEmail(true);
+    setScreenState(0);
+    Keyboard.dismiss();
   };
 
   const forgot = (
@@ -247,10 +272,15 @@ const Login = ({ navigation }) => {
               onPress={() => {
                 fPassScale.value = withSequence(withSpring(1.5), withSpring(1));
                 setisForgotPwd(!isForgotPwd);
+                setErrorMessage(
+                  errorMessage
+                    ? { password: "Your username or password may be incorrect" }
+                    : null
+                );
               }}
             >
               <Text style={styles.interactiveText}>
-                {isForgotPwd ? "Cancel" : "Forgot password"}
+                {isForgotPwd ? "Back" : "Forgot password"}
               </Text>
             </Pressable>
           )}
@@ -263,11 +293,12 @@ const Login = ({ navigation }) => {
                 if (isForgotUsr) {
                   setScreenState(0);
                 }
+                setSentEmail(false);
                 setisForgotUsr(!isForgotUsr);
               }}
             >
               <Text style={styles.interactiveText}>
-                {isForgotUsr ? "Cancel" : "Forgot username"}
+                {isForgotUsr ? "Back" : "Forgot username"}
               </Text>
             </Pressable>
           )}
@@ -287,7 +318,7 @@ const Login = ({ navigation }) => {
             }}
           >
             <Text style={styles.buttonText}>
-              {isForgotPwd ? "Next" : "Submit"}
+              {isForgotPwd ? "Next" : sentEmail ? "Resubmit" : "Submit"}
             </Text>
           </Pressable>
         </Animated.View>
@@ -343,6 +374,13 @@ const Login = ({ navigation }) => {
     <View>
       <InputField
         {...inputProps("Email", setEmail, emailRef)}
+        pretext={
+          sentEmail || isRegistering
+            ? undefined
+            : `If the email provided matches with an existing account` +
+              ` you will receive an email with a password reset code`
+        }
+        footer={sentEmail ? "Email Sent" : undefined}
         onSubmitEditing={
           isForgotUsr
             ? () => sendUsernames()
