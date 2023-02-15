@@ -1,3 +1,5 @@
+import "dotenv-safe/config";
+
 import express from "express";
 import cors from "cors";
 
@@ -9,12 +11,23 @@ import session from "express-session";
 import { SessionEntity } from "./modules/auth/session.entity";
 import { TypeormStore } from "connect-typeorm";
 import ClassValidationPipe from "./utils/ClassValidatorPipe";
-import "dotenv-save/config";
 
 const main = async () => {
   const server = express();
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-  await dataSource.initialize();
+
+  console.log(`env: ${process.env.NODE_ENV}`);
+  console.log(`db url: ${process.env.DATABASE_URL}`);
+
+  try {
+    await dataSource.initialize();
+    // await dataSource.runMigrations();
+  } catch (err: any) {
+    if (err.code === "42P07") {
+      return;
+    }
+  }
+
   const sessionRepository = dataSource.getRepository(SessionEntity);
 
   app.use(cors());
@@ -29,18 +42,17 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 3,
       },
       saveUninitialized: false,
-      secret: process.env.SESSION_SECRET,
+      secret: process.env.SESSION_SECRET as string | string[],
       resave: false,
     })
   );
 
   const passport = require("passport");
-  // app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalPipes(new ClassValidationPipe({ whitelist: true }));
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.listen(process.env.PORT, () => {
+  app.listen(process.env.PORT as string | number, () => {
     console.log(`server started on localhost:${process.env.PORT}`);
   });
 };

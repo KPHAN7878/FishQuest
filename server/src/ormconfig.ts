@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 
+// production ds
 export const connectionSource = new DataSource({
   type: "postgres",
   host: "localhost",
@@ -7,6 +8,6 @@ export const connectionSource = new DataSource({
   username: "postgres",
   password: "DataDolphin973",
   database: "postgres",
-  entities: ["dist/entities/*.js"],
+  entities: [__dirname + "/**/*.entity.{ts,js}"],
   migrations: ["dist/migrations/*.js"],
 });

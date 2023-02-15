@@ -14,8 +14,10 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+COPY .env.production .env
 
 RUN npm run-script build
 
 EXPOSE 8080
 CMD [ "node", "dist/index.js" ]
+USER node

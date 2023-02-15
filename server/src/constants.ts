@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import "dotenv-save/config";
+import path from "path";
 
 export const __prod__ = process.env.NODE_ENV === "production";
 export const MODEL_PATH = `${__dirname}/classifier/model.onnx`;
@@ -13,6 +13,7 @@ export const dataSource = new DataSource({
   entities: [__dirname + "/**/*.entity.{ts,js}"],
   logging: false,
   synchronize: !__prod__,
+  migrations: [path.join(__dirname, "./migrations/*")],
 });
 
 export const COOKIE_NAME = "FISH_QUEST";
