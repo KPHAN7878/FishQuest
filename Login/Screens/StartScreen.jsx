@@ -6,7 +6,8 @@ import styles, { width, height } from "../styles";
 export const StartScreen = ({ navigation }) => {
   Client.get("user/status")
     .then((res) => {
-      navigation.navigate("Profile");
+      //navigation.navigate("Profile");
+      navigation.navigate("Home");
     })
     .catch((err) => {
       if (err.response.status === 403) navigation.navigate("Login");

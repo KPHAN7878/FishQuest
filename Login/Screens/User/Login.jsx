@@ -178,7 +178,7 @@ const Login = ({ navigation }) => {
         Keyboard.dismiss();
         setScreenState(1);
         setErrorMessage(null);
-        navigation.navigate("Profile");
+        navigation.navigate("Home"); //navigation.navigate("Profile");
         buttonOpacity.value = 1;
       })
       .catch((err) => {
