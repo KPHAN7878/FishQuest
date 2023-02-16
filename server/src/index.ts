@@ -14,10 +14,8 @@ import ClassValidationPipe from "./utils/ClassValidatorPipe";
 
 const main = async () => {
   const server = express();
+  // server.set("proxy", 1);
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-
-  console.log(`env: ${process.env.NODE_ENV}`);
-  console.log(`db url: ${process.env.DATABASE_URL}`);
 
   try {
     await dataSource.initialize();
@@ -30,7 +28,12 @@ const main = async () => {
 
   const sessionRepository = dataSource.getRepository(SessionEntity);
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    })
+  );
   app.use(express.json());
   app.use(
     session({
@@ -40,6 +43,7 @@ const main = async () => {
       }).connect(sessionRepository),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 3,
+        domain: __prod__ ? ".fishquest.net" : undefined,
       },
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET as string | string[],
