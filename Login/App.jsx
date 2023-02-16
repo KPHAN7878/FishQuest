@@ -8,10 +8,17 @@ import Home from "./Screens/Social/Home";
 import MAP from "./Screens/Social/Map";
 import Logger from "./Screens/Social/Logger";
 
+import React, {useState} from "react";
+import { UserContext } from "./Contexts/UserContext";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
+  const [user, setUser] = useState(null);
+
   return (
+    <UserContext.Provider value={{user, setUser}}>
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false, gestureEnabled: false }}
@@ -33,5 +40,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </UserContext.Provider>
   );
 }
