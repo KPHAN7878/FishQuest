@@ -6,7 +6,7 @@ services:
     #   context: .
     #   dockerfile: Dockerfile
     image: wiltsig/fishquest:1
-    container_name: fishquest
+    container_name: nodejs
     restart: unless-stopped
     networks:
       - app-network
@@ -38,8 +38,8 @@ services:
       - web-root:/var/www/html
     depends_on:
       - webserver
-    command: certonly --webroot --webroot-path=/var/www/html --email wiltsig@gmail.com --agree-tos --no-eff-email --staging -d api.fishquest.net  -d www.api.fishquest.net
-    # command: certonly --webroot --webroot-path=/var/www/html --email wiltsig@gmail.com --agree-tos --no-eff-email --force-renewal -d api.fishquest.net  -d www.api.fishquest.net
+    command: certonly --webroot --webroot-path=/var/www/html --email wiltsig@gmail.com --agree-tos --no-eff-email --force-renewal -d api.fishquest.net  -d www.api.fishquest.net
+    # command: certonly --webroot --webroot-path=/var/www/html --email wiltsig@gmail.com --agree-tos --no-eff-email --staging -d api.fishquest.net  -d www.api.fishquest.net
 
 volumes:
   certbot-etc:
@@ -48,13 +48,13 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/ubuntu/views/
+      device: /home/ubuntu/fishquest/views/
       o: bind
   dhparam:
     driver: local
     driver_opts:
       type: none
-      device: /home/ubuntu/dhparam/
+      device: /home/ubuntu/fishquest/dhparam/
       o: bind
 
 networks:

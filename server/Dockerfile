@@ -12,6 +12,6 @@ ENV NODE_ENV production
 
 RUN npm run-script build
 
-EXPOSE 8080
+EXPOSE 4000
 CMD [ "node", "dist/index.js" ]
 USER node
