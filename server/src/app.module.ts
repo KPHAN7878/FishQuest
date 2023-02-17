@@ -5,16 +5,12 @@ import { __prod__ } from "./constants";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CatchModule } from "./modules/catch/catch.module";
 import { UserModule } from "./modules/user/user.module";
-// import { PostEntity } from "./modules/post/post.entity";
-// TypeOrmModule.forFeature([PostEntity]),
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: "postgres",
-      username: "postgres", //username: "admin",
-      password: "DataDolphin973", //password: "",
-      database: "fishquest", //database: "FishQuest",
+      url: process.env.DATABASE_URL,
       synchronize: !__prod__,
       autoLoadEntities: true,
       entities: [__dirname + "/**/*.entity.{ts,js}"],
