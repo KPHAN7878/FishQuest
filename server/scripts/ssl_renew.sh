@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# FOR REMOTE MACHINE "ubuntu@api.fishquest.net" ONLY
 COMPOSE="/usr/local/bin/docker-compose --ansi never"
 DOCKER="/usr/bin/docker"
 

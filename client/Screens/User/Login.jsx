@@ -49,7 +49,7 @@ const Login = ({ navigation }) => {
   const fPassScale = useSharedValue(1);
   const buttonOpacity = useSharedValue(1);
 
-  const {user, setUser} = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
 
   React.useEffect(() => {
     if (usernameRef && isForgotPwd) {
@@ -185,9 +185,9 @@ const Login = ({ navigation }) => {
         buttonOpacity.value = 1;
 
         //let test = JSON.stringify(res.data)
-        let currentUser = (res.data)
-        setUser(currentUser)
-        console.log("FINAL STRING: " + currentUser)
+        let currentUser = res.data;
+        setUser(currentUser);
+        console.log("FINAL STRING: " + currentUser);
       })
       .catch((err) => {
         if (err.response.status === 401) {

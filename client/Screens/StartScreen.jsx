@@ -1,12 +1,16 @@
 import { Text, View } from "react-native";
-import React from "react";
+import { useContext } from "react";
 import { Client } from "../utils/connection";
 import styles, { width, height } from "../styles";
+import { UserContext } from "../Contexts/UserContext";
 
 export const StartScreen = ({ navigation }) => {
+  const { setUser } = useContext(UserContext);
+
   Client.get("user/status")
-    .then((res) => {
-      //navigation.navigate("Profile");
+    .then(async () => {
+      const res = await Client.get("user/profile");
+      setUser(res.data);
       navigation.navigate("Home");
     })
     .catch((err) => {
