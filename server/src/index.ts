@@ -57,7 +57,9 @@ const main = async () => {
   app.use(passport.session());
 
   app.listen(process.env.PORT as string | number, () => {
-    console.log(`server started on localhost:${process.env.PORT}`);
+    console.log(
+      `server started on ${process.env.CORS_ORIGIN}, port ${process.env.PORT}`
+    );
   });
 };
 
