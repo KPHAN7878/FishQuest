@@ -1,4 +1,4 @@
-import React, { useState, createRef } from "react";
+import React, { useState, createRef, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { toErrorMap } from "../../utils/toErrorMap";
+import { UserContext } from "../../Contexts/UserContext";
 
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
@@ -47,6 +48,8 @@ const Login = ({ navigation }) => {
   const fUserScale = useSharedValue(1);
   const fPassScale = useSharedValue(1);
   const buttonOpacity = useSharedValue(1);
+
+  const {user, setUser} = useContext(UserContext);
 
   React.useEffect(() => {
     if (usernameRef && isForgotPwd) {
@@ -174,12 +177,17 @@ const Login = ({ navigation }) => {
     }
 
     await Client.post("user/login", user)
-      .then(() => {
+      .then((res) => {
         Keyboard.dismiss();
         setScreenState(1);
         setErrorMessage(null);
-        navigation.navigate("Profile");
+        navigation.navigate("Home"); //navigation.navigate("Profile");
         buttonOpacity.value = 1;
+
+        //let test = JSON.stringify(res.data)
+        let currentUser = (res.data)
+        setUser(currentUser)
+        console.log("FINAL STRING: " + currentUser)
       })
       .catch((err) => {
         if (err.response.status === 401) {
