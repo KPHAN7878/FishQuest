@@ -10,7 +10,7 @@ export const Profile = ({ navigation }) => {
     navigation.navigate("Login");
   };
 
-  const {user, setUser} = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
 
   return (
     <View
