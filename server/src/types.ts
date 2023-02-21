@@ -13,7 +13,7 @@ export class ErrorRes {
 }
 
 export type Ctx = Request & {
-  user?: UserEntity;
+  user: UserEntity;
   token?: TokenEntity | ErrorRes;
   session?: Session;
 };

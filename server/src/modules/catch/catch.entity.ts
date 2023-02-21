@@ -40,5 +40,5 @@ export class CatchEntity extends BaseEntity {
   post?: PostEntity;
 
   @Column()
-  dataUri: string; // cloud storage | local fs
+  imageUri: string; // cloud storage | local fs
 }
