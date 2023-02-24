@@ -1,12 +1,11 @@
 import Login from "./Screens/User/Login";
-import Profile from "./Screens/User/Profile";
 import SecureToken from "./Screens/User/SecureToken";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StartScreen } from "./Screens/StartScreen";
+import { useFonts } from "expo-font";
+
 import Home from "./Screens/Social/Home";
-import MAP from "./Screens/Social/Map";
-import Logger from "./Screens/Logger/Logger";
 
 import React, { useState } from "react";
 import { UserContext } from "./Contexts/UserContext";
@@ -16,7 +15,20 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [fontsLoaded, error] = useFonts({
+    Inter: require("./assets/fonts/Inter.ttf"),
+    Inter_regular: require("./assets/fonts/Inter_regular.ttf"),
+    Inter_medium: require("./assets/fonts/Inter_medium.ttf"),
+    Allura: require("./assets/fonts/Allura.ttf"),
+    Allura_regular: require("./assets/fonts/Allura_regular.ttf"),
+  });
 
+  if (!fontsLoaded && !error) {
+    return null;
+  }
+
+
+  //Other screens are in the 'navigation' tab
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <NavigationContainer>
@@ -26,11 +38,8 @@ export default function App() {
           <Stack.Screen name="StartScreen" component={StartScreen} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="Map" component={MAP} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="Logger" component={Logger} />
           <Stack.Screen name="CameraView" component={CameraView} />
-
+  
           <Stack.Screen
             name="SecureToken"
             component={SecureToken}
@@ -41,3 +50,4 @@ export default function App() {
     </UserContext.Provider>
   );
 }
+
