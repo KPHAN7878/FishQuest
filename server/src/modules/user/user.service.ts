@@ -196,4 +196,14 @@ export class UserService {
 
     this.tokenRepository.delete({ userId, tokenType: "password" });
   }
+
+  //testing update user profile information
+  async changeUserProfile(username: string, newImageURL: string) {
+    await this.userRepository.update(
+      {username: username},
+      {
+        profilePicUrl: newImageURL,
+      }
+    );
+  }
 }
