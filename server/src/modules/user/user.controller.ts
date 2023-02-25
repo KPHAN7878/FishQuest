@@ -32,7 +32,7 @@ import { TokenEntity } from "../auth/token.entity";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import {v4 as uuidv4} from 'uuid';
-import path from "path";
+import path, { join } from "path";
 
 @Controller("user")
 export class UserController {
@@ -142,12 +142,12 @@ export class UserController {
   }))
   changeUserProfile(  //could also replace with update
     @Param('username') username: string,
-    //@Body() { profilePicUrl }: ProfileImageInput,
     @UploadedFile() file: Express.Multer.File
   )
   {
     console.log(file);
-    //return ({imagePath:file.filename});
-    return this.userService.changeUserProfile(username, file.path);
+    const filepath = join(process.cwd(), 'uploads/profileimages/' + file.filename)
+    console.log(filepath)
+    return this.userService.changeUserProfile(username, filepath);
   }
 }
