@@ -33,6 +33,9 @@ export class UserEntity extends BaseEntity {
   @Column()
   password!: string;
 
+  @Column({nullable:true})
+  profilePicUrl: string;
+
   @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
   catches: CatchEntity[];
 

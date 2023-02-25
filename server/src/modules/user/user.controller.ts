@@ -9,6 +9,9 @@ import {
   Session,
   UseGuards,
   UseInterceptors,
+  Put,
+  Param,
+  UploadedFile,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import {
@@ -16,6 +19,7 @@ import {
   PasswordToken,
   EmailInput,
   UsernameInput,
+  ProfileImageInput,
 } from "./user.dto";
 import { HashPipe } from "./user.pipe";
 import { Request, Response } from "express";
@@ -24,6 +28,11 @@ import { COOKIE_NAME } from "../../constants";
 import { Ctx, ErrorRes } from "../../types";
 import { TokenInterceptor } from "../auth/token.interceptor";
 import { TokenEntity } from "../auth/token.entity";
+
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import {v4 as uuidv4} from 'uuid';
+import path, { join } from "path";
 
 @Controller("user")
 export class UserController {
@@ -115,5 +124,30 @@ export class UserController {
   async getAuthSession(@Session() session: Record<string, any>) {
     session.authorized = true;
     return session;
+  }
+
+  //testing update profile image 
+  @UseGuards(UserAuthGuard)
+  @Put(':username')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/profileimages',
+      filename: (req, file, cb) => {
+        const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+        const extension: string = path.parse(file.originalname).ext;
+
+        cb(null, `${filename}${extension}`)
+      }
+    })
+  }))
+  changeUserProfile(  //could also replace with update
+    @Param('username') username: string,
+    @UploadedFile() file: Express.Multer.File
+  )
+  {
+    console.log(file);
+    const filepath = join(process.cwd(), 'uploads/profileimages/' + file.filename)
+    console.log(filepath)
+    return this.userService.changeUserProfile(username, filepath);
   }
 }
