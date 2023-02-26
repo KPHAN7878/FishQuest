@@ -39,6 +39,6 @@ export default class CatchController {
   async submitCatch(@Body() submission: Submission) {
     const results = await this.catchService.submitCatch(submission);
     // ...
-    return results;
+    return {};
   }
 }
