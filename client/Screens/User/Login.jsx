@@ -370,7 +370,7 @@ const Login = ({ navigation }) => {
       secureTextEntry={true}
       style={{
         ...styles.textInput,
-        marginVertial: 3,
+        marginVertical: 3,
       }}
       onSubmitEditing={() => {
         registerOrLogin(isRegistering);

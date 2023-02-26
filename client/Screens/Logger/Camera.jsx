@@ -1,14 +1,19 @@
 import { Camera, CameraType } from "expo-camera";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import useAxios from "axios-hooks";
 import FormData from "form-data";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
-import { API_URL } from "@env";
+import { manipulateAsync } from "expo-image-manipulator";
+import { API_URL, S3_BUCKET } from "@env";
+import { S3 } from "../../utils/connection";
+import { UserContext } from "../../Contexts/UserContext";
+import { Buffer } from "buffer";
+import { height } from "../../styles";
 
-export const CameraView = () => {
+export const CameraView = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  const { user } = useContext(UserContext);
   const ref = useRef(null);
 
   const [
@@ -36,6 +41,24 @@ export const CameraView = () => {
     );
   };
 
+  const uploadToS3 = async (base64Image) => {
+    const Bucket = `${S3_BUCKET}/catches`;
+    const params = {
+      Key: `${Date.now()}.${user.username}.jpg`,
+      Body: Buffer.from(
+        base64Image.replace(/^data:image\/\w+;base64,/, ""),
+        "base64"
+      ),
+      ContentType: "jpg",
+      Bucket,
+    };
+
+    const { Location } = await S3.upload(params).promise();
+    console.log("uploading to S3", Location);
+
+    return Location;
+  };
+
   const takeSubmission = async () => {
     const cache = await ref.current.takePictureAsync({
       base64: true,
@@ -52,12 +75,17 @@ export const CameraView = () => {
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
     const form = new FormData();
-    form.append("time", "test");
-    form.append("date", "test");
+    const imageUri = await uploadToS3(cache.base64);
+
+    form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
     form.append("location", "test");
     submitCatch({ data: form });
   };
+
+  //   const goBack = () => {
+  // navigation.goBack();
+  //   }
 
   if (!permission) {
     return <View />;
@@ -76,18 +104,18 @@ export const CameraView = () => {
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={ref}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={takeSubmission}>
-            <Text style={styles.text}>Take Pic</Text>
-          </TouchableOpacity>
-        </View>
-      </Camera>
+      <Camera style={styles.camera} type={type} ref={ref}></Camera>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
+          <Text style={styles.text}>Go Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={takeSubmission}>
+          <Text style={styles.text}>Take Pic</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+          <Text style={styles.text}>Flip Camera</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -95,24 +123,29 @@ export const CameraView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-end",
   },
   camera: {
     flex: 1,
   },
   buttonContainer: {
+    backgroundColor: "black",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 64,
+
+    alignItems: "center",
+
+    postition: "absolute",
+    bottom: 0,
+    maxHeight: height * 0.15,
   },
   button: {
     flex: 1,
-    alignSelf: "flex-end",
     alignItems: "center",
   },
   text: {
-    fontSize: 24,
+    fontSize: 18,
+    textAlign: "center",
     fontWeight: "bold",
     color: "white",
   },
