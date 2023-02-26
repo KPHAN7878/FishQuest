@@ -1,13 +1,12 @@
 import * as React from "react";
 import Posts from "./Posts";
 
-const SocialFeed = ({navigation}) => {
+const SocialFeed = ({ navigation }) => {
   return (
     <>
-    <Posts/>
+      <Posts />
     </>
   );
 };
-
 
 export default SocialFeed;

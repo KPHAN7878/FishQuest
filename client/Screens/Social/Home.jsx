@@ -11,10 +11,10 @@ const Tabs = createBottomTabNavigator();
 const Home = () => {
   return (
     <>
-    <View style={styles.headerBox}>
-      <Text style={styles.fishQuest}>Fish Quest</Text>
-    </View>
-    <MainContainer/> 
+      <View style={styles.headerBox}>
+        <Text style={styles.fishQuest}>Fish Quest</Text>
+      </View>
+      <MainContainer />
     </>
   );
 };
@@ -45,6 +45,5 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
 });
-
 
 export default Home;
