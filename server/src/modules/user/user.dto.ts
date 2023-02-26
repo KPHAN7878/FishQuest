@@ -69,3 +69,9 @@ export class PasswordToken extends PasswordInput implements TokenInput {
   @IsString()
   tokenType: Tokens;
 }
+
+//testing update profile picture
+export class ProfileImageInput {
+  @IsString()
+  profilePicUrl: string;
+}

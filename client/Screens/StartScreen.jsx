@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, ActivityIndicator } from "react-native";
 import { useContext, useEffect } from "react";
 import { Client } from "../utils/connection";
 import styles, { width, height } from "../styles";
@@ -31,7 +31,7 @@ export const StartScreen = ({ navigation }) => {
           textAlign: "center",
         }}
       >
-        Loading...
+        <ActivityIndicator size="large" />
       </Text>
     </View>
   );

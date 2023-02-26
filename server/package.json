@@ -6,7 +6,7 @@
   "main": "index.js",
   "dependencies": {
     "@nestjs/passport": "^9.0.0",
-    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/platform-express": "^9.3.9",
     "@nestjs/typeorm": "^9.0.1",
     "@types/argon2": "^0.15.0",
     "@types/dotenv": "^8.2.0",
