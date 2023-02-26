@@ -5,9 +5,6 @@ export class Prediction extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  creatorId!: number;
-
   @Column({ type: "int", default: 0 })
   score: number;
 
@@ -18,5 +15,5 @@ export class Prediction extends BaseEntity {
   species: string;
 
   @Column("int", { array: true })
-  modelOutput?: number[]; // output tensor representation
+  modelOutput?: string; // output tensor representation
 }

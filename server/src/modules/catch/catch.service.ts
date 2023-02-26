@@ -7,6 +7,7 @@ import { ErrorRes, FieldError } from "../../types";
 import { __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
 import { Model } from "../../utils/ImageProc";
+import { UserEntity } from "../user/user.entity";
 
 @Injectable()
 export class CatchService {
@@ -16,18 +17,30 @@ export class CatchService {
     private readonly catchRepository: Repository<CatchEntity>
   ) {}
 
-  async submitCatch(sub: Submission): Promise<CatchEntity & Prediction> {
+  async submitCatch(
+    sub: Submission,
+    user: UserEntity
+  ): Promise<CatchEntity & Prediction> {
     const data = sub.imageBase64.split(";base64,").pop() as string;
 
     const image = await this.classifier.jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
     console.log(modelOutput);
 
-    const catchEntry: CatchEntity = CatchEntity.create();
-    // await this.catchRepository.save(catchEntry);
-    const prediction: Prediction = Prediction.create();
+    const catchEntry: CatchEntity = CatchEntity.create({
+      creator: user,
+      location: [], // change later
+      imageUri: sub.imageUri,
+    });
+    await this.catchRepository.save(catchEntry);
 
-    return {} as any;
+    const prediction: Prediction = Prediction.create({
+      status: true,
+      species: "",
+      modelOutput: JSON.stringify(modelOutput),
+    });
+
+    return { ...prediction, ...catchEntry } as CatchEntity & Prediction;
   }
 
   async getAll(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
@@ -48,12 +61,15 @@ export class CatchService {
   }
 
   //TEST saving catch to database
-  async testSubmitCatch(testCatch: Catch, filepath: string): Promise<CatchEntity> {
+  async testSubmitCatch(
+    testCatch: Catch,
+    filepath: string
+  ): Promise<CatchEntity> {
     const testCatchEntry = CatchEntity.create(testCatch as Catch);
 
-    console.log(testCatchEntry)
+    console.log(testCatchEntry);
 
-    testCatchEntry["imageUri"] = filepath
+    testCatchEntry["imageUri"] = filepath;
 
     await this.catchRepository.save(testCatchEntry);
 

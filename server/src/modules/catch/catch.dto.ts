@@ -17,7 +17,7 @@ export class Pred {
 
 export class Catch {
   creatorId: number;
-  comment: string;
+  note: string;
   location: number[];
   imageUri: string;
   //imageBase64: string;

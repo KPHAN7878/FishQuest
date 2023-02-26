@@ -10,6 +10,7 @@ import Home from "./Screens/Social/Home";
 import React, { useState } from "react";
 import { UserContext } from "./Contexts/UserContext";
 import { CameraView } from "./Screens/Logger/Camera";
+import Result from "./Screens/Logger/Result";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +28,6 @@ export default function App() {
     return null;
   }
 
-
   //Other screens are in the 'navigation' tab
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -35,11 +35,15 @@ export default function App() {
         <Stack.Navigator
           screenOptions={{ headerShown: false, gestureEnabled: false }}
         >
-          <Stack.Screen name="StartScreen" component={StartScreen} />
-          <Stack.Screen name="Login" component={Login} />
+          <Stack.Group>
+            <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="Login" component={Login} />
+          </Stack.Group>
           <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="CameraView" component={CameraView} />
-  
+          <Stack.Group>
+            <Stack.Screen name="CameraView" component={CameraView} />
+            <Stack.Screen name="Result" component={Result} />
+          </Stack.Group>
           <Stack.Screen
             name="SecureToken"
             component={SecureToken}
@@ -50,4 +54,3 @@ export default function App() {
     </UserContext.Provider>
   );
 }
-

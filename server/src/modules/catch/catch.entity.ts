@@ -18,16 +18,13 @@ export class CatchEntity extends BaseEntity {
   id!: number;
 
   @CreateDateColumn()
-  createdAt?: Date;
-
-  @Column()
-  creatorId: number;
+  createdAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.catches)
   creator: UserEntity;
 
-  @Column()
-  comment?: string;
+  @Column({ nullable: true })
+  note?: string;
 
   @Column("int", { array: true })
   location: number[];
