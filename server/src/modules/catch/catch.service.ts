@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CatchEntity } from "./catch.entity";
 import { Repository } from "typeorm";
-import { Pred, Submission } from "./catch.dto";
+import { Catch, Pred, Submission } from "./catch.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError } from "../../types";
 import { __prod__ } from "../../constants";
@@ -45,5 +45,19 @@ export class CatchService {
     }
 
     return catchEntry;
+  }
+
+  //TEST saving catch to database
+  async testSubmitCatch(testCatch: Catch, filepath: string): Promise<CatchEntity> {
+    const testCatchEntry = CatchEntity.create(testCatch as Catch);
+
+    console.log(testCatchEntry)
+
+    testCatchEntry["imageUri"] = filepath
+
+    await this.catchRepository.save(testCatchEntry);
+
+    return testCatchEntry;
+    //return {} as any;
   }
 }
