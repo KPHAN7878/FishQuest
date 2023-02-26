@@ -23,6 +23,7 @@ export const StartScreen = ({ navigation }) => {
     <View
       style={{
         flex: 1,
+        justifyContent: "center",
       }}
     >
       <Text

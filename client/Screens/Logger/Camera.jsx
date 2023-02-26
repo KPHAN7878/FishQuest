@@ -1,6 +1,13 @@
 import { Camera, CameraType } from "expo-camera";
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import useAxios from "axios-hooks";
 import FormData from "form-data";
 import { manipulateAsync } from "expo-image-manipulator";
@@ -15,25 +22,34 @@ export const CameraView = ({ navigation }) => {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const { user } = useContext(UserContext);
   const ref = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [key, setKey] = useState("");
+  const location = S3.getBucketLocation().service.endpoint.host;
 
-  const [
-    { data: __catchData, loading: catchLoading, error: catchError },
-    submitCatch,
-  ] = useAxios(
-    {
-      url: `http://${API_URL}/catch`,
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
+  const [{ data: result, loading: _, error: catchError }, submitCatch] =
+    useAxios(
+      {
+        url: `http://${API_URL}/catch`,
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    },
-    { manual: true }
-  );
+      { manual: true }
+    );
 
   useEffect(() => {
-    catchLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
-    if (catchError) console.log(catchError);
-  }, [catchLoading, catchError]);
+    isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
+    if (catchError) {
+      console.log(catchError);
+      setIsLoading(false);
+    }
+
+    if (result) {
+      setIsLoading(false);
+      navigation.navigate("Result", result);
+    }
+  }, [result, isLoading, catchError]);
 
   const toggleCameraType = () => {
     setType((current) =>
@@ -41,28 +57,26 @@ export const CameraView = ({ navigation }) => {
     );
   };
 
-  const uploadToS3 = async (base64Image) => {
+  const uploadToS3 = async (base64Image, Key) => {
     const Bucket = `${S3_BUCKET}/catches`;
     const params = {
-      Key: `${Date.now()}.${user.username}.jpg`,
       Body: Buffer.from(
         base64Image.replace(/^data:image\/\w+;base64,/, ""),
         "base64"
       ),
       ContentType: "jpg",
       Bucket,
+      Key,
     };
 
-    const { Location } = await S3.upload(params).promise();
-    console.log("uploading to S3", Location);
-
-    return Location;
+    await S3.upload(params).promise();
   };
 
   const takeSubmission = async () => {
+    setIsLoading(true);
     const cache = await ref.current.takePictureAsync({
       base64: true,
-      quality: 0.5,
+      quality: 0.1,
     });
     if (cache === undefined) {
       return;
@@ -74,18 +88,18 @@ export const CameraView = ({ navigation }) => {
       { base64: true }
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
-    const form = new FormData();
-    const imageUri = await uploadToS3(cache.base64);
+    setKey(`${Date.now()}.${user.username}.jpg`);
+    const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
 
+    const form = new FormData();
     form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
     form.append("location", "test");
-    submitCatch({ data: form });
-  };
 
-  //   const goBack = () => {
-  // navigation.goBack();
-  //   }
+    submitCatch({ data: form }).then(() => {
+      uploadToS3(cache.base64, key);
+    });
+  };
 
   if (!permission) {
     return <View />;
@@ -104,18 +118,26 @@ export const CameraView = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={ref}></Camera>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
-          <Text style={styles.text}>Go Back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={takeSubmission}>
-          <Text style={styles.text}>Take Pic</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-          <Text style={styles.text}>Flip Camera</Text>
-        </TouchableOpacity>
-      </View>
+      <Camera style={styles.camera} type={type} ref={ref}>
+        {isLoading && (
+          <View style={styles.loadingWheel}>
+            <ActivityIndicator size="large" />
+          </View>
+        )}
+      </Camera>
+      {!isLoading && (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
+            <Text style={styles.text}>Go Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={takeSubmission}>
+            <Text style={styles.text}>Take Pic</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -127,6 +149,11 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  loadingWheel: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
   },
   buttonContainer: {
     backgroundColor: "black",
