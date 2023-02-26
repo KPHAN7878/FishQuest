@@ -23,7 +23,6 @@ export const CameraView = ({ navigation }) => {
   const { user } = useContext(UserContext);
   const ref = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [key, setKey] = useState("");
   const location = S3.getBucketLocation().service.endpoint.host;
 
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
@@ -88,7 +87,7 @@ export const CameraView = ({ navigation }) => {
       { base64: true }
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
-    setKey(`${Date.now()}.${user.username}.jpg`);
+    const key = `${Date.now()}.${user.username}.jpg`;
     const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
 
     const form = new FormData();
