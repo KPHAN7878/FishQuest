@@ -3,16 +3,17 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import useAxios from "axios-hooks";
 import FormData from "form-data";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import { manipulateAsync } from "expo-image-manipulator";
 import { API_URL, S3_BUCKET } from "@env";
 import { S3 } from "../../utils/connection";
 import { UserContext } from "../../Contexts/UserContext";
 import { Buffer } from "buffer";
+import { height } from "../../styles";
 
-export const CameraView = () => {
+export const CameraView = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const ref = useRef(null);
 
   const [
@@ -82,6 +83,10 @@ export const CameraView = () => {
     submitCatch({ data: form });
   };
 
+  //   const goBack = () => {
+  // navigation.goBack();
+  //   }
+
   if (!permission) {
     return <View />;
   }
@@ -99,18 +104,18 @@ export const CameraView = () => {
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={ref}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={takeSubmission}>
-            <Text style={styles.text}>Take Pic</Text>
-          </TouchableOpacity>
-        </View>
-      </Camera>
+      <Camera style={styles.camera} type={type} ref={ref}></Camera>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
+          <Text style={styles.text}>Go Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={takeSubmission}>
+          <Text style={styles.text}>Take Pic</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
+          <Text style={styles.text}>Flip Camera</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -118,24 +123,29 @@ export const CameraView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-end",
   },
   camera: {
     flex: 1,
   },
   buttonContainer: {
+    backgroundColor: "black",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 64,
+
+    alignItems: "center",
+
+    postition: "absolute",
+    bottom: 0,
+    maxHeight: height * 0.15,
   },
   button: {
     flex: 1,
-    alignSelf: "flex-end",
     alignItems: "center",
   },
   text: {
-    fontSize: 24,
+    fontSize: 18,
+    textAlign: "center",
     fontWeight: "bold",
     color: "white",
   },
