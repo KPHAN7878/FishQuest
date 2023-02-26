@@ -8,6 +8,8 @@ import {
   ParseIntPipe,
   Param,
   UploadedFile,
+  Req,
+  UseGuards,
 } from "@nestjs/common";
 
 import { Catch, Pred, Submission } from "./catch.dto";
@@ -16,9 +18,12 @@ import { __prod__, IMG_FILE_LIMIT } from "../../constants";
 import { CatchService } from "./catch.service";
 import { CatchEntity } from "./catch.entity";
 import path, { join } from "path";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from "uuid";
+import { Ctx } from "../../types";
+import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("catch")
+@UseGuards(new UserAuthGuard())
 export default class CatchController {
   constructor(private readonly catchService: CatchService) {}
 
@@ -39,31 +44,37 @@ export default class CatchController {
       limits: { fieldSize: IMG_FILE_LIMIT },
     })
   )
-  async submitCatch(@Body() submission: Submission) {
-    const results = await this.catchService.submitCatch(submission);
+  async submitCatch(@Body() submission: Submission, @Req() { user }: Ctx) {
+    const results = await this.catchService.submitCatch(submission, user);
     // ...
-    return {};
+    console.log(results);
+    return results;
   }
 
   //testing catch logger API that saves data to database
   @Post("testlogger")
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/profileimages',
-      filename: (req, file, cb) => {
-        const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-        const extension: string = path.parse(file.originalname).ext;
+  @UseInterceptors(
+    FileInterceptor("file", {
+      storage: diskStorage({
+        destination: "./uploads/profileimages",
+        filename: (req, file, cb) => {
+          const filename: string =
+            path.parse(file.originalname).name.replace(/\s/g, "") + uuidv4();
+          const extension: string = path.parse(file.originalname).ext;
 
-        cb(null, `${filename}${extension}`)
-      }
+          cb(null, `${filename}${extension}`);
+        },
+      }),
     })
-  }))
+  )
   async testSubmitCatch(
     @Body() catchLog: Catch,
     @UploadedFile() file: Express.Multer.File
-    ) {
-    
-    const filepath = join(process.cwd(), 'uploads/profileimages/' + file.filename)
+  ) {
+    const filepath = join(
+      process.cwd(),
+      "uploads/profileimages/" + file.filename
+    );
     const results = await this.catchService.testSubmitCatch(catchLog, filepath);
 
     return results;
