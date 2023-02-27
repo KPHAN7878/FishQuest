@@ -11,6 +11,10 @@ import {
 } from "typeorm";
 import { TokenEntity } from "../auth/token.entity";
 import { CatchEntity } from "../catch/catch.entity";
+import { CommentEntity } from "../comment/comment.entity";
+import { LikeEntity } from "../like/like.entity";
+import { PostEntity } from "../post/post.entity";
+import { ReactionEntity } from "../reaction/reaction.entity";
 
 @Entity()
 @Unique(["username"])
@@ -33,12 +37,29 @@ export class UserEntity extends BaseEntity {
   @Column()
   password!: string;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   profilePicUrl: string;
-
-  @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
-  catches: CatchEntity[];
 
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
+
+  // catches that the user has submitted
+  @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
+  catches: CatchEntity[];
+
+  // posts that the user has created
+  @OneToMany(() => PostEntity, (post) => post.user)
+  posts: PostEntity[];
+
+  // likes of comments or posts
+  @OneToMany(() => LikeEntity, (like) => like.user)
+  likes: LikeEntity[];
+
+  // comments on user posts and other comments
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comments: CommentEntity[];
+
+  // reactions to a post
+  @OneToMany(() => ReactionEntity, (reaction) => reaction.user)
+  reactions: ReactionEntity[];
 }

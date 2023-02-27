@@ -3,7 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -13,12 +13,10 @@ import { PostEntity } from "../post/post.entity";
 @Entity()
 export class ReactionEntity extends BaseEntity {
   @PrimaryColumn()
-  @OneToMany(() => PostEntity, (postId) => postId.postId)
-  postId!: number;
+  postId: number;
 
   @PrimaryColumn()
-  @OneToMany(() => UserEntity, (user) => user.id )
-  userId!: number;
+  userId: number;
 
   @Column()
   type!: string;
@@ -29,7 +27,10 @@ export class ReactionEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
- 
+  @ManyToOne(() => UserEntity, (user) => user.reactions)
+  user: UserEntity;
 
+  @ManyToOne(() => PostEntity, (post) => post.likes)
+  @ManyToOne(() => PostEntity)
+  post: PostEntity;
 }
-
