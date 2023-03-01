@@ -21,6 +21,9 @@ export class PostEntity extends BaseEntity {
   id!: number;
 
   @Column()
+  creatorId: number;
+
+  @Column()
   text!: string;
 
   @Column({ default: 0 })

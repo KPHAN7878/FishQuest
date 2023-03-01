@@ -31,30 +31,22 @@ export class PostController {
   async deletePost(@Body("postId") postId: number) {
     return await this.postService.delete(postId);
   }
+  @Get("user")
+  async posts(
+    @Body() feedPagination: Paginated,
+    @Body("userId") userId: number,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return await this.postService.userPosts(feedPagination, userId, myId);
+  }
+
+  @Get("my-feed")
+  async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
+    return await this.postService.myFeed(feedPagination, user);
+  }
 
   @Get(":id")
   async getById(@Param("id") postId: number) {
     return await this.postService.getById(postId);
   }
-
-  @Get("feed")
-  async feed(
-    @Body() feedPagination: Paginated,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.feed(feedPagination, userId);
-  }
-
-  // @Get("comment")
-  // async getComments(
-  //   @Body("comment") comment: CommentPost,
-  //   @Body("pagination") commentPagination: Paginated,
-  //   @Req() { user: { id: userId } }: Ctx
-  // ) {
-  //   return await this.postService.getComments(
-  //     comment,
-  //     commentPagination,
-  //     userId
-  //   );
-  // }
 }

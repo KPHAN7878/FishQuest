@@ -16,7 +16,7 @@ export class LikeService {
 
   async likePost(postId: number, user: UserEntity): Promise<boolean> {
     const like = await LikeEntity.findOne({
-      where: { userId: user.id, type: "post" },
+      where: { userId: user.id, type: "post", likableId: postId },
       relations: ["post"],
     });
     const post = await PostEntity.findOneBy({ id: postId });
@@ -33,12 +33,11 @@ export class LikeService {
         userId: user.id,
         post: post!,
         type: "post",
+        likableId: postId,
         user,
       });
       this.likeRepository.save(newLike);
     }
-
-    console.log(post!.likeValue);
 
     return true;
   }
