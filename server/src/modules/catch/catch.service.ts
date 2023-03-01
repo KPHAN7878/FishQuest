@@ -30,6 +30,7 @@ export class CatchService {
       status: true,
       species: "",
       modelOutput: JSON.stringify(modelOutput),
+      userId: user.id,
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({

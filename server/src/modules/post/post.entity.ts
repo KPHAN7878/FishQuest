@@ -32,7 +32,7 @@ export class PostEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.posts)
   user: UserEntity;
 
-  @OneToOne(() => CatchEntity, { cascade: ["update"] })
+  @OneToOne(() => CatchEntity, (_catch) => _catch.post)
   catch!: CatchEntity;
 
   @OneToMany(() => LikeEntity, (like) => like.post)

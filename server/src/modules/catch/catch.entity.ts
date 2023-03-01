@@ -29,11 +29,12 @@ export class CatchEntity extends BaseEntity {
   @Column("int", { array: true })
   location: number[];
 
-  @OneToOne(() => Prediction, { cascade: true }) // info gathered after processing catch
+  @OneToOne(() => Prediction, { cascade: true })
   @JoinColumn()
   prediction: Prediction;
 
-  @OneToOne(() => PostEntity)
+  @OneToOne(() => PostEntity, (post) => post.catch, { cascade: true }) //bidirectional
+  @JoinColumn() // where you would use relations
   post?: PostEntity;
 
   @Column()

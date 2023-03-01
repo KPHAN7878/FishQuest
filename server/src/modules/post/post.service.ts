@@ -22,7 +22,7 @@ export class PostService {
   ): Promise<PostEntity | ErrorRes> {
     const catchEntry = await CatchEntity.findOne({
       where: { id: postData.catchId },
-      relations: ["user"],
+      relations: ["user", "post"], // attach relations
     });
 
     const errors = formErrors([
@@ -37,6 +37,11 @@ export class PostService {
         message: `id mismatch`,
         field: "catch",
       },
+      {
+        value: catchEntry?.post !== null,
+        message: `post for this catch already exists`,
+        field: "catch",
+      },
     ]);
 
     if (errors.length) return { errors };
@@ -47,7 +52,7 @@ export class PostService {
       user,
     });
 
-    this.postRepository.insert(postEntry);
+    this.postRepository.save(postEntry);
     return postEntry;
   }
 
