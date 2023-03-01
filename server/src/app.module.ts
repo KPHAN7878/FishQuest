@@ -6,6 +6,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { CatchModule } from "./modules/catch/catch.module";
 import { PostModule } from "./modules/post/post.module";
 import { UserModule } from "./modules/user/user.module";
+import { LikeModule } from "./modules/like/like.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { UserModule } from "./modules/user/user.module";
     CatchModule,
     AuthModule,
     PostModule,
+    LikeModule,
   ],
 })
 export class AppModule {}

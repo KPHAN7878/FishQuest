@@ -34,9 +34,9 @@ export class CatchEntity extends BaseEntity {
   prediction: Prediction;
 
   @OneToOne(() => PostEntity, (post) => post.catch, { cascade: true }) //bidirectional
-  @JoinColumn() // where you would use relations
+  @JoinColumn()
   post?: PostEntity;
 
   @Column()
-  imageUri: string; // cloud storage | local fs
+  imageUri: string;
 }

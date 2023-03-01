@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { Ctx } from "../../types";
-import { CommentPost, Paginated, PostInput, UpdatePostInput } from "./post.dto";
+import { Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("post")
@@ -32,14 +32,6 @@ export class PostController {
     return await this.postService.delete(postId);
   }
 
-  @Post("comment")
-  async createComment(
-    @Body() comment: CommentPost,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.createComment(comment, userId);
-  }
-
   @Get(":id")
   async getById(@Param("id") postId: number) {
     return await this.postService.getById(postId);
@@ -53,16 +45,16 @@ export class PostController {
     return await this.postService.feed(feedPagination, userId);
   }
 
-  @Get("comment")
-  async getComments(
-    @Body("comment") comment: CommentPost,
-    @Body("pagination") commentPagination: Paginated,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.getComments(
-      comment,
-      commentPagination,
-      userId
-    );
-  }
+  // @Get("comment")
+  // async getComments(
+  //   @Body("comment") comment: CommentPost,
+  //   @Body("pagination") commentPagination: Paginated,
+  //   @Req() { user: { id: userId } }: Ctx
+  // ) {
+  //   return await this.postService.getComments(
+  //     comment,
+  //     commentPagination,
+  //     userId
+  //   );
+  // }
 }

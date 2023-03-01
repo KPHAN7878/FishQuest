@@ -19,7 +19,8 @@ export const formErrors = (
         if (predicate.value && !stop) {
           if (predicate.stopIf) stop = true;
           const error: FieldError = {
-            ...predicate,
+            field: predicate.field,
+            message: predicate.message,
           };
           return error;
         } else {
@@ -30,7 +31,8 @@ export const formErrors = (
   } else {
     if ((predicates as ErrorResolver).value) {
       const error: FieldError = {
-        ...(predicates as ErrorResolver),
+        field: (predicates as ErrorResolver).field,
+        message: (predicates as ErrorResolver).message,
       };
       errors = [error];
     }

@@ -15,10 +15,3 @@ export class Paginated {
   limit: number;
   cursor: string;
 }
-
-export class CommentPost {
-  @IsNumber()
-  postId: number;
-  @IsNotEmpty()
-  comment: string;
-}

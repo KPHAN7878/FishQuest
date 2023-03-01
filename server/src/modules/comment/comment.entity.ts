@@ -14,6 +14,12 @@ import { UserEntity } from "../user/user.entity";
 
 @Entity()
 export class CommentEntity extends BaseEntity {
+  @PrimaryColumn()
+  type: "post" | "comment";
+
+  @PrimaryColumn()
+  userId: number;
+
   @Column()
   text!: string;
 
@@ -23,10 +29,7 @@ export class CommentEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @PrimaryColumn()
-  userId: number;
-
-  @ManyToOne(() => UserEntity, (user) => user.comments)
+  @ManyToOne(() => UserEntity, (user) => user.comments, { cascade: true })
   user: UserEntity;
 
   @ManyToOne(() => PostEntity, (post) => post.comments)
@@ -34,7 +37,7 @@ export class CommentEntity extends BaseEntity {
   post?: PostEntity;
 
   @ManyToOne(() => CommentEntity, (comment) => comment.comments)
-  @ManyToOne(() => CommentEntity, { nullable: true })
+  @ManyToOne(() => CommentEntity, { nullable: true }) // reflexive
   comment?: CommentEntity;
 
   @OneToMany(() => CommentEntity, (comment) => comment.comment)

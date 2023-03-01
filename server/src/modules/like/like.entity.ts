@@ -1,6 +1,5 @@
 import {
   BaseEntity,
-  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -12,11 +11,14 @@ import { UserEntity } from "../user/user.entity";
 
 @Entity()
 export class LikeEntity extends BaseEntity {
-  @CreateDateColumn()
-  createdAt: Date;
+  @PrimaryColumn()
+  type: "post" | "comment";
 
   @PrimaryColumn()
   userId: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.likes, { cascade: true })
   user: UserEntity;

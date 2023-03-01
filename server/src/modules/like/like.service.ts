@@ -1,34 +1,44 @@
 import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes, FieldError } from "../../types";
 import { UserEntity } from "../user/user.entity";
 import { LikeEntity } from "../like/like.entity";
 import { PostEntity } from "../post/post.entity";
-import { LikePost } from "./like.dto";
 
 @Injectable()
 export class LikeService {
   constructor(
     @InjectRepository(LikeEntity)
-    private readonly likeRepository: Repository<LikeEntity>
+    private readonly likeRepository: Repository<LikeEntity>,
+    @InjectRepository(PostEntity)
+    private readonly postRepository: Repository<PostEntity>
   ) {}
 
-  async like(likeInput: LikePost, user: UserEntity): Promise<boolean> {
+  async likePost(postId: number, user: UserEntity): Promise<boolean> {
     const like = await LikeEntity.findOne({
-      where: { userId: user.id },
+      where: { userId: user.id, type: "post" },
       relations: ["post"],
     });
-    const post = await PostEntity.findOneBy({ id: likeInput.postId });
+    const post = await PostEntity.findOneBy({ id: postId });
+    post!.likeValue += like ? -1 : 1;
 
     if (like) {
+      this.postRepository.update(
+        { id: postId },
+        { likeValue: post!.likeValue }
+      );
       this.likeRepository.remove(like);
     } else {
-      const newLike = LikeEntity.create({ userId: user.id, user, post: post! });
+      const newLike = LikeEntity.create({
+        userId: user.id,
+        post: post!,
+        type: "post",
+        user,
+      });
       this.likeRepository.save(newLike);
     }
 
-    console.log(post!.likes.length);
+    console.log(post!.likeValue);
 
     return true;
   }

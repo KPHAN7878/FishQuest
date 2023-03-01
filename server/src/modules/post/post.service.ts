@@ -4,8 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes } from "../../types";
 import { PostEntity } from "./post.entity";
 import { UserEntity } from "../user/user.entity";
-import { CommentPost, Paginated, PostInput, UpdatePostInput } from "./post.dto";
-import { CommentEntity } from "../comment/comment.entity";
+import { Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { CatchEntity } from "../catch/catch.entity";
 import { formErrors } from "../../utils/formError";
 
@@ -79,15 +78,6 @@ export class PostService {
     return true;
   }
 
-  async createComment(
-    comment: CommentPost,
-    userId: number
-  ): Promise<boolean | ErrorRes> {
-    // Create CommentEntity for this with relationships
-
-    return {} as any;
-  }
-
   async getById(postId: number): Promise<PostEntity | ErrorRes> {
     // find post where postId
 
@@ -101,11 +91,11 @@ export class PostService {
     return {} as any;
   }
 
-  async getComments(
-    comment: CommentPost,
-    commentPagination: Paginated,
-    userId: number
-  ): Promise<CommentEntity[] | ErrorRes> {
-    return {} as any;
-  }
+  // async getComments(
+  //   comment: CommentPost,
+  //   commentPagination: Paginated,
+  //   userId: number
+  // ): Promise<CommentEntity[] | ErrorRes> {
+  //   return {} as any;
+  // }
 }
