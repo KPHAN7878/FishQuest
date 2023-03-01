@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CatchEntity } from "./catch.entity";
 import { Repository } from "typeorm";
-import { Catch, Pred, Submission } from "./catch.dto";
+import { Catch, Submission } from "./catch.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError } from "../../types";
 import { __prod__ } from "../../constants";
@@ -25,20 +25,20 @@ export class CatchService {
 
     const image = await this.classifier.jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
-    console.log(modelOutput);
-
-    const catchEntry: CatchEntity = CatchEntity.create({
-      creator: user,
-      location: [], // change later
-      imageUri: sub.imageUri,
-    });
-    await this.catchRepository.save(catchEntry);
 
     const prediction: Prediction = Prediction.create({
       status: true,
       species: "",
       modelOutput: JSON.stringify(modelOutput),
     });
+
+    const catchEntry: CatchEntity = CatchEntity.create({
+      location: [], // change later
+      imageUri: sub.imageUri,
+      user,
+      prediction,
+    });
+    await this.catchRepository.save(catchEntry);
 
     return { ...prediction, ...catchEntry } as CatchEntity & Prediction;
   }

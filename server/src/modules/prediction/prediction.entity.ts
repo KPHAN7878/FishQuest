@@ -14,6 +14,6 @@ export class Prediction extends BaseEntity {
   @Column({ nullable: true })
   species: string;
 
-  @Column("int", { array: true })
+  @Column()
   modelOutput?: string; // output tensor representation
 }

@@ -8,6 +8,7 @@ import argon2 from "argon2";
 import { sendEmail } from "../../utils/sendEmail";
 import seedrandom from "seedrandom";
 import { TokenEntity } from "../auth/token.entity";
+import { formErrors } from "../../utils/formError";
 
 @Injectable()
 export class UserService {
@@ -135,32 +136,26 @@ export class UserService {
       return token.tokenType === tokenType;
     });
 
-    let errors: FieldError[] = [];
-    if (!token) {
-      errors.push({
+    const errors = formErrors([
+      {
+        value: !token,
         message: `no code for ${tokenType}`,
         field: "code",
-      });
-    } else {
-      const valid = await argon2.verify(token!.code, code);
-      if (!valid) {
-        errors.push({
-          message: "invalid code",
-          field: "code",
-        });
-      }
-      if (today > token!.expiresAt) {
-        errors.push({
-          message: "token expired",
-          field: "code",
-        });
-      }
-    }
+        stopIf: true,
+      },
+      {
+        value: await argon2.verify(token!.code, code),
+        message: "invalid code",
+        field: "code",
+      },
+      {
+        value: today > token!.expiresAt,
+        message: "token expired",
+        field: "code",
+      },
+    ]);
 
-    if (errors.length) {
-      return { errors };
-    }
-
+    if (errors.length) return { errors };
     return token!;
   }
 
@@ -200,7 +195,7 @@ export class UserService {
   //testing update user profile information
   async changeUserProfile(username: string, newImageURL: string) {
     await this.userRepository.update(
-      {username: username},
+      { username: username },
       {
         profilePicUrl: newImageURL,
       }

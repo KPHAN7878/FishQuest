@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes, FieldError } from "../../types";
+import { ErrorRes } from "../../types";
 import { PostEntity } from "./post.entity";
 import { UserEntity } from "../user/user.entity";
 import { CommentPost, Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { CommentEntity } from "../comment/comment.entity";
 import { CatchEntity } from "../catch/catch.entity";
+import { formErrors } from "../../utils/formError";
 
 @Injectable()
 export class PostService {
@@ -19,16 +20,26 @@ export class PostService {
     postData: PostInput,
     user: UserEntity
   ): Promise<PostEntity | ErrorRes> {
-    const catchEntry = await CatchEntity.findOneBy({ id: postData.catchId });
-    if (!catchEntry) {
-      const errors: FieldError[] = [
-        {
-          message: `could not find catch id: ${postData.catchId}`,
-          field: "catch",
-        },
-      ];
-      return { errors };
-    }
+    const catchEntry = await CatchEntity.findOne({
+      where: { id: postData.catchId },
+      relations: ["user"],
+    });
+
+    const errors = formErrors([
+      {
+        value: !catchEntry,
+        message: `could not find catch id: ${postData.catchId}`,
+        field: "catch",
+        stopIf: true,
+      },
+      {
+        value: catchEntry?.user.id !== user.id,
+        message: `id mismatch`,
+        field: "catch",
+      },
+    ]);
+
+    if (errors.length) return { errors };
 
     const postEntry = PostEntity.create({
       text: postData.text,
@@ -42,15 +53,13 @@ export class PostService {
 
   async update(postData: UpdatePostInput): Promise<boolean | ErrorRes> {
     const postEntry = await PostEntity.findOneBy({ id: postData.postId });
-    if (!postEntry) {
-      const errors: FieldError[] = [
-        {
-          message: `could not find post id: ${postData.postId}`,
-          field: "post",
-        },
-      ];
-      return { errors };
-    }
+
+    const errors = formErrors({
+      value: !postEntry,
+      message: `could not find post id: ${postData.postId}`,
+      field: "post",
+    });
+    if (errors) return { errors };
 
     await this.postRepository.update(
       { id: postData.postId },

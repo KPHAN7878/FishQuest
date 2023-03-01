@@ -1,9 +1,9 @@
-import { IsNumber, IsNotEmpty } from "class-validator";
+import { IsNumber, IsNotEmpty, IsString } from "class-validator";
 
 export class PostInput {
   @IsNumber()
   catchId: number;
-  @IsNotEmpty()
+  @IsString()
   text: string;
 }
 

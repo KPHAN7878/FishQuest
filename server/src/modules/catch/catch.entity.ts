@@ -20,8 +20,8 @@ export class CatchEntity extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.catches)
-  creator: UserEntity;
+  @ManyToOne(() => UserEntity, (user) => user.catches, { cascade: true })
+  user: UserEntity;
 
   @Column({ nullable: true })
   note?: string;
@@ -29,9 +29,9 @@ export class CatchEntity extends BaseEntity {
   @Column("int", { array: true })
   location: number[];
 
-  @OneToOne(() => Prediction) // info gathered after processing catch
+  @OneToOne(() => Prediction, { cascade: true }) // info gathered after processing catch
   @JoinColumn()
-  predData: Prediction;
+  prediction: Prediction;
 
   @OneToOne(() => PostEntity)
   post?: PostEntity;

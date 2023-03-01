@@ -44,7 +44,7 @@ export class UserEntity extends BaseEntity {
   tokens: TokenEntity[];
 
   // catches that the user has submitted
-  @OneToMany(() => CatchEntity, (userCatch) => userCatch.creator)
+  @OneToMany(() => CatchEntity, (userCatch) => userCatch.user)
   catches: CatchEntity[];
 
   // posts that the user has created
@@ -52,7 +52,7 @@ export class UserEntity extends BaseEntity {
   posts: PostEntity[];
 
   // likes of comments or posts
-  @OneToMany(() => LikeEntity, (like) => like.user, { cascade: true })
+  @OneToMany(() => LikeEntity, (like) => like.user)
   likes: LikeEntity[];
 
   // comments on user posts and other comments
