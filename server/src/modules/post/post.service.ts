@@ -12,6 +12,7 @@ import {
   UpdatePostInput,
 } from "./post.dto";
 import { CommentEntity } from "../comment/comment.entity";
+import { CatchEntity } from "../catch/catch.entity";
 
 // Note: typeorm has a querybuilder where u can write and
 // execute raw SQL if you need to use it for more advanced
@@ -24,30 +25,57 @@ import { CommentEntity } from "../comment/comment.entity";
 export class PostService {
   constructor(
     @InjectRepository(PostEntity)
-    private readonly postRepository: Repository<PostEntity>
+    private readonly postRepository: Repository<PostEntity>,
+    private readonly catchRepository: Repository<CatchEntity>
   ) {}
 
   async insert(
     postData: PostInput,
     user: UserEntity
   ): Promise<PostEntity | ErrorRes> {
-    // insert into post table with input parameters
+    const catchEntry = await CatchEntity.findOneBy({ id: postData.catchId });
+    if (!catchEntry) {
+      const errors: FieldError[] = [
+        {
+          message: `could not find catch id: ${postData.catchId}`,
+          field: "catch",
+        },
+      ];
+      return { errors };
+    }
 
-    return {} as any;
+    const postEntry = PostEntity.create({
+      text: postData.text,
+      catch: catchEntry!,
+      user,
+    });
+
+    this.postRepository.insert(postEntry);
+    return postEntry;
   }
 
-  async update(
-    postData: UpdatePostInput,
-    userId: number
-  ): Promise<PostEntity | ErrorRes> {
-    // find post where userId and postData.postId and update with postData
+  async update(postData: UpdatePostInput): Promise<boolean | ErrorRes> {
+    const postEntry = await PostEntity.findOneBy({ id: postData.postId });
+    if (!postEntry) {
+      const errors: FieldError[] = [
+        {
+          message: `could not find post id: ${postData.postId}`,
+          field: "post",
+        },
+      ];
+      return { errors };
+    }
 
-    return {} as any;
+    await this.postRepository.update(
+      { id: postData.postId },
+      { text: postData.text }
+    );
+
+    return true;
   }
 
-  async delete(postId: number, userId: number): Promise<boolean> {
-    // delete post where userId and postId
-
+  async delete(postId: number): Promise<boolean> {
+    this.postRepository.delete({ id: postId });
     return true;
   }
 
