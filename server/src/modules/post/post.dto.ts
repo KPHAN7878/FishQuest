@@ -16,11 +16,6 @@ export class Paginated {
   cursor: string;
 }
 
-export class LikePost {
-  value: boolean;
-  postId: number;
-}
-
 export class CommentPost {
   @IsNumber()
   postId: number;

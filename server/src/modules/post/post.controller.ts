@@ -9,13 +9,7 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { Ctx } from "../../types";
-import {
-  CommentPost,
-  LikePost,
-  Paginated,
-  PostInput,
-  UpdatePostInput,
-} from "./post.dto";
+import { CommentPost, Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("post")
@@ -29,27 +23,13 @@ export class PostController {
   }
 
   @Post("update")
-  async updatePost(
-    @Body() postData: UpdatePostInput,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.update(postData, userId);
+  async updatePost(@Body() postData: UpdatePostInput) {
+    return await this.postService.update(postData);
   }
 
   @Post("delete")
-  async deletePost(
-    @Body("postId") postId: number,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.delete(postId, userId);
-  }
-
-  @Post("like")
-  async like(
-    @Body() postIdandValue: LikePost,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.like(postIdandValue, userId);
+  async deletePost(@Body("postId") postId: number) {
+    return await this.postService.delete(postId);
   }
 
   @Post("comment")

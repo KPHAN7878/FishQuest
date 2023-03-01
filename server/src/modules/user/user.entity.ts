@@ -52,7 +52,7 @@ export class UserEntity extends BaseEntity {
   posts: PostEntity[];
 
   // likes of comments or posts
-  @OneToMany(() => LikeEntity, (like) => like.user)
+  @OneToMany(() => LikeEntity, (like) => like.user, { cascade: true })
   likes: LikeEntity[];
 
   // comments on user posts and other comments

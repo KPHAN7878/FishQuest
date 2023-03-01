@@ -4,29 +4,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError } from "../../types";
 import { PostEntity } from "./post.entity";
 import { UserEntity } from "../user/user.entity";
-import {
-  CommentPost,
-  LikePost,
-  Paginated,
-  PostInput,
-  UpdatePostInput,
-} from "./post.dto";
+import { CommentPost, Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { CommentEntity } from "../comment/comment.entity";
 import { CatchEntity } from "../catch/catch.entity";
-
-// Note: typeorm has a querybuilder where u can write and
-// execute raw SQL if you need to use it for more advanced
-// queries.
-//
-// Make sure to resolve errors and return them with the
-// correct format. Look at user.service for reference.
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(PostEntity)
-    private readonly postRepository: Repository<PostEntity>,
-    private readonly catchRepository: Repository<CatchEntity>
+    private readonly postRepository: Repository<PostEntity>
   ) {}
 
   async insert(
@@ -76,12 +62,6 @@ export class PostService {
 
   async delete(postId: number): Promise<boolean> {
     this.postRepository.delete({ id: postId });
-    return true;
-  }
-
-  async like(likeInput: LikePost, userId: number): Promise<boolean> {
-    // Create LikeEntity for this with relationships
-
     return true;
   }
 
