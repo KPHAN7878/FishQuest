@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommentEntity } from "../comment/comment.entity";
-import { CommentPost } from "./comment.dto";
+import { CommentComment, CommentPost } from "./comment.dto";
 import { UserEntity } from "../user/user.entity";
 import { PostEntity } from "../post/post.entity";
 
@@ -14,16 +14,38 @@ export class CommentService {
   ) {}
 
   async commentPost(
-    comment: CommentPost,
+    commentInput: CommentPost,
     user: UserEntity
   ): Promise<CommentEntity> {
-    const post = await PostEntity.findOneBy({ id: comment.postId });
+    const post = await PostEntity.findOneBy({
+      id: commentInput.postId,
+    });
 
     const newComment = CommentEntity.create({
-      text: comment.text,
+      text: commentInput.text,
       userId: user.id,
       post: post!,
       type: "post",
+      user,
+    });
+    this.commentRepository.save(newComment);
+
+    return newComment;
+  }
+
+  async commentComment(
+    commentInput: CommentComment,
+    user: UserEntity
+  ): Promise<CommentEntity> {
+    const comment = await CommentEntity.findOneBy({
+      id: commentInput.commentId,
+    });
+
+    const newComment = CommentEntity.create({
+      text: commentInput.text,
+      userId: user.id,
+      type: "comment",
+      comment: comment!,
       user,
     });
     this.commentRepository.save(newComment);

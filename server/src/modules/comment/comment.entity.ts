@@ -36,12 +36,12 @@ export class CommentEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.comments, { cascade: true })
   user: UserEntity;
 
-  @ManyToOne(() => PostEntity, (post) => post.comments)
+  @ManyToOne(() => PostEntity, (post) => post.comments, { cascade: true })
   @ManyToOne(() => PostEntity, { nullable: true })
   post?: PostEntity;
 
   @ManyToOne(() => CommentEntity, (comment) => comment.comments)
-  @ManyToOne(() => CommentEntity, { nullable: true }) // reflexive
+  @ManyToOne(() => CommentEntity, { nullable: true, cascade: true }) // reflexive
   comment?: CommentEntity;
 
   @OneToMany(() => CommentEntity, (comment) => comment.comment)
