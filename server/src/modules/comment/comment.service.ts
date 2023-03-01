@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes } from "../../types";
 import { CommentEntity } from "../comment/comment.entity";
 import { CommentPost } from "./comment.dto";
 import { UserEntity } from "../user/user.entity";
@@ -17,18 +16,18 @@ export class CommentService {
   async commentPost(
     comment: CommentPost,
     user: UserEntity
-  ): Promise<boolean | ErrorRes> {
+  ): Promise<CommentEntity> {
     const post = await PostEntity.findOneBy({ id: comment.postId });
 
     const newComment = CommentEntity.create({
       text: comment.text,
       userId: user.id,
       post: post!,
-      type: "comment",
+      type: "post",
       user,
     });
     this.commentRepository.save(newComment);
 
-    return true;
+    return newComment;
   }
 }

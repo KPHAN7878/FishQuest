@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { LikeEntity } from "../like/like.entity";
@@ -14,7 +15,10 @@ import { UserEntity } from "../user/user.entity";
 
 @Entity()
 export class CommentEntity extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   type: "post" | "comment";
 
   @PrimaryColumn()
