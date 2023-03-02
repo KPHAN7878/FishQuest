@@ -9,13 +9,7 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { Ctx } from "../../types";
-import {
-  CommentPost,
-  LikePost,
-  Paginated,
-  PostInput,
-  UpdatePostInput,
-} from "./post.dto";
+import { Paginated, PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("post")
@@ -29,60 +23,30 @@ export class PostController {
   }
 
   @Post("update")
-  async updatePost(
-    @Body() postData: UpdatePostInput,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.update(postData, userId);
+  async updatePost(@Body() postData: UpdatePostInput) {
+    return await this.postService.update(postData);
   }
 
   @Post("delete")
-  async deletePost(
-    @Body("postId") postId: number,
-    @Req() { user: { id: userId } }: Ctx
+  async deletePost(@Body("postId") postId: number) {
+    return await this.postService.delete(postId);
+  }
+  @Get("user")
+  async posts(
+    @Body() feedPagination: Paginated,
+    @Body("userId") userId: number,
+    @Req() { user: { id: myId } }: Ctx
   ) {
-    return await this.postService.delete(postId, userId);
+    return await this.postService.userPosts(feedPagination, userId, myId);
   }
 
-  @Post("like")
-  async like(
-    @Body() postIdandValue: LikePost,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.like(postIdandValue, userId);
-  }
-
-  @Post("comment")
-  async createComment(
-    @Body() comment: CommentPost,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.createComment(comment, userId);
+  @Get("my-feed")
+  async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
+    return await this.postService.myFeed(feedPagination, user);
   }
 
   @Get(":id")
   async getById(@Param("id") postId: number) {
     return await this.postService.getById(postId);
-  }
-
-  @Get("feed")
-  async feed(
-    @Body() feedPagination: Paginated,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.feed(feedPagination, userId);
-  }
-
-  @Get("comment")
-  async getComments(
-    @Body("comment") comment: CommentPost,
-    @Body("pagination") commentPagination: Paginated,
-    @Req() { user: { id: userId } }: Ctx
-  ) {
-    return await this.postService.getComments(
-      comment,
-      commentPagination,
-      userId
-    );
   }
 }

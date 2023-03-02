@@ -1,16 +1,13 @@
 import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { __prod__ } from "./constants";
+import { entities, __prod__ } from "./constants";
 import { AuthModule } from "./modules/auth/auth.module";
-import { SessionEntity } from "./modules/auth/session.entity";
-import { TokenEntity } from "./modules/auth/token.entity";
-import { CatchEntity } from "./modules/catch/catch.entity";
 import { CatchModule } from "./modules/catch/catch.module";
-import { PostEntity } from "./modules/post/post.entity";
-import { Prediction } from "./modules/prediction/prediction.entity";
-import { UserEntity } from "./modules/user/user.entity";
+import { PostModule } from "./modules/post/post.module";
 import { UserModule } from "./modules/user/user.module";
+import { LikeModule } from "./modules/like/like.module";
+import { CommentModule } from "./modules/comment/comment.module";
 
 @Module({
   imports: [
@@ -19,13 +16,15 @@ import { UserModule } from "./modules/user/user.module";
       url: process.env.DATABASE_URL,
       synchronize: !__prod__,
       autoLoadEntities: true,
-      //entities: [__dirname + "/**/*.entity.{ts,js}"],
-      entities: [SessionEntity, TokenEntity, CatchEntity, Prediction, UserEntity, PostEntity],
+      entities,
     }),
     PassportModule.register({ session: true }),
     UserModule,
     CatchModule,
     AuthModule,
+    PostModule,
+    LikeModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

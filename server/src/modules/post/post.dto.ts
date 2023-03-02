@@ -1,25 +1,24 @@
-import { CatchEntity } from "../catch/catch.entity";
+import { IsNumber, IsNotEmpty, IsString } from "class-validator";
+import { PostEntity } from "./post.entity";
 
 export class PostInput {
-  catch: CatchEntity;
+  @IsNumber()
+  catchId: number;
+  @IsString()
   text: string;
 }
 
 export class UpdatePostInput extends PostInput {
-  postId: string;
+  @IsNumber()
+  postId: number;
 }
 
 export class Paginated {
   limit: number;
-  cursor: string;
+  cursor?: string;
 }
 
-export class LikePost {
-  value: boolean;
-  postId: number;
-}
-
-export class CommentPost {
-  comment: string;
-  postId: number;
+export class PaginatedPost {
+  posts: PostEntity[];
+  hasMore: boolean;
 }
