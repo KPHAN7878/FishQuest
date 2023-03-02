@@ -26,6 +26,7 @@ export class CommentService {
       userId: user.id,
       post: post!,
       type: "post",
+      commentableId: commentInput.postId,
       user,
     });
     this.commentRepository.save(newComment);
@@ -37,8 +38,11 @@ export class CommentService {
     commentInput: CommentComment,
     user: UserEntity
   ): Promise<CommentEntity> {
-    const comment = await CommentEntity.findOneBy({
-      id: commentInput.commentId,
+    const comment = await CommentEntity.findOne({
+      where: {
+        id: commentInput.commentId,
+      },
+      relations: ["comments"],
     });
 
     const newComment = CommentEntity.create({
@@ -46,9 +50,11 @@ export class CommentService {
       userId: user.id,
       type: "comment",
       comment: comment!,
+      commentableId: commentInput.commentId,
       user,
     });
     this.commentRepository.save(newComment);
+    console.log(comment!.comments);
 
     return newComment;
   }

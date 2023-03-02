@@ -24,6 +24,9 @@ export class CommentEntity extends BaseEntity {
   @PrimaryColumn()
   userId: number;
 
+  @PrimaryColumn()
+  commentableId: number;
+
   @Column()
   text!: string;
 
@@ -41,7 +44,7 @@ export class CommentEntity extends BaseEntity {
   post?: PostEntity;
 
   @ManyToOne(() => CommentEntity, (comment) => comment.comments)
-  @ManyToOne(() => CommentEntity, { nullable: true, cascade: true }) // reflexive
+  @ManyToOne(() => CommentEntity, { nullable: true, cascade: ["update"] }) // reflexive
   comment?: CommentEntity;
 
   @OneToMany(() => CommentEntity, (comment) => comment.comment)
