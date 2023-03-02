@@ -12,4 +12,13 @@ export class LikeController {
   async likePost(@Body("postId") postId: number, @Req() { user }: Ctx) {
     return await this.likeService.likePost(postId, user);
   }
+
+  @Post("comment")
+  async likeComment(
+    @Body("commentId") commentId: number,
+    @Req() { user }: Ctx
+  ) {
+    console.log(commentId);
+    return await this.likeService.likeComment(commentId, user);
+  }
 }

@@ -36,6 +36,9 @@ export class CommentEntity extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ default: 0 })
+  likeValue!: number;
+
   @ManyToOne(() => UserEntity, (user) => user.comments, { cascade: true })
   user: UserEntity;
 
