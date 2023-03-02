@@ -24,6 +24,7 @@ export const CameraView = ({ navigation }) => {
   const ref = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const location = S3.getBucketLocation().service.endpoint.host;
+  const [image, setImage] = useState(null);
 
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
     useAxios(
@@ -46,6 +47,7 @@ export const CameraView = ({ navigation }) => {
 
     if (result) {
       setIsLoading(false);
+      result["ImageCache"] = image;
       navigation.navigate("Result", result);
     }
   }, [result, isLoading, catchError]);
@@ -89,6 +91,8 @@ export const CameraView = ({ navigation }) => {
 
     const key = `${Date.now()}.${user.username}.jpg`;
     const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
+
+    setImage(resizedImg)
 
     const form = new FormData();
     form.append("imageUri", imageUri);

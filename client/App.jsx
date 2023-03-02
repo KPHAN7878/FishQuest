@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { UserContext } from "./Contexts/UserContext";
 import { CameraView } from "./Screens/Logger/Camera";
 import Result from "./Screens/Logger/Result";
+import CreatePost from "./Screens/Social/CreatePost";
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,7 @@ export default function App() {
           <Stack.Group>
             <Stack.Screen name="CameraView" component={CameraView} />
             <Stack.Screen name="Result" component={Result} />
+            <Stack.Screen name="CreatePost" component={CreatePost} />
           </Stack.Group>
           <Stack.Screen
             name="SecureToken"

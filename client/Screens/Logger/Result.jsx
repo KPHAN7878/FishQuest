@@ -17,10 +17,12 @@ const Result = ({ route, navigation }) => {
           textAlign: "center",
         }}
       >
-        {JSON.stringify(result)}
+        {/* {JSON.stringify(result)} */}
       </Text>
 
-      <Pressable style={styles.formButton} onPress={() => {}}>
+      <Pressable style={styles.formButton} onPress={() => {
+        navigation.navigate("CreatePost", result)
+      }}>
         <Text style={styles.buttonText}>{"Post Catch"}</Text>
       </Pressable>
       <Pressable
