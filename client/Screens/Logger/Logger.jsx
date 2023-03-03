@@ -15,6 +15,14 @@ const Logger = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>Camera</Text>
       </Pressable>
+      <Pressable
+        style={styles.formButton}
+        onPress={async () => {
+          navigation.navigate("Catches");
+        }}
+      >
+        <Text style={styles.buttonText}>All Catches</Text>
+      </Pressable>
     </View>
   );
 };
