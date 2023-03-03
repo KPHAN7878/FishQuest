@@ -12,6 +12,9 @@ import { UserContext } from "./Contexts/UserContext";
 import { CameraView } from "./Screens/Logger/Camera";
 import Result from "./Screens/Logger/Result";
 import CreatePost from "./Screens/Social/CreatePost";
+import CommentContainer from "./Screens/Social/CommentContainer";
+import Catches from "./Screens/Logger/Catches";
+import CatchDetail from "./Screens/Logger/CatchDetail";
 
 const Stack = createNativeStackNavigator();
 
@@ -40,11 +43,16 @@ export default function App() {
             <Stack.Screen name="StartScreen" component={StartScreen} />
             <Stack.Screen name="Login" component={Login} />
           </Stack.Group>
+          <Stack.Group>
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="CommentContainer" component={CommentContainer} />
+          </Stack.Group>
           <Stack.Group>
             <Stack.Screen name="CameraView" component={CameraView} />
+            <Stack.Screen name="Catches" component={Catches} />
             <Stack.Screen name="Result" component={Result} />
             <Stack.Screen name="CreatePost" component={CreatePost} />
+            <Stack.Screen name="CatchDetail" component={CatchDetail} />
           </Stack.Group>
           <Stack.Screen
             name="SecureToken"
