@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { Ctx } from "../../types";
-import { Paginated, PostInput, UpdatePostInput } from "./post.dto";
+import { PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("post")
@@ -30,19 +30,6 @@ export class PostController {
   @Post("delete")
   async deletePost(@Body("postId") postId: number) {
     return await this.postService.delete(postId);
-  }
-  @Get("user")
-  async posts(
-    @Body() feedPagination: Paginated,
-    @Body("userId") userId: number,
-    @Req() { user: { id: myId } }: Ctx
-  ) {
-    return await this.postService.userPosts(feedPagination, userId, myId);
-  }
-
-  @Get("my-feed")
-  async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
-    return await this.postService.myFeed(feedPagination, user);
   }
 
   @Get(":id")

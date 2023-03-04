@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
@@ -42,6 +43,12 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
+
+  @ManyToMany(() => UserEntity, (user) => user.following)
+  followers: UserEntity[];
+
+  @ManyToMany(() => UserEntity, (user) => user.followers)
+  following: UserEntity[];
 
   // catches that the user has submitted
   @OneToMany(() => CatchEntity, (userCatch) => userCatch.user)
