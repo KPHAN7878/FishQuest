@@ -96,13 +96,6 @@ export class PostService {
   ): Promise<PaginatedPost> {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
-    const replacements: any[] = [realLimitPlusOne, myId, userId, "post"];
-
-    let cursorIdx = replacements.length + 1;
-    if (cursor) {
-      replacements.push(new Date(parseInt(cursor)));
-      cursorIdx = replacements.length;
-    }
 
     const posts = await dataSource.query(
       `
@@ -116,16 +109,17 @@ export class PostService {
     ) creator,
     ${
       myId
-        ? '(select "likableId" from public.like_entity l where ' +
-          'l."userId" = $2 and l."type" = $4 and l."likableId" = p.id) "likableId"'
-        : 'null as "likableId"'
+        ? `(select exists ` +
+          '(select "likableId" from public.like_entity l where ' +
+          `l."userId" = ${myId} and l."type" = 'post' and ` +
+          `l."likableId" = p.id)) "liked"`
+        : 'null as "liked"'
     }
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
-    ${cursor ? `where p."createdAt" < $${cursorIdx} and p.id = $3` : ""}
+    ${cursor ? `where p."createdAt" < ${cursor} and p.id = ${userId}` : ""}
     order by p."createdAt" DESC
-    limit $1
-    `,
-      replacements
+    limit ${realLimitPlusOne}
+    `
     );
 
     return {
@@ -140,4 +134,12 @@ export class PostService {
   ): Promise<PaginatedPost> {
     return {} as any;
   }
+
+  // async getComments(
+  //   comment: CommentPost,
+  //   commentPagination: Paginated,
+  //   userId: number
+  // ): Promise<CommentEntity[] | ErrorRes> {
+  //   return {} as any;
+  // }
 }

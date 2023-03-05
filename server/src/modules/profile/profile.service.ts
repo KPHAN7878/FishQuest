@@ -35,18 +35,28 @@ export class ProfileService {
     { limit, skip }: Paginated,
     userId: number,
     myId: number,
-    query: string
+    type: "followers" | "following"
   ): Promise<PaginatedUser> {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
-    const replacements: any[] = [realLimitPlusOne, userId, myId];
-
-    if (skip) {
-      replacements.push(skip);
-    }
-
     const users = await dataSource.query(
-      query + `${skip ? `offset $${replacements.length}` : ""}`
+      `
+    select u.*,
+    json_build_object(
+      'id', u.id,
+      'username', u.username
+    ) user,
+    ${
+      myId
+        ? `(select exists ` +
+          `(select * from u right join u.following fg on fg.id = ${myId})) "following"`
+        : 'null as "following"'
+    }
+    from user_entity u right join u.${type} fs on fs.id = ${userId}
+    order by u."username" ASC
+    limit ${realLimitPlusOne}
+   ${skip ? `offset ${skip}` : ""}
+    `
     );
 
     return {
@@ -60,24 +70,7 @@ export class ProfileService {
     userId: number,
     myId: number
   ): Promise<PaginatedUser> {
-    const query = `
-    select u.*,
-    json_build_object(
-      'id', u.id,
-      'username', u.username
-    ) user,
-    ${
-      myId
-        ? `(select exists ` +
-          `(select * from u right join u.following fg on fg.id = $3)) "following"`
-        : 'null as "following"'
-    }
-    from user_entity u right join u.followers fs on fs.id = $2
-    order by u."username" ASC
-    limit $1
-    `;
-
-    return this.followPaginated(paginate, userId, myId, query);
+    return this.followPaginated(paginate, userId, myId, "followers");
   }
 
   async following(
@@ -85,24 +78,7 @@ export class ProfileService {
     userId: number,
     myId: number
   ): Promise<PaginatedUser> {
-    const query = `
-    select u.*,
-    json_build_object(
-      'id', u.id,
-      'username', u.username
-    ) user,
-    ${
-      myId
-        ? `(select exists ` +
-          `(select * from u right join u.following fg on fg.id = $3)) "following"`
-        : 'null as "following"'
-    }
-    from user_entity u right join u.following fs on fs.id = $2
-    order by u."username" ASC
-    limit $1
-    `;
-
-    return this.followPaginated(paginate, userId, myId, query);
+    return this.followPaginated(paginate, userId, myId, "following");
   }
 
   //testing update user profile information
