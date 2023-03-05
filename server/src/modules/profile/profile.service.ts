@@ -15,18 +15,20 @@ export class ProfileService {
   ) {}
 
   async follow(followId: number, user: UserEntity): Promise<boolean> {
+    if (followId === user.id) {
+      return false;
+    }
+
     const userToFollow = await this.userRepository.findOne({
       where: { id: followId },
+      relations: ["followers"],
     });
 
     if (!userToFollow) {
       return false;
     }
-
-    this.userRepository.update(
-      { id: user.id },
-      { following: [...user.following, userToFollow] }
-    );
+    userToFollow.followers.push(user);
+    this.userRepository.save(userToFollow);
 
     return true;
   }
@@ -41,18 +43,21 @@ export class ProfileService {
     const realLimitPlusOne = realLimit + 1;
     const users = await dataSource.query(
       `
-    select u.*,
+    select
     json_build_object(
-      'id', u.id,
-      'username', u.username
+      'id', f."userEntityId_1",
+      'username', f."userEntityUsername_1"
     ) user,
     ${
       myId
-        ? `(select exists ` +
-          `(select * from u right join u.following fg on fg.id = ${myId})) "following"`
+        ? `(select exists (select * from ` +
+          `user_entity ` +
+          `where f."userEntityId_1" in (select "userEntityId_1" ` +
+          `from rfollowing where "userEntityId_2" = ${myId}))) "following"`
         : 'null as "following"'
     }
-    from user_entity u right join u.${type} fs on fs.id = ${userId}
+    from user_entity u right join rfollowing f on f."userEntityId_1" = u.id
+    where f."userEntityId_2" = ${userId}
     order by u."username" ASC
     limit ${realLimitPlusOne}
    ${skip ? `offset ${skip}` : ""}

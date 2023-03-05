@@ -15,7 +15,7 @@ export class ProfileController {
   ) {}
 
   @Post("follow")
-  async follow(@Body("followId") id: number, @Req() { user }: Ctx) {
+  async follow(@Body("userId") id: number, @Req() { user }: Ctx) {
     return this.userService.follow(id, user);
   }
 
