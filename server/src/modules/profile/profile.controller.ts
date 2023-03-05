@@ -1,24 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Req,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { Ctx } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { v4 as uuidv4 } from "uuid";
-import path, { join } from "path";
 import { PostService } from "../post/post.service";
-import { Paginated } from "../post/post.dto";
+import { Paginated } from "./profile.dto";
 import { UserService } from "../user/user.service";
 
 @Controller("profile")
@@ -30,27 +15,35 @@ export class ProfileController {
   ) {}
 
   @Post("follow")
-  async follow(@Body("userId") req: Ctx) {
-    return;
+  async follow(@Body("followId") id: number, @Req() { user }: Ctx) {
+    return this.userService.follow(id, user);
   }
 
   @Get("followers")
-  async followers(@Body("userId") req: Ctx) {
-    return;
+  async followers(
+    @Body() pagination: Paginated,
+    @Body("userId") userId: number,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return this.userService.followers(pagination, userId, myId);
   }
 
   @Get("following")
-  async following(@Body("userId") req: Ctx) {
-    return;
+  async following(
+    @Body() pagination: Paginated,
+    @Body("userId") userId: number,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return this.userService.following(pagination, userId, myId);
   }
 
   @Get("posts")
   async posts(
-    @Body() feedPagination: Paginated,
+    @Body() pagination: Paginated,
     @Body("userId") userId: number,
     @Req() { user: { id: myId } }: Ctx
   ) {
-    return await this.postService.userPosts(feedPagination, userId, myId);
+    return await this.postService.userPosts(pagination, userId, myId);
   }
 
   @Get("likes")
@@ -76,33 +69,11 @@ export class ProfileController {
     return await this.postService.myFeed(feedPagination, user);
   }
 
-  //testing update profile image
-  @Put(":username")
-  @UseInterceptors(
-    FileInterceptor("file", {
-      storage: diskStorage({
-        destination: "./uploads/profileimages",
-        filename: (_, file, cb) => {
-          const filename: string =
-            path.parse(file.originalname).name.replace(/\s/g, "") + uuidv4();
-          const extension: string = path.parse(file.originalname).ext;
-
-          cb(null, `${filename}${extension}`);
-        },
-      }),
-    })
-  )
-  changeUserProfile(
-    //could also replace with update
-    @Param("username") username: string,
-    @UploadedFile() file: Express.Multer.File
+  @Post("change-profile-picture")
+  changeProfilePic(
+    @Req() { user: { id: myId } }: Ctx,
+    @Body("imageUri") imageUri: string
   ) {
-    console.log(file);
-    const filepath = join(
-      process.cwd(),
-      "uploads/profileimages/" + file.filename
-    );
-    console.log(filepath);
-    return this.userService.changeUserProfile(username, filepath);
+    return this.userService.changeProfilePic(imageUri, myId);
   }
 }

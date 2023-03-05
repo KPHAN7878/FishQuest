@@ -44,10 +44,10 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
 
-  @ManyToMany(() => UserEntity, (user) => user.following)
+  @ManyToMany(() => UserEntity, (user) => user.following, { cascade: true })
   followers: UserEntity[];
 
-  @ManyToMany(() => UserEntity, (user) => user.followers)
+  @ManyToMany(() => UserEntity, (user) => user.followers, { cascade: true })
   following: UserEntity[];
 
   // catches that the user has submitted
