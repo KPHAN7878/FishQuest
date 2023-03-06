@@ -30,6 +30,15 @@ export class ProfileService {
     userToFollow.followers.push(user);
     this.userRepository.save(userToFollow);
 
+    try {
+      const query =
+        `insert into rfollowers values ` +
+        `(${user.id}, '${user.username}', ${followId}, '${userToFollow.username}')`;
+      await dataSource.query(query);
+    } catch (err) {
+      console.log(err);
+    }
+
     return true;
   }
 
@@ -56,7 +65,7 @@ export class ProfileService {
           `from rfollowing where "userEntityId_2" = ${myId}))) "following"`
         : 'null as "following"'
     }
-    from user_entity u right join rfollowing f on f."userEntityId_1" = u.id
+    from user_entity u right join r${type} f on f."userEntityId_1" = u.id
     where f."userEntityId_2" = ${userId}
     order by u."username" ASC
     limit ${realLimitPlusOne}

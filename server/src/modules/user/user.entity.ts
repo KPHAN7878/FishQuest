@@ -51,7 +51,9 @@ export class UserEntity extends BaseEntity {
   })
   followers: UserEntity[];
 
-  @ManyToMany(() => UserEntity, (user) => user.followers)
+  @ManyToMany(() => UserEntity, (user) => user.followers, {
+    cascade: ["insert", "update"],
+  })
   @JoinTable({
     name: "rfollowing",
   })
