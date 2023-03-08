@@ -27,6 +27,8 @@ import Animated, {
 import { toErrorMap } from "../../utils/toErrorMap";
 import { UserContext } from "../../Contexts/UserContext";
 
+import * as Location from 'expo-location';
+
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
 
@@ -40,6 +42,9 @@ const Login = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [sentEmail, setSentEmail] = useState(false);
 
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
   const usernameRef = createRef();
   const passwordRef = createRef();
   const emailRef = createRef();
@@ -50,6 +55,29 @@ const Login = ({ navigation }) => {
   const buttonOpacity = useSharedValue(1);
 
   const { user, setUser } = useContext(UserContext);
+
+  //location services
+  React.useEffect(() => {
+    (async () => {
+      
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      console.log(location)
+    })();
+  }, []);
+
+  let text = 'Waiting..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
 
   React.useEffect(() => {
     if (usernameRef && isForgotPwd) {

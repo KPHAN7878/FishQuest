@@ -26,6 +26,17 @@ export class CatchService {
     const image = await this.classifier.jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
 
+    var numArr = sub.location.split(",")
+
+    console.log("sub.location" + sub.location)
+    console.log("numArr: " + numArr)
+
+    var finalArr = []
+    finalArr.push(parseFloat(numArr[0]));
+    finalArr.push(parseFloat(numArr[1]));
+
+    console.log(finalArr)
+
     const prediction: Prediction = Prediction.create({
       status: true,
       species: "",
@@ -34,7 +45,7 @@ export class CatchService {
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({
-      location: [], // change later
+      location: finalArr, // change later
       imageUri: sub.imageUri,
       user,
       prediction,
