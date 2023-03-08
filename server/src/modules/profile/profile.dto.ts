@@ -6,7 +6,7 @@ export class PaginatedUser {
 }
 
 export class GetUsersInput {
-  userId: number;
+  userId?: number;
   myId: number;
   type: "followers" | "following";
 }

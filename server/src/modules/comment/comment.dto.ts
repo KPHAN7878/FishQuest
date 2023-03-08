@@ -13,6 +13,7 @@ export class CommentInput {
 export class GetCommentsInput {
   commentableId: number;
   myId: number;
+  id?: number;
   type: "comment" | "post";
 }
 
