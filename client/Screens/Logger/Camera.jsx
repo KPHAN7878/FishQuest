@@ -36,8 +36,6 @@ export const CameraView = ({ navigation }) => {
   //location services
   React.useEffect(() => {
     (async () => {
-
-      let locationArr = []
       
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -45,18 +43,9 @@ export const CameraView = ({ navigation }) => {
         return;
       }
 
-      console.log("pre currentLocation: " + currentLocation)
       let location_ = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
-      locationArr.push(location_.coords.latitude)
-      locationArr.push(location_.coords.longitude)
-      console.log("locationArr: " + locationArr)
-      //setLocation([...locationArr]);
-      tempArr = [...locationArr];
-      let fianlString = location_.coords.latitude + "," + location_.coords.longitude
-      console.log("final string: " + fianlString)
-      console.log("temp array: " + tempArr)
-      setLocation(fianlString)
-      //console.log("Camera current location: " + currentLocation)      //REMOVE LATER
+      let finalString = location_.coords.latitude + "," + location_.coords.longitude
+      setLocation(finalString)
     })();
   }, []);
 

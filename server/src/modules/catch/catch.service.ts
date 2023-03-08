@@ -26,9 +26,6 @@ export class CatchService {
     const image = await this.classifier.jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
 
-    //converting string to int array
-    //console.log("location array from catch service: " + sub.location)
-
     var numArr = sub.location.split(",")
 
     console.log("sub.location" + sub.location)
