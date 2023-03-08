@@ -17,6 +17,8 @@ import { UserContext } from "../../Contexts/UserContext";
 import { Buffer } from "buffer";
 import { height } from "../../styles";
 
+import * as Location from 'expo-location';
+
 export const CameraView = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
@@ -25,6 +27,45 @@ export const CameraView = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = S3.getBucketLocation().service.endpoint.host;
   const [image, setImage] = useState(null);
+  const [currentLocation, setLocation] = useState([1, 2]);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  let tempArr = []
+  
+
+  //location services
+  React.useEffect(() => {
+    (async () => {
+
+      let locationArr = []
+      
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      console.log("pre currentLocation: " + currentLocation)
+      let location_ = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
+      locationArr.push(location_.coords.latitude)
+      locationArr.push(location_.coords.longitude)
+      console.log("locationArr: " + locationArr)
+      //setLocation([...locationArr]);
+      tempArr = [...locationArr];
+      let fianlString = location_.coords.latitude + "," + location_.coords.longitude
+      console.log("final string: " + fianlString)
+      console.log("temp array: " + tempArr)
+      setLocation(fianlString)
+      //console.log("Camera current location: " + currentLocation)      //REMOVE LATER
+    })();
+  }, []);
+
+  let text = 'Waiting..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (currentLocation) {
+    text = JSON.stringify(currentLocation);
+  }
 
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
     useAxios(
@@ -37,6 +78,7 @@ export const CameraView = ({ navigation }) => {
       },
       { manual: true }
     );
+
 
   useEffect(() => {
     isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
@@ -94,10 +136,14 @@ export const CameraView = ({ navigation }) => {
 
     setImage(resizedImg)
 
+    console.log("tempArr " + tempArr)
+
     const form = new FormData();
     form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
-    form.append("location", "test");
+    form.append("location", currentLocation);
+
+    console.log("form: " + JSON.stringify(form))
 
     submitCatch({ data: form }).then(() => {
       uploadToS3(cache.base64, key);
