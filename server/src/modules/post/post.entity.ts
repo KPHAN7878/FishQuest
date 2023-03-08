@@ -29,6 +29,9 @@ export class PostEntity extends BaseEntity {
   @Column({ default: 0 })
   likeValue!: number;
 
+  @Column({ default: 0 })
+  commentAmount!: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

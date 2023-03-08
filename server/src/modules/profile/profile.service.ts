@@ -2,8 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "../user/user.entity";
-import { dataSource } from "../../constants";
-import { Paginated, PaginatedUser } from "./profile.dto";
+import { dataSource, paginateLimit } from "../../constants";
+import { GetUsersInput, PaginatedUser } from "./profile.dto";
+import { followingSubquery } from "../../utils/subquery";
+import { PaginatedSkip } from "../../types";
 
 // this class is responsible for whatever is on
 // or from the user's profile page
@@ -42,14 +44,11 @@ export class ProfileService {
     return true;
   }
 
-  async followPaginated(
-    { limit, skip }: Paginated,
-    userId: number,
-    myId: number,
-    type: "followers" | "following"
+  async getUsers(
+    { limit, skip }: PaginatedSkip,
+    input: GetUsersInput
   ): Promise<PaginatedUser> {
-    const realLimit = Math.min(50, limit);
-    const realLimitPlusOne = realLimit + 1;
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
     const users = await dataSource.query(
       `
     select
@@ -57,16 +56,9 @@ export class ProfileService {
       'id', f."userEntityId_1",
       'username', f."userEntityUsername_1"
     ) user,
-    ${
-      myId
-        ? `(select exists (select * from ` +
-          `user_entity ` +
-          `where f."userEntityId_1" in (select "userEntityId_1" ` +
-          `from rfollowing where "userEntityId_2" = ${myId}))) "following"`
-        : 'null as "following"'
-    }
-    from user_entity u right join r${type} f on f."userEntityId_1" = u.id
-    where f."userEntityId_2" = ${userId}
+    ${followingSubquery(input.myId)} from user_entity
+    u right join r${input.type} f on f."userEntityId_1" = u.id
+    where f."userEntityId_2" = ${input.userId}
     order by u."username" ASC
     limit ${realLimitPlusOne}
    ${skip ? `offset ${skip}` : ""}
@@ -77,22 +69,6 @@ export class ProfileService {
       users: users.slice(0, realLimit),
       hasMore: users.length === realLimitPlusOne,
     };
-  }
-
-  async followers(
-    paginate: Paginated,
-    userId: number,
-    myId: number
-  ): Promise<PaginatedUser> {
-    return this.followPaginated(paginate, userId, myId, "followers");
-  }
-
-  async following(
-    paginate: Paginated,
-    userId: number,
-    myId: number
-  ): Promise<PaginatedUser> {
-    return this.followPaginated(paginate, userId, myId, "following");
   }
 
   //testing update user profile information

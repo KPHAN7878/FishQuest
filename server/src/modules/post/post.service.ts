@@ -1,18 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes } from "../../types";
+import { ErrorRes, PaginatedCursor } from "../../types";
 import { PostEntity } from "./post.entity";
 import { UserEntity } from "../user/user.entity";
-import {
-  Paginated,
-  PaginatedPost,
-  PostInput,
-  UpdatePostInput,
-} from "./post.dto";
+import { PaginatedPost, PostInput, UpdatePostInput } from "./post.dto";
 import { CatchEntity } from "../catch/catch.entity";
 import { formErrors } from "../../utils/formError";
-import { dataSource } from "../../constants";
+import { dataSource, paginateLimit } from "../../constants";
+import { likeSubquery } from "../../utils/subquery";
 
 @Injectable()
 export class PostService {
@@ -90,12 +86,11 @@ export class PostService {
   }
 
   async userPosts(
-    { limit, cursor }: Paginated,
+    { limit, cursor }: PaginatedCursor,
     userId: number,
     myId: number
   ): Promise<PaginatedPost> {
-    const realLimit = Math.min(50, limit);
-    const realLimitPlusOne = realLimit + 1;
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
 
     const posts = await dataSource.query(
       `
@@ -103,18 +98,8 @@ export class PostService {
     json_build_object(
       'id', u.id,
       'username', u.username,
-      'email', u.email,
-      'createdAt', u."createdAt",
-      'updatedAt', u."updatedAt" 
     ) creator,
-    ${
-      myId
-        ? `(select exists ` +
-          '(select "likableId" from public.like_entity l where ' +
-          `l."userId" = ${myId} and l."type" = 'post' and ` +
-          `l."likableId" = p.id)) "liked"`
-        : 'null as "liked"'
-    }
+    ${likeSubquery("post", myId)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
     ${cursor ? `where p."createdAt" < ${cursor} and p.id = ${userId}` : ""}
     order by p."createdAt" DESC
@@ -129,17 +114,9 @@ export class PostService {
   }
 
   async myFeed(
-    { limit, cursor }: Paginated,
+    { limit, cursor }: PaginatedCursor,
     user: UserEntity
   ): Promise<PaginatedPost> {
     return {} as any;
   }
-
-  // async getComments(
-  //   comment: CommentPost,
-  //   commentPagination: Paginated,
-  //   userId: number
-  // ): Promise<CommentEntity[] | ErrorRes> {
-  //   return {} as any;
-  // }
 }

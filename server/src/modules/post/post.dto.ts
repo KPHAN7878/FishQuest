@@ -13,11 +13,6 @@ export class UpdatePostInput extends PostInput {
   postId: number;
 }
 
-export class Paginated {
-  limit: number;
-  cursor?: string;
-}
-
 export class PaginatedPost {
   posts: PostEntity[];
   hasMore: boolean;

@@ -1,17 +1,20 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
-import { Ctx } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 import { PostService } from "../post/post.service";
-import { Paginated } from "./profile.dto";
+import { GetUsersInput } from "./profile.dto";
 import { UserService } from "../user/user.service";
+import { GetCommentsInput } from "../comment/comment.dto";
+import { CommentService } from "../comment/comment.service";
 
 @Controller("profile")
 @UseGuards(UserAuthGuard)
 export class ProfileController {
   constructor(
     private readonly userService: UserService,
-    private readonly postService: PostService
+    private readonly postService: PostService,
+    private readonly commentService: CommentService
   ) {}
 
   @Post("follow")
@@ -19,46 +22,34 @@ export class ProfileController {
     return this.userService.follow(id, user);
   }
 
-  @Get("followers")
-  async followers(
-    @Body() pagination: Paginated,
-    @Body("userId") userId: number,
-    @Req() { user: { id: myId } }: Ctx
-  ) {
-    return this.userService.followers(pagination, userId, myId);
-  }
-
-  @Get("following")
+  //followers or following users
+  @Get("get-users")
   async following(
-    @Body() pagination: Paginated,
-    @Body("userId") userId: number,
+    @Body() input: GetUsersInput & Paginated,
     @Req() { user: { id: myId } }: Ctx
   ) {
-    return this.userService.following(pagination, userId, myId);
+    return this.userService.getUsers(input, { ...input, myId });
   }
 
   @Get("posts")
   async posts(
-    @Body() pagination: Paginated,
-    @Body("userId") userId: number,
+    @Body() input: Paginated & { id: number },
     @Req() { user: { id: myId } }: Ctx
   ) {
-    return await this.postService.userPosts(pagination, userId, myId);
+    return await this.postService.userPosts(input, input.id, myId);
+  }
+
+  @Get("comments")
+  async getCommentsById(
+    @Body() input: GetCommentsInput & Paginated & { id: number },
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return await this.commentService.getComments(input, { ...input, myId });
   }
 
   @Get("likes")
   async likes(
-    @Body() feedPagination: Paginated,
-    @Body("userId") userId: number,
-    @Req() { user: { id: myId } }: Ctx
-  ) {
-    return;
-  }
-
-  @Get("comments")
-  async comments(
-    @Body() feedPagination: Paginated,
-    @Body("userId") userId: number,
+    @Body() feedPagination: Paginated & { id: number },
     @Req() { user: { id: myId } }: Ctx
   ) {
     return;

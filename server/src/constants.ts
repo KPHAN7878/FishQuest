@@ -42,3 +42,9 @@ export const DEV_EMAIL_ACC = {
   user: "celestine.gutmann@ethereal.email", // generated ethereal user
   pass: "FrnH5jSnzQ62tsRJ3A", // generated ethereal password
 };
+
+export const paginateLimit = (limit: number) => {
+  const realLimit = Math.min(50, limit);
+  const realLimitPlusOne = realLimit + 1;
+  return [realLimit, realLimitPlusOne];
+};

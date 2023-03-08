@@ -5,6 +5,10 @@ import { UserEntity } from "../user/user.entity";
 import { LikeEntity } from "../like/like.entity";
 import { PostEntity } from "../post/post.entity";
 import { CommentEntity } from "../comment/comment.entity";
+import { PaginatedCursor, PaginatedSkip } from "../../types";
+import { GetLikeInput, PaginatedLike } from "./like.dto";
+import { dataSource, paginateLimit } from "../../constants";
+import { likeSubquery } from "../../utils/subquery";
 
 @Injectable()
 export class LikeService {
@@ -71,5 +75,39 @@ export class LikeService {
     }
 
     return true;
+  }
+
+  async getLikes(
+    { limit, cursor }: PaginatedCursor,
+    input: GetLikeInput
+  ): Promise<PaginatedLike> {
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+    const comments = await dataSource.query(
+      `
+    select p.*,
+    json_build_object(
+      'id', c."id",
+      'text', c."text"
+    ) comment,
+    json_build_object(
+      'id', u.id,
+      'username', u.username,
+    ) creator,
+    ${likeSubquery(undefined, input.myId)}
+    from post_entity p, comment_entity c, user_entity u where (u."id" = ${
+      input.id
+    }) and (
+    ${input.id ? `p."id" = ${input.likableId})` : ""}
+    or
+    ${input.id ? `c."id" = ${input.likableId})` : ""})
+    ${cursor ? `p."createdAt" < ${cursor}` : ""} and
+    limit ${realLimitPlusOne}
+    `
+    );
+
+    return {
+      comments: comments.slice(0, realLimit),
+      hasMore: comments.length === realLimitPlusOne,
+    };
   }
 }

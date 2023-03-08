@@ -19,3 +19,15 @@ export type Ctx = Request & {
 };
 
 export type Tokens = "password";
+
+export type PaginatedCursor = {
+  limit: number;
+  cursor?: string;
+};
+
+export type PaginatedSkip = {
+  limit: number;
+  skip?: number;
+};
+
+export type Paginated = PaginatedCursor | PaginatedSkip;

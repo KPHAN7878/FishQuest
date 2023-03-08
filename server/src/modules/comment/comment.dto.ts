@@ -1,15 +1,22 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
+import { CommentEntity } from "./comment.entity";
 
-export class CommentPost {
+export class CommentInput {
   @IsNumber()
-  postId: number;
+  commentableId: number;
   @IsNotEmpty()
   text: string;
+  @IsNotEmpty()
+  type: "comment" | "post";
 }
 
-export class CommentComment {
-  @IsNumber()
-  commentId: number;
-  @IsNotEmpty()
-  text: string;
+export class GetCommentsInput {
+  commentableId: number;
+  myId: number;
+  type: "comment" | "post";
+}
+
+export class PaginatedComment {
+  comments: CommentEntity[];
+  hasMore: boolean;
 }

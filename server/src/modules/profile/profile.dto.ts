@@ -5,7 +5,8 @@ export class PaginatedUser {
   hasMore: boolean;
 }
 
-export class Paginated {
-  limit: number;
-  skip?: string;
+export class GetUsersInput {
+  userId: number;
+  myId: number;
+  type: "followers" | "following";
 }

@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PostService } from "./post.service";
-import { Ctx } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
@@ -35,5 +35,14 @@ export class PostController {
   @Get(":id")
   async getById(@Param("id") postId: number) {
     return await this.postService.getById(postId);
+  }
+
+  @Get("get-posts/:id")
+  async getPostsByUserId(
+    @Body() input: Paginated,
+    @Req() { user: { id: myId } }: Ctx,
+    @Param("id") userId: number
+  ) {
+    return await this.postService.userPosts(input, userId, myId);
   }
 }
