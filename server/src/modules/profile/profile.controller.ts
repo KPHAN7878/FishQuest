@@ -20,8 +20,10 @@ export class ProfileController {
     private readonly likeService: LikeService
   ) {}
 
-  @Post("follow")
-  async follow(@Body("userId") id: number, @Req() { user }: Ctx) {
+  @Post("follow") async follow(
+    @Body("userId") id: number,
+    @Req() { user }: Ctx
+  ) {
     return this.userService.follow(id, user);
   }
 
@@ -70,4 +72,6 @@ export class ProfileController {
   ) {
     return this.userService.changeProfilePic(imageUri, myId);
   }
+
+  // add bio
 }
