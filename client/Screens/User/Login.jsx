@@ -27,6 +27,8 @@ import Animated, {
 import { toErrorMap } from "../../utils/toErrorMap";
 import { UserContext } from "../../Contexts/UserContext";
 
+import { StackActions, NavigationActions } from "@react-navigation/native";
+
 import * as Location from 'expo-location';
 
 const Login = ({ navigation }) => {
@@ -210,6 +212,7 @@ const Login = ({ navigation }) => {
         setScreenState(1);
         setErrorMessage(null);
         navigation.navigate("Home"); //navigation.navigate("Profile");
+
         buttonOpacity.value = 1;
 
         //let test = JSON.stringify(res.data)

@@ -43,8 +43,9 @@ export const CameraView = ({ navigation }) => {
         return;
       }
 
-      let location_ = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
+      let location_ = await Location.getCurrentPositionAsync({enableHighAccuracy: false});
       let finalString = location_.coords.latitude + "," + location_.coords.longitude
+      console.log("final string: " + finalString)
       setLocation(finalString)
     })();
   }, []);
