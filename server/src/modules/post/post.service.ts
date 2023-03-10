@@ -91,17 +91,20 @@ export class PostService {
     myId: number
   ): Promise<PaginatedPost> {
     const [realLimit, realLimitPlusOne] = paginateLimit(limit);
-
     const posts = await dataSource.query(
       `
     select p.*,
     json_build_object(
       'id', u.id,
-      'username', u.username,
+      'username', u.username
     ) creator,
     ${likeSubquery("post", myId)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
-    ${cursor ? `where p."createdAt" < ${cursor} and p.id = ${userId}` : ""}
+    ${
+      cursor
+        ? `where p."createdAt" < '${cursor}' and p."creatorId" = '${userId}'`
+        : ""
+    }
     order by p."createdAt" DESC
     limit ${realLimitPlusOne}
     `
@@ -117,6 +120,34 @@ export class PostService {
     { limit, cursor }: PaginatedCursor,
     user: UserEntity
   ): Promise<PaginatedPost> {
-    return {} as any;
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+    const posts = await dataSource.query(
+      `
+    select p.id, p."likeValue", p."commentValue",
+    p."createdAt", p.text,
+    json_build_object(
+      'id', u.id,
+      'username', u.username
+    ) creator,
+    ${likeSubquery("post", user.id)}
+    from post_entity p inner join public.user_entity u on u.id = p."creatorId"
+    where
+    ${
+      cursor
+        ? `p."createdAt" < '${cursor}' and p."creatorId" in (
+          select "userEntityId_1" from
+          rfollowing where "userEntityId_2" = '${user.id}'
+    ) or p."creatorId" = ${user.id}`
+        : ""
+    }
+    order by p."createdAt" DESC
+    limit ${realLimitPlusOne}
+    `
+    );
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 }

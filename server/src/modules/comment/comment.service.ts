@@ -32,7 +32,7 @@ export class CommentService {
         : await CommentEntity.findOneBy({
             id: commentInput.commentableId,
           });
-    commentable!.commentAmount += 1;
+    commentable!.commentValue += 1;
 
     const commentProps = {
       ...(commentInput.type === "post"
@@ -71,7 +71,7 @@ export class CommentService {
     from post_entity p, comment_entity c, user_entity u
     where ${
       input.id
-        ? `u."id" = ${input.id}`
+        ? `u."id" = ${input.id}` // date > ~~
         : `c."commentableId" = ${input.commentableId}`
     }
     order by c."likeValue" DESC

@@ -40,7 +40,7 @@ export class CommentEntity extends BaseEntity {
   likeValue!: number;
 
   @Column({ default: 0 })
-  commentAmount!: number;
+  commentValue!: number;
 
   @ManyToOne(() => UserEntity, (user) => user.comments, { cascade: true })
   user: UserEntity;

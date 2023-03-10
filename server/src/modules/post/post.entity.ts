@@ -30,7 +30,7 @@ export class PostEntity extends BaseEntity {
   likeValue!: number;
 
   @Column({ default: 0 })
-  commentAmount!: number;
+  commentValue!: number;
 
   @CreateDateColumn()
   createdAt: Date;
