@@ -37,8 +37,19 @@ export class ProfileService {
         `insert into rfollowers values ` +
         `(${user.id}, '${user.username}', ${followId}, '${userToFollow.username}')`;
       await dataSource.query(query);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      if (err.code === "23505") {
+        const query1 =
+          `delete from rfollowers ` +
+          `where "userEntityId_1" = '${user.id}' and "userEntityId_2" = '${followId}'`;
+        const query2 =
+          `delete from rfollowing ` +
+          `where "userEntityId_2" = '${user.id}' and "userEntityId_1" = '${followId}'`;
+        await dataSource.query(query1);
+        await dataSource.query(query2);
+      } else {
+        console.log(err);
+      }
     }
 
     return true;
