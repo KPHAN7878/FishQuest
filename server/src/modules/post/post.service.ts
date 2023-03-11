@@ -1,18 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes } from "../../types";
+import { ErrorRes, PaginatedCursor } from "../../types";
 import { PostEntity } from "./post.entity";
 import { UserEntity } from "../user/user.entity";
-import {
-  Paginated,
-  PaginatedPost,
-  PostInput,
-  UpdatePostInput,
-} from "./post.dto";
+import { PaginatedPost, PostInput, UpdatePostInput } from "./post.dto";
 import { CatchEntity } from "../catch/catch.entity";
 import { formErrors } from "../../utils/formError";
-import { dataSource } from "../../constants";
+import { dataSource, paginateLimit } from "../../constants";
+import { likeSubquery } from "../../utils/subquery";
+import { include } from "../../utils/formEntity";
 
 @Injectable()
 export class PostService {
@@ -51,26 +48,40 @@ export class PostService {
 
     if (errors.length) return { errors };
 
-    const postEntry = PostEntity.create({
+    let postEntry = PostEntity.create({
       text: postData.text,
       catch: catchEntry!,
       creatorId: user.id,
       user,
     });
 
-    this.postRepository.save(postEntry);
-    return postEntry;
+    postEntry = await this.postRepository.save(postEntry);
+    return include<PostEntity>(postEntry, [
+      ["id", "text", "commentValue", "likeValue"],
+      { user: ["username", "id", "profilePicUrl"] },
+      { catch: ["imageUri", "note", "location"] },
+    ]);
   }
 
-  async update(postData: UpdatePostInput): Promise<boolean | ErrorRes> {
+  async update(
+    postData: UpdatePostInput,
+    user: UserEntity
+  ): Promise<boolean | ErrorRes> {
     const postEntry = await PostEntity.findOneBy({ id: postData.postId });
 
-    const errors = formErrors({
-      value: !postEntry,
-      message: `could not find post id: ${postData.postId}`,
-      field: "post",
-    });
-    if (errors) return { errors };
+    const errors = formErrors([
+      {
+        value: !postEntry,
+        message: `could not find post id: ${postData.postId}`,
+        field: "post",
+      },
+      {
+        value: postEntry?.creatorId !== user.id,
+        message: `id mismatch`,
+        field: "post",
+      },
+    ]);
+    if (errors.length) return { errors };
 
     await this.postRepository.update(
       { id: postData.postId },
@@ -90,48 +101,37 @@ export class PostService {
   }
 
   async userPosts(
-    { limit, cursor }: Paginated,
+    { limit, cursor }: PaginatedCursor,
     userId: number,
     myId: number
   ): Promise<PaginatedPost> {
-    const realLimit = Math.min(50, limit);
-    const realLimitPlusOne = realLimit + 1;
-    const replacements: any[] = [realLimitPlusOne];
-
-    replacements.push(myId);
-    let cursorIdx = 3;
-    if (cursor) {
-      replacements.push(new Date(parseInt(cursor)));
-      cursorIdx = replacements.length;
-    }
-    replacements.push("post");
-
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
     const posts = await dataSource.query(
       `
-    select p.*,
+    select p.id, p."likeValue", p."commentValue",
+    p."createdAt", p.text,
     json_build_object(
       'id', u.id,
       'username', u.username,
-      'email', u.email,
-      'createdAt', u."createdAt",
-      'updatedAt', u."updatedAt" 
+      'profilePicUrl', u."profilePicUrl"
     ) creator,
-    ${
-      myId
-        ? '(select "likableId" from public.like_entity l where' +
-          ' l."userId" = $2 and l."type" = $3 and l."likableId" = p.id) "likableId"'
-        : 'null as "likableId"'
-    }
+    json_build_object(
+      'id', c."id",
+      'note', c."note",
+      'imageUri', c."imageUri",
+      'location', c."location"
+    ) catch,
+    ${likeSubquery("post", myId)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
+    right join catch_entity c on c."id" = p."catchId"
     ${
       cursor
-        ? `where p."createdAt" < $${cursorIdx} and p."id" = $${userId}`
+        ? `where p."createdAt" < '${cursor}' and p."creatorId" = '${userId}'`
         : ""
     }
     order by p."createdAt" DESC
-    limit $1
-    `,
-      replacements
+    limit ${realLimitPlusOne}
+    `
     );
 
     return {
@@ -141,17 +141,45 @@ export class PostService {
   }
 
   async myFeed(
-    { limit, cursor }: Paginated,
+    { limit, cursor }: PaginatedCursor,
     user: UserEntity
   ): Promise<PaginatedPost> {
-    return {} as any;
-  }
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+    const posts = await dataSource.query(
+      `
+    select p.id, p."likeValue", p."commentValue",
+    p."createdAt", p.text,
+    json_build_object(
+      'id', u.id,
+      'username', u.username,
+      'profilePicUrl', u."profilePicUrl"
+    ) creator,
+    json_build_object(
+      'id', c."id",
+      'note', c."note",
+      'imageUri', c."imageUri",
+      'location', c."location"
+    ) catch,
+    ${likeSubquery("post", user.id)}
+    from post_entity p inner join public.user_entity u on u.id = p."creatorId"
+    right join catch_entity c on c."id" = p."catchId"
+    where
+    ${
+      cursor
+        ? `p."createdAt" < '${cursor}' and p."creatorId" in (
+          select "userEntityId_1" from
+          rfollowing where "userEntityId_2" = '${user.id}'
+    ) or p."creatorId" = ${user.id}`
+        : ""
+    }
+    order by p."createdAt" DESC
+    limit ${realLimitPlusOne}
+    `
+    );
 
-  // async getComments(
-  //   comment: CommentPost,
-  //   commentPagination: Paginated,
-  //   userId: number
-  // ): Promise<CommentEntity[] | ErrorRes> {
-  //   return {} as any;
-  // }
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
+  }
 }

@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PostService } from "./post.service";
-import { Ctx } from "../../types";
-import { Paginated, PostInput, UpdatePostInput } from "./post.dto";
+import { Ctx, Paginated } from "../../types";
+import { PostInput, UpdatePostInput } from "./post.dto";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("post")
@@ -23,30 +23,26 @@ export class PostController {
   }
 
   @Post("update")
-  async updatePost(@Body() postData: UpdatePostInput) {
-    return await this.postService.update(postData);
+  async updatePost(@Body() postData: UpdatePostInput, @Req() { user }: Ctx) {
+    return await this.postService.update(postData, user);
   }
 
   @Post("delete")
   async deletePost(@Body("postId") postId: number) {
     return await this.postService.delete(postId);
   }
-  @Get("user")
-  async posts(
-    @Body() feedPagination: Paginated,
-    @Body("userId") userId: number,
-    @Req() { user: { id: myId } }: Ctx
-  ) {
-    return await this.postService.userPosts(feedPagination, userId, myId);
-  }
-
-  @Get("my-feed")
-  async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
-    return await this.postService.myFeed(feedPagination, user);
-  }
 
   @Get(":id")
   async getById(@Param("id") postId: number) {
     return await this.postService.getById(postId);
+  }
+
+  @Get("get-posts/:id")
+  async getPostsByUserId(
+    @Body() input: Paginated,
+    @Req() { user: { id: myId } }: Ctx,
+    @Param("id") userId: number
+  ) {
+    return await this.postService.userPosts(input, userId, myId);
   }
 }

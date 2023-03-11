@@ -22,7 +22,7 @@ export class CommentEntity extends BaseEntity {
   type: "post" | "comment";
 
   @PrimaryColumn()
-  userId: number;
+  creatorId: number;
 
   @PrimaryColumn()
   commentableId: number;
@@ -38,6 +38,9 @@ export class CommentEntity extends BaseEntity {
 
   @Column({ default: 0 })
   likeValue!: number;
+
+  @Column({ default: 0 })
+  commentValue!: number;
 
   @ManyToOne(() => UserEntity, (user) => user.comments, { cascade: true })
   user: UserEntity;

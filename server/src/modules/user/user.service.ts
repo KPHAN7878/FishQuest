@@ -9,15 +9,19 @@ import { sendEmail } from "../../utils/sendEmail";
 import seedrandom from "seedrandom";
 import { TokenEntity } from "../auth/token.entity";
 import { formErrors } from "../../utils/formError";
+import { ProfileService } from "../profile/profile.service";
 
+// this is used anywhere
 @Injectable()
-export class UserService {
+export class UserService extends ProfileService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(TokenEntity)
-    private readonly tokenRepository: Repository<TokenEntity>
-  ) {}
+    private readonly tokenRepository: Repository<TokenEntity>,
+    @InjectRepository(UserEntity)
+    protected readonly userRepository: Repository<UserEntity>
+  ) {
+    super(userRepository);
+  }
 
   async insert(regInfo: RegisterInput): Promise<UserEntity | ErrorRes> {
     const userEntry = UserEntity.create(regInfo as UserEntity);
@@ -190,15 +194,5 @@ export class UserService {
     );
 
     this.tokenRepository.delete({ userId, tokenType: "password" });
-  }
-
-  //testing update user profile information
-  async changeUserProfile(username: string, newImageURL: string) {
-    await this.userRepository.update(
-      { username: username },
-      {
-        profilePicUrl: newImageURL,
-      }
-    );
   }
 }

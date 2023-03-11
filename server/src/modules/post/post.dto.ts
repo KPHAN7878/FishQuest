@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { PostEntity } from "./post.entity";
 
 export class PostInput {
@@ -8,14 +8,11 @@ export class PostInput {
   text: string;
 }
 
-export class UpdatePostInput extends PostInput {
+export class UpdatePostInput {
   @IsNumber()
   postId: number;
-}
-
-export class Paginated {
-  limit: number;
-  cursor?: string;
+  @IsString()
+  text: string;
 }
 
 export class PaginatedPost {

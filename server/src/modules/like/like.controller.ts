@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { LikeService } from "./like.service";
-import { Ctx } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
+import { GetLikeInput } from "./like.dto";
 
 @Controller("like")
 @UseGuards(new UserAuthGuard())
@@ -18,7 +19,14 @@ export class LikeController {
     @Body("commentId") commentId: number,
     @Req() { user }: Ctx
   ) {
-    console.log(commentId);
     return await this.likeService.likeComment(commentId, user);
+  }
+
+  @Get("get-likes")
+  async getCommentsByUserId(
+    @Body() input: GetLikeInput & Paginated,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return await this.likeService.getLikes(input, { ...input, myId });
   }
 }

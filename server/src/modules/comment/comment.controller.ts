@@ -1,7 +1,15 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
-import { Ctx } from "../../types";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
-import { CommentComment, CommentPost } from "./comment.dto";
+import { CommentInput, GetCommentsInput } from "./comment.dto";
 import { CommentService } from "./comment.service";
 
 @Controller("comment")
@@ -9,13 +17,24 @@ import { CommentService } from "./comment.service";
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
-  @Post("post")
-  async commentPost(@Body() comment: CommentPost, @Req() { user }: Ctx) {
-    return await this.commentService.commentPost(comment, user);
+  @Post()
+  async comment(@Body() comment: CommentInput, @Req() { user }: Ctx) {
+    return await this.commentService.comment(comment, user);
   }
 
-  @Post("comment")
-  async commentComment(@Body() comment: CommentComment, @Req() { user }: Ctx) {
-    return await this.commentService.commentComment(comment, user);
+  @Get("get-comments")
+  async getComments(
+    @Body() input: GetCommentsInput & Paginated,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return await this.commentService.getComments(input, { ...input, myId });
+  }
+
+  @Get("get-comments")
+  async getCommentsByUserId(
+    @Body() input: GetCommentsInput & Paginated,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+    return await this.commentService.getComments(input, { ...input, myId });
   }
 }

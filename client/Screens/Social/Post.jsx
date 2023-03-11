@@ -13,10 +13,9 @@ import { FontAwesome } from "@expo/vector-icons";
 import { FontFamily } from "../../GlobalStyles";
 import CommentContainer from "./CommentContainer";
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 const Post = ({ post }) => {
-
   const navigation = useNavigation();
 
   return (
@@ -94,9 +93,12 @@ const Post = ({ post }) => {
         </View>
 
         <View style={styles.viewComments}>
-          <TouchableOpacity activeOpacity={0.2} onPress={() => {
-            navigation.navigate(CommentContainer)
-          }}>
+          <TouchableOpacity
+            activeOpacity={0.2}
+            onPress={() => {
+              navigation.navigate(CommentContainer);
+            }}
+          >
             <Text style={styles.viewCommentText}>View 4 Comments</Text>
           </TouchableOpacity>
         </View>
