@@ -7,6 +7,7 @@ export class Submission {
   imageUri: string;
   @IsString()
   location: string;
+  //location: number[];
 }
 
 export class Pred {
