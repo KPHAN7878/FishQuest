@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { PostEntity } from "./post.entity";
 
 export class PostInput {

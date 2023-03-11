@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -42,6 +43,7 @@ export class PostEntity extends BaseEntity {
   user: UserEntity;
 
   @OneToOne(() => CatchEntity, (_catch) => _catch.post)
+  @JoinColumn()
   catch!: CatchEntity;
 
   @OneToMany(() => LikeEntity, (like) => like.post)

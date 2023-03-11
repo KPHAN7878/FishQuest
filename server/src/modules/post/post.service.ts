@@ -115,8 +115,15 @@ export class PostService {
       'username', u.username,
       'profilePicUrl', u."profilePicUrl"
     ) creator,
+    json_build_object(
+      'id', c."id",
+      'note', c."note",
+      'imageUri', c."imageUri",
+      'location', c."location"
+    ) catch,
     ${likeSubquery("post", myId)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
+    right join catch_entity c on c."id" = p."catchId"
     ${
       cursor
         ? `where p."createdAt" < '${cursor}' and p."creatorId" = '${userId}'`
@@ -147,8 +154,15 @@ export class PostService {
       'username', u.username,
       'profilePicUrl', u."profilePicUrl"
     ) creator,
+    json_build_object(
+      'id', c."id",
+      'note', c."note",
+      'imageUri', c."imageUri",
+      'location', c."location"
+    ) catch,
     ${likeSubquery("post", user.id)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
+    right join catch_entity c on c."id" = p."catchId"
     where
     ${
       cursor

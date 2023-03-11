@@ -34,7 +34,6 @@ export class CatchEntity extends BaseEntity {
   prediction: Prediction;
 
   @OneToOne(() => PostEntity, (post) => post.catch, { cascade: true }) //bidirectional
-  @JoinColumn()
   post?: PostEntity;
 
   @Column()

@@ -82,32 +82,84 @@ export class LikeService {
     input: GetLikeInput
   ): Promise<PaginatedLike> {
     const [realLimit, realLimitPlusOne] = paginateLimit(limit);
-    const comments = await dataSource.query(
-      `
-    select p.*,
+    const commentSelector = `
     json_build_object(
-      'id', c."id",
-      'text', c."text"
-    ) comment,
+      'text', c.text,
+      'id', c.id,
+      'commentableId', c."commentableId",
+      'createdAt', c."createdAt",
+      'likeValue', c."likeValue",
+      'commentValue', c."commentValue"
+    ) "likeContent",
+    `;
+    const commentJoin = `
+    (like_entity l inner join comment_entity c
+    on c.id = l."likableId" and l."type" = 'comment'
+    inner join user_entity u on u.id = l."userId")
+    `;
+
+    const postSelector = `
+    json_build_object(
+      'text', p.text,
+      'id', p.id,
+      'createdAt', p."createdAt",
+      'likeValue', p."likeValue",
+      'commentValue', p."commentValue",
+      'catch', json_build_object(
+        'id', ca."id",
+        'note', ca."note",
+        'imageUri', ca."imageUri",
+        'location', ca."location"
+      )
+    ) "likeContent",
+    `;
+    const postJoin = `
+    (like_entity l inner join post_entity p on p.id = l."likableId"
+    and l."type" = 'post'
+    right join catch_entity ca on ca."id" = p."catchId"
+    inner join user_entity u on u.id = l."userId")
+    `;
+
+    const formQuery = (
+      selector: string,
+      join: string,
+      type: "post" | "comment"
+    ) => {
+      return `
+    select ${selector}
     json_build_object(
       'id', u.id,
       'username', u.username,
+      'profilePicUrl', u."profilePicUrl"
     ) creator,
-    ${likeSubquery(undefined, input.myId)}
-    from post_entity p, comment_entity c, user_entity u where (u."id" = ${
-      input.id
-    }) and (
-    ${input.id ? `p."id" = ${input.likableId})` : ""}
-    or
-    ${input.id ? `c."id" = ${input.likableId})` : ""})
-    ${cursor ? `p."createdAt" < ${cursor}` : ""} and
+    l.type "likeType",
+    l."createdAt" "likedAt",
+    ${likeSubquery(type, input.id)}
+    from ${join}
+    ${
+      cursor
+        ? `where l."createdAt" < '${cursor}' and u."id" = '${input.id}'`
+        : ""
+    }
+    order by l."createdAt" DESC
     limit ${realLimitPlusOne}
-    `
+    `;
+    };
+
+    const postCommentUnion = await dataSource.query(
+      `
+      select * from 
+      (${formQuery(postSelector, postJoin, "post")}) lp
+      union all
+      select * from 
+      (${formQuery(commentSelector, commentJoin, "comment")}) lc
+      order by "likedAt" DESC
+      `
     );
 
     return {
-      comments: comments.slice(0, realLimit),
-      hasMore: comments.length === realLimitPlusOne,
+      likes: postCommentUnion.slice(0, realLimit),
+      hasMore: postCommentUnion.length === realLimitPlusOne,
     };
   }
 }
