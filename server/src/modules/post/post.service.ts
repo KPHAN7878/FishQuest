@@ -93,10 +93,12 @@ export class PostService {
     const [realLimit, realLimitPlusOne] = paginateLimit(limit);
     const posts = await dataSource.query(
       `
-    select p.*,
+    select p.id, p."likeValue", p."commentValue",
+    p."createdAt", p.text,
     json_build_object(
       'id', u.id,
-      'username', u.username
+      'username', u.username,
+      'profilePicUrl', u."profilePicUrl"
     ) creator,
     ${likeSubquery("post", myId)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"
@@ -127,7 +129,8 @@ export class PostService {
     p."createdAt", p.text,
     json_build_object(
       'id', u.id,
-      'username', u.username
+      'username', u.username,
+      'profilePicUrl', u."profilePicUrl"
     ) creator,
     ${likeSubquery("post", user.id)}
     from post_entity p inner join public.user_entity u on u.id = p."creatorId"

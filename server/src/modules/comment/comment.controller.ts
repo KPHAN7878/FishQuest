@@ -30,12 +30,11 @@ export class CommentController {
     return await this.commentService.getComments(input, { ...input, myId });
   }
 
-  @Get("get-comments/:id")
+  @Get("get-comments")
   async getCommentsByUserId(
     @Body() input: GetCommentsInput & Paginated,
-    @Param("id") id: number,
     @Req() { user: { id: myId } }: Ctx
   ) {
-    return await this.commentService.getComments(input, { ...input, myId, id });
+    return await this.commentService.getComments(input, { ...input, myId });
   }
 }

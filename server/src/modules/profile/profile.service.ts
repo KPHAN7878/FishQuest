@@ -54,7 +54,8 @@ export class ProfileService {
     select
     json_build_object(
       'id', f."userEntityId_1",
-      'username', f."userEntityUsername_1"
+      'username', f."userEntityUsername_1",
+      'profilePicUrl', u."profilePicUrl"
     ) user,
     ${followingSubquery(input.myId)} from user_entity
     u right join r${input.type} f on f."userEntityId_1" = u.id

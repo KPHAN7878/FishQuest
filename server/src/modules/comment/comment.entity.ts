@@ -22,7 +22,7 @@ export class CommentEntity extends BaseEntity {
   type: "post" | "comment";
 
   @PrimaryColumn()
-  userId: number;
+  creatorId: number;
 
   @PrimaryColumn()
   commentableId: number;

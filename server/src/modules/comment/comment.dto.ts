@@ -11,9 +11,8 @@ export class CommentInput {
 }
 
 export class GetCommentsInput {
-  commentableId: number;
-  myId: number;
-  id?: number;
+  commentableId?: number;
+  myId?: number;
   type: "comment" | "post";
 }
 

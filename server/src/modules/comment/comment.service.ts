@@ -11,7 +11,7 @@ import { UserEntity } from "../user/user.entity";
 import { PostEntity } from "../post/post.entity";
 import { dataSource, paginateLimit } from "../../constants";
 import { likeSubquery } from "../../utils/subquery";
-import { PaginatedSkip } from "../../types";
+import { PaginatedCursor, PaginatedSkip } from "../../types";
 
 @Injectable()
 export class CommentService {
@@ -33,50 +33,64 @@ export class CommentService {
             id: commentInput.commentableId,
           });
     commentable!.commentValue += 1;
+    commentable!.save();
 
     const commentProps = {
       ...(commentInput.type === "post"
         ? { post: commentable as PostEntity }
         : { comment: commentable as CommentEntity }),
-      userId: user.id,
+      creatorId: user.id,
       user,
     };
 
-    const newComment = CommentEntity.create({
+    let newComment = CommentEntity.create({
       ...commentProps,
       ...commentInput,
     });
-    this.commentRepository.save(newComment);
+    newComment = await this.commentRepository.save(newComment);
 
     return newComment;
   }
 
   async getComments(
-    { limit, skip }: PaginatedSkip,
+    paginate: PaginatedSkip | PaginatedCursor,
     input: GetCommentsInput & { id?: number }
   ): Promise<PaginatedComment> {
-    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+    const [realLimit, realLimitPlusOne] = paginateLimit(paginate.limit);
+
+    const byUser = (paginate as PaginatedCursor).cursor
+      ? `u."id" = ${input.id} and c."createdAt" < '${
+          (paginate as PaginatedCursor).cursor
+        }'`
+      : "";
+    const byComment = `c."commentableId" = ${input.commentableId}`;
+
     const comments = await dataSource.query(
       `
-    select
-    json_build_object(
-      'id', c."id",
-      'text', c."text"
-    ) comment,
+    select * from (
+    select distinct on (c.id) c.text, c.id, c."commentableId",
+    c."createdAt", c."likeValue", c."commentValue",
     json_build_object(
       'id', u.id,
       'username', u.username,
+      'profilePicUrl', u."profilePicUrl"
     ) creator,
     ${likeSubquery("comment", input.myId)}
-    from post_entity p, comment_entity c, user_entity u
-    where ${
-      input.id
-        ? `u."id" = ${input.id}` // date > ~~
-        : `c."commentableId" = ${input.commentableId}`
-    }
-    order by c."likeValue" DESC
+    from post_entity p, user_entity u
+    inner join comment_entity c on u.id = c."creatorId"
+    where ${input.id ? byUser : byComment}
+    order by c.id, ${input.id ? 'c."createdAt"' : 'c."likeValue"'} DESC
     limit ${realLimitPlusOne}
-   ${skip ? `offset ${skip}` : ""}
+     ${
+       input.id
+         ? ""
+         : `${
+             (paginate as PaginatedSkip).skip
+               ? `offset ${(paginate as PaginatedSkip).skip}`
+               : ""
+           }`
+     }) c
+    order by ${input.id ? 'c."createdAt"' : 'c."likeValue"'} DESC
     `
     );
 
