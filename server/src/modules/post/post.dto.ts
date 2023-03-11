@@ -8,9 +8,11 @@ export class PostInput {
   text: string;
 }
 
-export class UpdatePostInput extends PostInput {
+export class UpdatePostInput {
   @IsNumber()
   postId: number;
+  @IsString()
+  text: string;
 }
 
 export class PaginatedPost {

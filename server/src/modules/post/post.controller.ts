@@ -23,8 +23,8 @@ export class PostController {
   }
 
   @Post("update")
-  async updatePost(@Body() postData: UpdatePostInput) {
-    return await this.postService.update(postData);
+  async updatePost(@Body() postData: UpdatePostInput, @Req() { user }: Ctx) {
+    return await this.postService.update(postData, user);
   }
 
   @Post("delete")

@@ -12,6 +12,7 @@ import { PostEntity } from "../post/post.entity";
 import { dataSource, paginateLimit } from "../../constants";
 import { likeSubquery } from "../../utils/subquery";
 import { PaginatedCursor, PaginatedSkip } from "../../types";
+import { exclude, include } from "../../utils/formEntity";
 
 @Injectable()
 export class CommentService {
@@ -48,6 +49,14 @@ export class CommentService {
       ...commentInput,
     });
     newComment = await this.commentRepository.save(newComment);
+    newComment = {
+      ...exclude<CommentEntity>(newComment, [
+        ["creatorId", "updatedAt", "comment", "post"],
+      ]),
+      ...include<CommentEntity>(newComment, [
+        { user: ["username", "id", "profilePicUrl"] },
+      ]),
+    } as CommentEntity;
 
     return newComment;
   }

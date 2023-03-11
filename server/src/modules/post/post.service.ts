@@ -9,6 +9,7 @@ import { CatchEntity } from "../catch/catch.entity";
 import { formErrors } from "../../utils/formError";
 import { dataSource, paginateLimit } from "../../constants";
 import { likeSubquery } from "../../utils/subquery";
+import { include } from "../../utils/formEntity";
 
 @Injectable()
 export class PostService {
@@ -47,26 +48,40 @@ export class PostService {
 
     if (errors.length) return { errors };
 
-    const postEntry = PostEntity.create({
+    let postEntry = PostEntity.create({
       text: postData.text,
       catch: catchEntry!,
       creatorId: user.id,
       user,
     });
 
-    this.postRepository.save(postEntry);
-    return postEntry;
+    postEntry = await this.postRepository.save(postEntry);
+    return include<PostEntity>(postEntry, [
+      ["id", "text", "commentValue", "likeValue"],
+      { user: ["username", "id", "profilePicUrl"] },
+      { catch: ["imageUri", "note", "location"] },
+    ]);
   }
 
-  async update(postData: UpdatePostInput): Promise<boolean | ErrorRes> {
+  async update(
+    postData: UpdatePostInput,
+    user: UserEntity
+  ): Promise<boolean | ErrorRes> {
     const postEntry = await PostEntity.findOneBy({ id: postData.postId });
 
-    const errors = formErrors({
-      value: !postEntry,
-      message: `could not find post id: ${postData.postId}`,
-      field: "post",
-    });
-    if (errors) return { errors };
+    const errors = formErrors([
+      {
+        value: !postEntry,
+        message: `could not find post id: ${postData.postId}`,
+        field: "post",
+      },
+      {
+        value: postEntry?.creatorId !== user.id,
+        message: `id mismatch`,
+        field: "post",
+      },
+    ]);
+    if (errors.length) return { errors };
 
     await this.postRepository.update(
       { id: postData.postId },
