@@ -2,11 +2,9 @@ import {
   BaseEntity,
   Column,
   Entity,
-  OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { CatchEntity } from "../catch/catch.entity";
 
 @Entity()
 export class Prediction extends BaseEntity {

@@ -17,7 +17,7 @@ import { UserContext } from "../../Contexts/UserContext";
 import { Buffer } from "buffer";
 import { height } from "../../styles";
 
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 export const CameraView = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
@@ -30,27 +30,28 @@ export const CameraView = ({ navigation }) => {
   const [currentLocation, setLocation] = useState([1, 2]);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  let tempArr = []
-  
+  let tempArr = [];
 
   //location services
   React.useEffect(() => {
     (async () => {
-      
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
         return;
       }
 
-      let location_ = await Location.getCurrentPositionAsync({enableHighAccuracy: false});
-      let finalString = location_.coords.latitude + "," + location_.coords.longitude
-      console.log("final string: " + finalString)
-      setLocation(finalString)
+      let location_ = await Location.getCurrentPositionAsync({
+        enableHighAccuracy: false,
+      });
+      let finalString =
+        location_.coords.latitude + "," + location_.coords.longitude;
+      console.log("final string: " + finalString);
+      setLocation(finalString);
     })();
   }, []);
 
-  let text = 'Waiting..';
+  let text = "Waiting..";
   if (errorMsg) {
     text = errorMsg;
   } else if (currentLocation) {
@@ -68,7 +69,6 @@ export const CameraView = ({ navigation }) => {
       },
       { manual: true }
     );
-
 
   useEffect(() => {
     isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
@@ -124,19 +124,19 @@ export const CameraView = ({ navigation }) => {
     const key = `${Date.now()}.${user.username}.jpg`;
     const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
 
-    setImage(resizedImg)
+    setImage(resizedImg);
 
-    console.log("tempArr " + tempArr)
+    console.log("tempArr " + tempArr);
 
     const form = new FormData();
     form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
     form.append("location", currentLocation);
 
-    console.log("form: " + JSON.stringify(form))
+    console.log("form: " + JSON.stringify(form));
 
     submitCatch({ data: form }).then(() => {
-      uploadToS3(cache.base64, key);
+      // uploadToS3(cache.base64, key);
     });
   };
 

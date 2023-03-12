@@ -52,6 +52,7 @@
     "start-ts-node": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "migration:generate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate -d src/ormconfig.ts",
+    "migration:create": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:create",
     "migration:run": "./node_modules/.bin/ts-node ./node_modules/typeorm/cli.js migration:run -d src/ormconfig.ts"
   }
 }
