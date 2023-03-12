@@ -26,9 +26,6 @@ export class CatchEntity extends BaseEntity {
   @Column({ nullable: true })
   note?: string;
 
-  // @Column("int", { array: true, nullable: true })
-  // location: number[];
-
   @Column("float", { array: true, nullable: true })
   location: number[];
 

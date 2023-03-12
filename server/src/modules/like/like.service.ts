@@ -5,7 +5,7 @@ import { UserEntity } from "../user/user.entity";
 import { LikeEntity } from "../like/like.entity";
 import { PostEntity } from "../post/post.entity";
 import { CommentEntity } from "../comment/comment.entity";
-import { PaginatedCursor, PaginatedSkip } from "../../types";
+import { PaginatedCursor } from "../../types";
 import { GetLikeInput, PaginatedLike } from "./like.dto";
 import { dataSource, paginateLimit } from "../../constants";
 import { likeSubquery } from "../../utils/subquery";
