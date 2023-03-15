@@ -1,4 +1,5 @@
-import * as React from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
+//import * as React from "react";
 import { Dimensions } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -10,10 +11,13 @@ import LoggerScreen from "../Screens/Logger/Logger";
 import MissionsScreen from "../Screens/Missions/Missions";
 import ProfileScreen from "../Screens/User/Profile";
 
+import * as Location from 'expo-location';
+
 const Tab = createBottomTabNavigator();
 
 // Navigation Bar
 export default function MainContainer() {
+
   return (
     <Tab.Navigator
       initialRouteName={"Social"}

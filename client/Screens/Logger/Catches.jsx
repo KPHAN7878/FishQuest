@@ -1,11 +1,14 @@
-import * as React from "react";
-import { StyleSheet, ScrollView, Dimensions, View, Text, Button, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { StyleSheet, ScrollView, Dimensions, View, Text, Button, TouchableOpacity, ActivityIndicator, SafeAreaView } from "react-native";
 import Catch from "./Catch";
+import { Client } from "../../utils/connection";
 var { height } = Dimensions.get('window')
 var { width } = Dimensions.get('window')
 
 
 const Catches = ({navigation}) => {
+
+  const [catches2, setCatches] = useState([]);
   
   //SAMPLE DATA
   //QUERY CATCH TABLE LATER
@@ -62,14 +65,46 @@ const Catches = ({navigation}) => {
   ];
   ///////////////////////////////////////////////////////
 
+  const getCatches = async () => {
+    await Client.get("catch")
+    .then((res) => {
+      setCatches(res.data.catches);
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+  }
+
+  useEffect(() => {
+    getCatches();
+    console.log("route: " + JSON.stringify(catches2))
+  }, []);
+
   return (
+    
     <View style={styles.testContainer}>
       <View style={styles.headerBox}>
         <Button title='Back' color='#841584' onPress={() => {navigation.goBack()}}/>
       </View>
-      <ScrollView>
-        {/* <Text>Product Container</Text> */}
+      
+      <ScrollView style={{marginBottom: 1, flex: 1, height: '100%'}}>
+        {catches2 ? 
         <View style={styles.listContainer}>
+        {catches2.map((item) => {
+          return(
+            <TouchableOpacity
+            style={{width: '25%'}}
+            onPress={() => {navigation.navigate("CatchDetail", item)}}
+            >
+            <Catch {...item} />
+            </TouchableOpacity>
+          )
+        })}
+        <View></View>
+      </View>
+      : <ActivityIndicator size="large" style={{flex:1, justifyContent: 'center'}}/> }
+        {/* <Text>Product Container</Text> */}
+        {/* <View style={styles.listContainer}>
           {catches.map((item) => {
             return(
               <TouchableOpacity
@@ -80,8 +115,9 @@ const Catches = ({navigation}) => {
               </TouchableOpacity>
             )
           })}
-        </View>
+        </View> */}
       </ScrollView>
+
     </View>
   );
 };
@@ -90,10 +126,12 @@ const styles = StyleSheet.create({
   container: {
     flexWrap: "wrap",
     backgroundColor: "gainsboro",
+    flex: 1
   },
   testContainer: {
     flex: 1,
-    backgroundColor: 'gainsboro'
+    backgroundColor: 'gainsboro',
+    height: '100%'
   },
   listContainer: {
     height: height,
