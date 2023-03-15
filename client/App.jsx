@@ -16,6 +16,7 @@ import CommentContainer from "./Screens/Social/CommentContainer";
 import Catches from "./Screens/Logger/Catches";
 import CatchDetail from "./Screens/Logger/CatchDetail";
 import Map from "./Screens/Map/Map";
+import UserSearch from "./Screens/Social/UserSearch";
 
 const Stack = createNativeStackNavigator();
 
@@ -47,6 +48,9 @@ export default function App() {
           <Stack.Group>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="CommentContainer" component={CommentContainer} />
+          </Stack.Group>
+          <Stack.Group>
+          <Stack.Screen name="UserSearch" component={UserSearch} />
           </Stack.Group>
           <Stack.Group>
             <Stack.Screen name="CameraView" component={CameraView} />

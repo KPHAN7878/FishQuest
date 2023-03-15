@@ -195,4 +195,9 @@ export class UserService extends ProfileService {
 
     this.tokenRepository.delete({ userId, tokenType: "password" });
   }
+
+  async searchUsername(username: string) {
+    const userEntry = this.userRepository.find();
+    return userEntry;
+  }
 }

@@ -8,6 +8,7 @@ import {
   Session,
   UseGuards,
   UseInterceptors,
+  Param,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import {
@@ -114,5 +115,19 @@ export class UserController {
   async getAuthSession(@Session() session: Record<string, any>) {
     session.authorized = true;
     return session;
+  }
+
+  @Get(":username")
+  async findUsers(@Param("username") username: string) {
+    const allUsers = await this.userService.searchUsername(username);
+    let test = allUsers
+    console.log("test: " + JSON.stringify(allUsers))
+    const filteredUsers = allUsers.filter(function (x) {
+
+    return x.username.includes(username)})
+
+    console.log("\n\nfiltered array: " + JSON.stringify(filteredUsers))
+
+    return filteredUsers
   }
 }
