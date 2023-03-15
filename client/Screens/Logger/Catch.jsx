@@ -12,12 +12,17 @@ import {
 var { width } = Dimensions.get('window')
 
 const Catch = (props) => {
+  let tempString = props.imageUri
+  let finalString = tempString.replace("fishquest/development", "development/catches")
   return (
     <View style={styles.container}>
+      {/* <Text>{JSON.stringify(props)}</Text> */}
+      {/* {console.log(props.imageUri)} */}
+      {console.log("final string: " + finalString)}
       <Image 
         style={styles.image}
         resizeMode="cover"
-        source={{uri: props.profilePic ? props.profilePic : 'https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png'}}
+        source={{uri: finalString ? finalString : 'https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png'}}
       />
     </View>
   )

@@ -15,6 +15,7 @@ import CreatePost from "./Screens/Social/CreatePost";
 import CommentContainer from "./Screens/Social/CommentContainer";
 import Catches from "./Screens/Logger/Catches";
 import CatchDetail from "./Screens/Logger/CatchDetail";
+import Map from "./Screens/Map/Map";
 
 const Stack = createNativeStackNavigator();
 
@@ -52,6 +53,7 @@ export default function App() {
             <Stack.Screen name="Catches" component={Catches} />
             <Stack.Screen name="Result" component={Result} />
             <Stack.Screen name="CreatePost" component={CreatePost} />
+            <Stack.Screen name="Map" component={Map} />
             <Stack.Screen name="CatchDetail" component={CatchDetail} />
           </Stack.Group>
           <Stack.Screen
