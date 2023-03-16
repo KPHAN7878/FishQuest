@@ -6,19 +6,27 @@ var { height } = Dimensions.get('window')
 var { width } = Dimensions.get('window')
 
 const UserSearch = ({navigation}) => {
-  const [usersList, setUsers] = useState()
+  const [usersList, setUsers] = useState([])
 
   const searchFunction = async (input) => {
     console.log("onChangeText: " + input)
 
-    await Client.get("user/" + input)
-    .then((res) => {
-      console.log("USERS: " + JSON.stringify(res))
-      console.log("\n\n")
-    })
-    .catch((error) => {
-      console.log(error);
-    })
+    if(input.length !== 0)
+    {
+        await Client.get("user/" + input)
+        .then((res) => {
+        console.log("USERS: " + JSON.stringify(res))
+        console.log("\n\n")
+        setUsers(res.data)
+        })
+        .catch((error) => {
+        console.log(error);
+        })
+    }
+    else
+    {
+        setUsers([])
+    }
   }
 
   return (
@@ -30,30 +38,21 @@ const UserSearch = ({navigation}) => {
       <TextInput 
         placeholder='input here'
         onChangeText={(input) => searchFunction(input)}/>
+      {usersList ? usersList.map((item) => {
+          return(
+            <Text>
+                {JSON.stringify(item.username)}
+            </Text>
+          )
+        }) : <View/>}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flexWrap: "wrap",
-      backgroundColor: "gainsboro",
-    },
     testContainer: {
       flex: 1,
       backgroundColor: 'gainsboro'
-    },
-    listContainer: {
-      height: height,
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "flex-start",
-      flexWrap: "wrap",
-      backgroundColor: "gainsboro",
-    },
-    center: {
-        justifyContent: 'center',
-        alignItems: 'center'
     },
     headerBox: {
       marginTop: 0,
