@@ -1,18 +1,25 @@
 import React from "react";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
 import { FontFamily, Color } from "../../GlobalStyles";
+import { useNavigation } from '@react-navigation/native';
 
 import MainContainer from "../../navigation/MainContainer";
 
 const Tabs = createBottomTabNavigator();
 
 const Home = () => {
+
+  const navigation = useNavigation();
+
   return (
     <>
       <View style={styles.headerBox}>
         <Text style={styles.fishQuest}>Fish Quest</Text>
+        <Button title="search" onPress={async () => {
+          navigation.navigate("UserSearch");
+        }}/>
       </View>
       <MainContainer />
     </>
@@ -26,6 +33,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#787777",
     backgroundColor: "#2596be",
+    flexDirection:'row'
   },
   fishQuest: {
     top: 40,
