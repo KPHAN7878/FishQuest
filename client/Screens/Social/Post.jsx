@@ -59,6 +59,7 @@ const Post = ({ post }) => {
           <Image
             style={styles.postImage}
             source={require("../../assets/post_pic.png")}
+            // source={require(post.catch)}
           />
         </View>
 

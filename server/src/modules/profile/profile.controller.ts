@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards, Param } from "@nestjs/common";
 import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
@@ -24,6 +24,7 @@ export class ProfileController {
     @Body("userId") id: number,
     @Req() { user }: Ctx
   ) {
+    console.log("id: " + id)
     return this.userService.follow(id, user);
   }
 
@@ -63,6 +64,21 @@ export class ProfileController {
   @Get("feed")
   async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
     return await this.postService.myFeed(feedPagination, user);
+  }
+
+  //testing feed with @Param instead of @Body becuase axios GET does not allow body in request
+  @Get("feedV2/:string")
+  async myFeedVersion2(@Param('string') feedPagination: string, @Req() { user }: Ctx) {
+
+    const splitArray = feedPagination.split(",")
+
+    let testObject = {
+      limit: parseInt(splitArray[0]),
+      cursor: splitArray[1]
+    }
+
+    let test = testObject as Paginated
+    return await this.postService.myFeed(test, user);
   }
 
   @Post("change-profile-picture")
