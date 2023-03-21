@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import Post from "./Post";
 import { Client } from "../../utils/connection";
 import axios from "axios";
@@ -9,7 +9,7 @@ const Posts = () => {
   const [postsPostgres, setPosts] = useState();
 
   const getSocialFeed = async () => {
-    await Client.get("profile/feedV2/10,2023-03-17T21:04:30.752Z")
+    await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
     .then((res) => {
       //setCatches(res.data.catches);
       console.log("profile feed: " + JSON.stringify(res.data.posts))
@@ -51,9 +51,9 @@ const Posts = () => {
   return (
     <ScrollView style={styles.posts}>
       {console.log("\n\nPOSTS" + JSON.stringify(postsPostgres) + "\n\n")}
-      {postsPostgres.map((post) => (
+      {postsPostgres ? postsPostgres.map((post) => (
         <Post post={post} key={post.id} />
-      ))}
+      )) : <View></View>}
     </ScrollView>
   );
 };

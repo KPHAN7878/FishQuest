@@ -18,6 +18,9 @@ import { useNavigation } from "@react-navigation/native";
 const Post = ({ post }) => {
   const navigation = useNavigation();
 
+  let tempString = post.catch.imageUri
+  let finalString = tempString.replace("fishquest/development", "development/catches")
+
   return (
     <View
       style={{
@@ -45,7 +48,7 @@ const Post = ({ post }) => {
                   `/users/${post.userId}`;
                 }}
               >
-                <Text style={styles.name}>{post.name}</Text>
+                <Text style={styles.name}>{post.creator.username}</Text>
               </TouchableOpacity>
               <Text style={styles.date}>a few seconds ago</Text>
             </View>
@@ -58,9 +61,13 @@ const Post = ({ post }) => {
         <View style={styles.content}>
           <Image
             style={styles.postImage}
+            //defaultSource={'../../assets/no_image.png'}
             source={require("../../assets/post_pic.png")}
-            // source={require(post.catch)}
+            //source={{uri: finalString}}
+            
+            
           />
+          {console.log("profileUri: " + finalString + "\n\n")}
         </View>
 
         <View style={styles.info}>
@@ -90,7 +97,7 @@ const Post = ({ post }) => {
         </View>
 
         <View style={styles.captionView}>
-          <Text style={styles.caption}>{post.desc}</Text>
+          <Text style={styles.caption}>{post.text}</Text>
         </View>
 
         <View style={styles.viewComments}>
