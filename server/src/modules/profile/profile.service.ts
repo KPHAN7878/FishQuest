@@ -17,6 +17,8 @@ export class ProfileService {
   ) {}
 
   async follow(followId: number, user: UserEntity): Promise<boolean> {
+    console.log("followId: " + followId)
+    console.log("current user: " + JSON.stringify(user))
     if (followId === user.id) {
       return false;
     }

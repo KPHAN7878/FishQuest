@@ -17,7 +17,7 @@ const Result = ({ route, navigation }) => {
           textAlign: "center",
         }}
       >
-        {/* {JSON.stringify(result)} */}
+        {console.log(JSON.stringify(result.id))}
       </Text>
 
       <Pressable style={styles.formButton} onPress={() => {
