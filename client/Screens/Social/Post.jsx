@@ -15,11 +15,31 @@ import CommentContainer from "./CommentContainer";
 
 import { useNavigation } from "@react-navigation/native";
 
+var { height } = Dimensions.get('window')
+var { width } = Dimensions.get('window')
+
 const Post = ({ post }) => {
+
+  // const [imageUrl, setImageUrl] = React.useState();
+  const [valid, setValid] = React.useState(true);
+
   const navigation = useNavigation();
 
   let tempString = post.catch.imageUri
   let finalString = tempString.replace("fishquest/development", "development/catches")
+  // setImageUrl(finalString)
+
+  fetch(finalString)
+    .then((res) => {
+      if (res.status === 403)
+      {
+        setValid(false)
+      }
+      console.log("FETCH URL RESPONSE: " + JSON.stringify(res))
+    })
+    .catch(error => {
+      console.error(error);
+    });
 
   return (
     <View
@@ -58,16 +78,19 @@ const Post = ({ post }) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.content}>
-          <Image
-            style={styles.postImage}
-            //defaultSource={'../../assets/no_image.png'}
-            source={require("../../assets/post_pic.png")}
-            //source={{uri: finalString}}
-            
-            
+        {/* <View style={styles.content}> */}
+        <View style={styles.testContainer}>
+          <Image            
+            // style={styles.postImage}
+            style={styles.testImage}
+            resizeMode="cover"
+            // source={require("../../assets/no_image.png")}
+            // source={require("../../assets/post_pic.png")}
+            source={
+              valid ? {uri: finalString} : require("../../assets/no_image.png")}
           />
           {console.log("profileUri: " + finalString + "\n\n")}
+          {console.log("ERROR: " + valid)}
         </View>
 
         <View style={styles.info}>
@@ -153,7 +176,7 @@ const styles = StyleSheet.create({
   postImage: {
     width: "100%",
     maxHeight: 388,
-    resizeMode: "cover",
+    //resizeMode: "cover",
     marginTop: 20,
     borderRadius: 20,
   },
@@ -193,6 +216,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#828282",
   },
+  testContainer: {
+    width: 350,
+    height: 450,
+    paddingLeft: 2,
+    paddingRight: 2,
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+    elevation: 8,
+  },
+  testImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+    alignSelf: 'center',
+    borderRadius: 20,
+  }
 });
 
 export default Post;
