@@ -29,6 +29,18 @@ const UserSearch = ({navigation}) => {
     }
   }
 
+  const followButton = async (userId) => {
+    await Client.post("profile/follow", {
+      userId: userId
+    })
+    .then((res) => {
+
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+  }
+
   return (
     <View style={styles.testContainer}>
       <View style={styles.headerBox}>
@@ -47,7 +59,7 @@ const UserSearch = ({navigation}) => {
             <View style={styles.usersView}>
                 <Text style={{fontWeight: 'bold'}}>{item.username}</Text>
                 {/* <Button title="Follow" style={styles.followButton}/> */}
-                <Pressable style={styles.button}>
+                <Pressable style={styles.button} onPress={() => followButton(item.id)}>
                     <Text style={styles.text}>Follow</Text>
                 </Pressable>
             </View>
