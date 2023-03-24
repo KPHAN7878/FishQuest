@@ -1,14 +1,15 @@
 import { Body, Controller, Get, Post, Req, UseGuards, Param } from "@nestjs/common";
-import { Ctx, Paginated } from "../../types";
+import { Ctx, Paginated, PaginatedSkip } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 import { PostService } from "../post/post.service";
-import { GetUsersInput } from "./profile.dto";
+import { GetUsersInput, PaginatedUser } from "./profile.dto";
 import { UserService } from "../user/user.service";
 import { GetCommentsInput } from "../comment/comment.dto";
 import { CommentService } from "../comment/comment.service";
 import { LikeService } from "../like/like.service";
 import { GetLikeInput } from "../like/like.dto";
+import { UserEntity } from "../user/user.entity";
 
 @Controller("profile")
 @UseGuards(UserAuthGuard)
@@ -44,6 +45,29 @@ export class ProfileController {
   ) {
     return this.userService.getUsers(input, { ...input, myId });
   }
+
+    //followers or following users
+    @Get("get-usersV2/:string")
+    async followingV2(
+      //@Body() input: GetUsersInput & Paginated,
+      @Param('string') input: string,
+      @Req() { user: { id: myId } }: Ctx
+    ) {
+
+      const splitArray = input.split(",")
+
+      let testObject = {
+        limit: 25,
+        skip: null,
+        userId: 1,
+        myId: 1,
+        type: "following"
+      }
+
+      let input_ = testObject as GetUsersInput & Paginated
+
+      return this.userService.getUsers(input_, { ...input_, myId });
+    }
 
   @Get("comments")
   async getCommentsById(

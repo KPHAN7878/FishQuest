@@ -7,21 +7,67 @@ var { width } = Dimensions.get('window')
 
 const UserSearch = ({navigation}) => {
   const [usersList, setUsers] = useState([])
+  const [followUsersArray, setArray] = useState([]);
+  const [onSwitch, setSwitch] = useState();
 
   const searchFunction = async (input) => {
     console.log("onChangeText: " + input)
 
     if(input.length !== 0)
-    {
+    {   
+        // setArray([]);
+
         await Client.get("user/" + input)
         .then((res) => {
         //console.log("USERS: " + JSON.stringify(res))
         console.log("\n\n")
         setUsers(res.data)
+        
+        // const followArray = []
+        // usersList.forEach(function(item){
+        //   console.log("usersList Item: " + JSON.stringify(item.username) + "\n")
+        //   followArray.push(item.username)
+        // });
+
+        // setArray(followArray.slice())
+
+        // console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+        // console.log("usersArray: " + JSON.stringify(usersArray))
+
+        })
+        .then(async () => {
+          //setArray([]);
+
+          const res = await Client.get("profile/get-usersV2/testing");
+
+          console.log("RES: " + JSON.stringify(res.data.users) + "\n\n")
+
+          const followArray = []
+          res.data.users.forEach(function(item){
+          console.log("usersList Item: " + JSON.stringify(item.user.username) + "\n")
+          followArray.push(item.user.username)
+        });
+
+        setArray(followArray.slice())
+
+        //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+        console.log("usersArray: " + JSON.stringify(followUsersArray))
+
         })
         .catch((error) => {
         console.log(error);
         })
+
+        // const followArray = []
+        // usersList.forEach(function(item){
+        //   console.log("usersList Item: " + JSON.stringify(item.username) + "\n")
+        //   followArray.push(item.username)
+        // });
+
+        // setArray(followArray.slice())
+
+        // console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+        // console.log("usersArray: " + JSON.stringify(usersArray))
     }
     else
     {
@@ -33,7 +79,23 @@ const UserSearch = ({navigation}) => {
     await Client.post("profile/follow", {
       userId: userId
     })
-    .then((res) => {
+    .then(async () => {
+      //setArray([]);
+
+      const res = await Client.get("profile/get-usersV2/testing");
+
+      console.log("RES: " + JSON.stringify(res.data.users) + "\n\n")
+
+      const followArray = []
+      res.data.users.forEach(function(item){
+      console.log("usersList Item: " + JSON.stringify(item.user.username) + "\n")
+      followArray.push(item.user.username)
+    });
+
+    setArray(followArray.slice())
+
+    //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+    console.log("usersArray: " + JSON.stringify(followUsersArray))
 
     })
     .catch((error) => {
@@ -60,7 +122,7 @@ const UserSearch = ({navigation}) => {
                 <Text style={{fontWeight: 'bold'}}>{item.username}</Text>
                 {/* <Button title="Follow" style={styles.followButton}/> */}
                 <Pressable style={styles.button} onPress={() => followButton(item.id)}>
-                    <Text style={styles.text}>Follow</Text>
+                    <Text style={styles.text}>{followUsersArray.includes(item.username) ? "Following" : "Follow"}</Text>
                 </Pressable>
             </View>
           )
