@@ -3,27 +3,24 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    OneToOne,
     PrimaryGeneratedColumn,
   } from "typeorm";
   import { UserEntity } from "../user/user.entity";
 
   
   @Entity()
-  export class CatchEntity extends BaseEntity {
+  export class BiologistEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
-    id!: number;
+    userId!: number;
   
     @CreateDateColumn()
     createdAt: Date;
 
     @Column()
-    uniqueSpecies!: number;
+    value!: number;
 
     @Column() 
-    rank!: number;  //0-3 bronze, silver, gold, diamond
+    rank!: number;  //achievement ranks 0-4 none, bronze, silver, gold, diamond
 
-    @OneToOne(() => UserEntity, (user) => user.bio)
-    user: UserEntity;
 
   }
