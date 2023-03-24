@@ -10,6 +10,7 @@ import { CommentService } from "../comment/comment.service";
 import { LikeService } from "../like/like.service";
 import { GetLikeInput } from "../like/like.dto";
 import { UserEntity } from "../user/user.entity";
+import { split } from "lodash";
 
 @Controller("profile")
 @UseGuards(UserAuthGuard)
@@ -56,12 +57,19 @@ export class ProfileController {
 
       const splitArray = input.split(",")
 
+      console.log("split array: " + input + "\n")
+
       let testObject = {
-        limit: 25,
+        // limit: 25,
+        // skip: null,
+        // userId: 1,
+        // myId: 1,
+        // type: "following"
+        limit: parseInt(splitArray[0]),
         skip: null,
-        userId: 1,
+        userId: parseInt(splitArray[1]),
         myId: 1,
-        type: "following"
+        type: splitArray[2]
       }
 
       let input_ = testObject as GetUsersInput & Paginated
