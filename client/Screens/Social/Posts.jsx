@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView, View, RefreshControl } from "react-native";
 import Post from "./Post";
 import { Client } from "../../utils/connection";
 import axios from "axios";
@@ -7,6 +7,7 @@ import axios from "axios";
 const Posts = () => {
 
   const [postsPostgres, setPosts] = useState();
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const getSocialFeed = async () => {
     await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
@@ -24,6 +25,14 @@ const Posts = () => {
   React.useEffect(() => {
     getSocialFeed();
     // console.log("route: " + JSON.stringify(route.params))
+  }, []);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getSocialFeed();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
   }, []);
 
   //TEMPORARY DATABASE //////////////////////////////////
@@ -49,7 +58,11 @@ const Posts = () => {
   ///////////////////////////////////////////////////////
 
   return (
-    <ScrollView style={styles.posts}>
+    <ScrollView style={styles.posts}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+
       {console.log("\n\nPOSTS" + JSON.stringify(postsPostgres) + "\n\n")}
       {postsPostgres ? postsPostgres.map((post) => (
         <Post post={post} key={post.id} />
