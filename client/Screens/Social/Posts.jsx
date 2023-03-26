@@ -10,9 +10,15 @@ const Posts = () => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const getSocialFeed = async () => {
-    await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, '0');
+    let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    let yyyy = today.getFullYear();
+    today = yyyy + '-' + mm + '-' + dd;
+    //await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
+    console.log("TODAY: " + today)
+    await Client.get("profile/feedV2/10," + today + "T21:04:30.752Z")
     .then((res) => {
-      //setCatches(res.data.catches);
       console.log("profile feed: " + JSON.stringify(res.data.posts))
       setPosts(res.data.posts)
       
