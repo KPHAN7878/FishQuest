@@ -3,6 +3,8 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    JoinColumn,
+    OneToOne,
     PrimaryColumn
   } from "typeorm";
   import { UserEntity } from "../user/user.entity";
@@ -16,11 +18,11 @@ import {
     @CreateDateColumn()
     createdAt: Date;
 
-    @Column()
+    @Column({default: '0'})
     value!: number;
 
-    @Column() 
-    rank!: number;  //achievement ranks 0-4 none, bronze, silver, gold, diamond
-
+    @OneToOne(() => UserEntity, { cascade: true })
+    @JoinColumn()
+    user: UserEntity;
 
   }

@@ -42,7 +42,8 @@ export class MissionsService {
 
       async adventurer_check(
         postData: CatchEntity,
-        user: UserEntity
+        user: UserEntity,
+        adv: AdventurerEntity
       ): Promise<boolean>{
         const uniques: any[] = [];
         const allLocs = await dataSource.query(                 //get all user's catches' locations
@@ -56,8 +57,14 @@ export class MissionsService {
         for (const value of allLocs) {                           //check number of unique locations currently logged
           if (!uniques.includes(value)) { uniques.push(value); }
         }
-        if (uniques.length > prevLocs){               //if current number of unqiues is more than previously logged then a new species has been caught and we can add one
+        if (uniques.length > prevLocs){                           //if current number of unqiues is more than previously logged then a new location has been used
           this.insert(postData, postData.user, this.adventurerRepository, AdventurerEntity)
+          await dataSource.query(
+            `update adventurer_entity
+            set value = value +1
+            where "userId" = ${user.id};
+            `
+          )
           return true
         }
         if (uniques.length == prevLocs){                
@@ -85,6 +92,12 @@ export class MissionsService {
         }
         if (uniques.length > prevSpec){               //if current number of unqiues is more than previously logged then a new species has been caught and we can add one
           this.insert(postData, user, this.biologistRepository, BiologistEntity)
+          await dataSource.query(
+            `update biologist_entity
+            set value = value +1
+            where "userId" = ${user.id};
+            `
+          )
           return true
         }
         if (uniques.length == prevSpec){                
@@ -94,9 +107,16 @@ export class MissionsService {
       }
 
       async angler_check(
-        postData: any
+        postData: any,
+        user: UserEntity
       ): Promise<boolean>{
         this.insert(postData, postData.user, this.anglerRepository, AnglerEntity)
+        await dataSource.query(
+          `update angler_entity
+          set value = value +1
+          where "userId" = ${user.id};
+          `
+        )
         return true
         //since missions will only be called if a successful catch is made we can just go ahead and use insert for angler
       }

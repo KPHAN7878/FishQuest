@@ -19,7 +19,7 @@ import { User } from "../user/user.dto";
     @CreateDateColumn()
     createdAt: Date;
 
-    @Column()
+    @Column({default: '0'})
     value!: number;
 
     @OneToOne(() => UserEntity, { cascade: true })
