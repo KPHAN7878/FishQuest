@@ -41,6 +41,9 @@ const Post = ({ post }) => {
       console.error(error);
     });
 
+
+    const postCaption = post.text;
+
   return (
     <View
       style={{
@@ -127,7 +130,7 @@ const Post = ({ post }) => {
           <TouchableOpacity
             activeOpacity={0.2}
             onPress={() => {
-              navigation.navigate(CommentContainer);
+              navigation.navigate('CommentContainer', {caption: postCaption});
             }}
           >
             <Text style={styles.viewCommentText}>View 4 Comments</Text>
