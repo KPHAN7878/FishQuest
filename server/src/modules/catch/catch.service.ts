@@ -8,34 +8,27 @@ import { __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
 import { Model } from "../../utils/ImageProc";
 import { UserEntity } from "../user/user.entity";
+import { MissionsService } from "../missions/missions.service";
 
 @Injectable()
 export class CatchService {
   private classifier: Model = new Model({ verbose: true });
   constructor(
     @InjectRepository(CatchEntity)
-    private readonly catchRepository: Repository<CatchEntity>
+    private readonly catchRepository: Repository<CatchEntity>,
+    private readonly missionsService: MissionsService
   ) {}
 
-  async submitCatch(
-    sub: Submission,
-    user: UserEntity
-  ): Promise<CatchEntity & Prediction> {
+  async submitCatch(sub: Submission, user: UserEntity): Promise<any> {
     const data = sub.imageBase64.split(";base64,").pop() as string;
 
     const image = await this.classifier.jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
+    var numArr = sub.location.split(",");
 
-    var numArr = sub.location.split(",")
-
-    console.log("sub.location" + sub.location)
-    console.log("numArr: " + numArr)
-
-    var finalArr = []
+    var finalArr = [];
     finalArr.push(parseFloat(numArr[0]));
     finalArr.push(parseFloat(numArr[1]));
-
-    console.log(finalArr)
 
     const prediction: Prediction = Prediction.create({
       status: true,
@@ -45,14 +38,15 @@ export class CatchService {
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({
-      location: finalArr, // change later
+      location: finalArr,
       imageUri: sub.imageUri,
       user,
       prediction,
     });
     await this.catchRepository.save(catchEntry);
+    const res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
 
-    return { ...prediction, ...catchEntry } as CatchEntity & Prediction;
+    return { ...res, missions: this.missionsService.allChecks(res) };
   }
 
   async getAll(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
@@ -72,7 +66,6 @@ export class CatchService {
     return catchEntry;
   }
 
-  //TEST saving catch to database
   async testSubmitCatch(
     testCatch: Catch,
     filepath: string
@@ -86,6 +79,5 @@ export class CatchService {
     await this.catchRepository.save(testCatchEntry);
 
     return testCatchEntry;
-    //return {} as any;
   }
 }
