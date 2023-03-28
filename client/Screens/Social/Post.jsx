@@ -12,6 +12,9 @@ import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontFamily } from "../../GlobalStyles";
 import CommentContainer from "./CommentContainer";
+import { Client } from "../../utils/connection";
+import axios from "axios";
+import { UserContext } from "../../Contexts/UserContext";
 
 import { useNavigation } from "@react-navigation/native";
 
@@ -22,8 +25,11 @@ const Post = ({ post }) => {
 
   // const [imageUrl, setImageUrl] = React.useState();
   const [valid, setValid] = React.useState(true);
+  const [liked, setLike] = React.useState();
 
   const navigation = useNavigation();
+
+  const { user, setUser } = useContext(UserContext);
 
   let tempString = post.catch.imageUri
   let finalString = tempString.replace("fishquest/development", "development/catches")
@@ -40,6 +46,32 @@ const Post = ({ post }) => {
     .catch(error => {
       console.error(error);
     });
+
+    const likePost = async (postId) => {
+      await Client.post("like/post", {
+        postId: postId,
+      })
+      .then((res) => {
+      //console.log("USERS: " + JSON.stringify(res))
+      console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res))
+      })
+      .catch((error) => {
+      console.log(error);
+      })
+    }
+
+    const getLikes = async (postId) => {
+      await Client.post("like/post", {
+        postId: postId,
+      })
+      .then((res) => {
+      //console.log("USERS: " + JSON.stringify(res))
+      console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res))
+      })
+      .catch((error) => {
+      console.log(error);
+      })
+    }
 
 
     const postCaption = post.text;
@@ -102,7 +134,7 @@ const Post = ({ post }) => {
               <TouchableOpacity
                 style={styles.like}
                 activeOpacity={0.2}
-                onPress={() => {}}
+                onPress={() => {likePost(post.id)}}       //like button
               >
                 <AntDesign name="like2" size={24} color="black" />
               </TouchableOpacity>
