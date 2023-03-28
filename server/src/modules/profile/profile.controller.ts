@@ -93,6 +93,28 @@ export class ProfileController {
     return this.likeService.getLikes(input, { ...input, myId });
   }
 
+  @Get("likesV2/:string")
+  async likesV2(
+    //@Body() input: GetLikeInput & Paginated,
+    @Param('string') input: string,
+    @Req() { user: { id: myId } }: Ctx
+  ) {
+
+    const splitArray = input.split(",")
+
+    console.log("split array: " + input + "\n")
+
+    let testObject = {
+      limit: parseInt(splitArray[0]),
+      cursor: splitArray[1],
+      id: parseInt(splitArray[2])
+    }
+
+    let input_ = testObject as GetLikeInput & Paginated
+
+    return this.likeService.getLikes(input_, { ...input_, myId });
+  }
+
   @Get("feed")
   async myFeed(@Body() feedPagination: Paginated, @Req() { user }: Ctx) {
     return await this.postService.myFeed(feedPagination, user);
