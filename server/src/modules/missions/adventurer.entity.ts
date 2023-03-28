@@ -17,7 +17,7 @@ export class AdventurerEntity extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: "0" })
+  @Column({ default: "1" })
   value!: number;
 
   @OneToOne(() => UserEntity, { cascade: true })

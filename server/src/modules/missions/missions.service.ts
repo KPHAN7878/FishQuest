@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { dataSource } from "../../constants";
 import { CatchEntity } from "../catch/catch.entity";
 import { Prediction } from "../prediction/prediction.entity";
-import { UserEntity } from "../user/user.entity";
 import { AdventurerEntity } from "./adventurer.entity";
 import { AnglerEntity } from "./angler.entity";
 import { BiologistEntity } from "./biologist.entity";
@@ -22,12 +20,10 @@ export class MissionsService {
     private readonly adventurerRepository: Repository<AdventurerEntity>
   ) {}
   async insert(
-    postData: any,
-    user: UserEntity,
-    repo: any,
-    entity: any
+    postData: Prediction & CatchEntity,
+    repo: Repository<AdventurerEntity | BiologistEntity | AnglerEntity>
   ): Promise<any> {
-    const missionsEntry = entity.findOneby({
+    const missionsEntry: any = repo.findOne({
       where: { userId: postData.userId },
     });
     if (missionsEntry) {
@@ -35,101 +31,47 @@ export class MissionsService {
         { userId: postData.userId },
         { value: missionsEntry.value + 1 }
       );
+    } else {
+      repo.insert({
+        userId: postData.user.id,
+        user: postData.user,
+      });
     }
   }
 
-  async adventurer_check(
-    postData: CatchEntity,
-    user: UserEntity,
-    adv: AdventurerEntity
-  ): Promise<boolean> {
-    const uniques: any[] = [];
-    const allLocs = await dataSource.query(
-      //get all user's catches' locations
-      `select location from catch_entity
-          where catch_entity."userId" = ${user.id};`
-    );
-    const prevLocs = await dataSource.query(
-      //get number of unique locations previously logged
-      `select value from adventurer_entity
-          where adventurer_entity."userId" =  ${user.id}`
-    );
-    for (const value of allLocs) {
-      //check number of unique locations currently logged
-      if (!uniques.includes(value)) {
-        uniques.push(value);
-      }
-    }
-    if (uniques.length > prevLocs) {
-      //if current number of unqiues is more than previously logged then a new location has been used
-      this.insert(
-        postData,
-        postData.user,
-        this.adventurerRepository,
-        AdventurerEntity
-      );
-      await dataSource.query(
-        `update adventurer_entity
-            set value = value +1
-            where "userId" = ${user.id};
-            `
-      );
+  async adventurerCheck(postData: Prediction & CatchEntity): Promise<boolean> {
+    const prevLocs = await CatchEntity.find({
+      relations: ["user"],
+    }).then((values: CatchEntity[]): number[][] => {
+      return values
+        .filter((val: CatchEntity) => val.user.id === postData.user.id)
+        .map((val: CatchEntity) => val.location);
+    });
+
+    if (!prevLocs.includes(postData.location)) {
+      this.insert(postData, this.adventurerRepository);
       return true;
     }
-    if (uniques.length == prevLocs) {
-      return false;
-    }
-    return true;
+
+    return false;
   }
 
-  async biologist_check(
-    postData: Prediction,
-    user: UserEntity
-  ): Promise<boolean> {
-    const uniques: string[] = [];
-    const allSpec = await dataSource.query(
-      //get all user's logged species
-      `select species from prediction
-          where prediction."userId" = ${user.id};
-        `
-    );
-    const prevSpec = await dataSource.query(
-      //get number of unique species previously logged
-      `select value from biologist_entity
-          where biologist_entity."userId" =  ${user.id}`
-    );
-    for (const value of allSpec) {
-      //check number of unique species currently logged
-      if (!uniques.includes(value)) {
-        uniques.push(value);
-      }
-    }
-    if (uniques.length > prevSpec) {
-      //if current number of unqiues is more than previously logged then a new species has been caught and we can add one
-      this.insert(postData, user, this.biologistRepository, BiologistEntity);
-      await dataSource.query(
-        `update biologist_entity
-            set value = value +1
-            where "userId" = ${user.id};
-            `
-      );
+  async biologistCheck(postData: Prediction & CatchEntity): Promise<boolean> {
+    const prevSpecs = await Prediction.find({
+      where: { userId: postData.user.id },
+    }).then((values: Prediction[]): string[] => {
+      return values.map((val: Prediction) => val.species);
+    });
+
+    if (!prevSpecs.includes(postData.species)) {
+      this.insert(postData, this.biologistRepository);
       return true;
-    }
-    if (uniques.length == prevSpec) {
-      return false;
     }
     return false;
   }
 
-  async angler_check(postData: any, user: UserEntity): Promise<boolean> {
-    this.insert(postData, postData.user, this.anglerRepository, AnglerEntity);
-    await dataSource.query(
-      `update angler_entity
-          set value = value +1
-          where "userId" = ${user.id};
-          `
-    );
+  async anglerCheck(postData: Prediction & CatchEntity): Promise<boolean> {
+    this.insert(postData, this.anglerRepository);
     return true;
-    //since missions will only be called if a successful catch is made we can just go ahead and use insert for angler
   }
 }
