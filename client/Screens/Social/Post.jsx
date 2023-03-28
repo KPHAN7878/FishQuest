@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ const Post = ({ post }) => {
   // const [imageUrl, setImageUrl] = React.useState();
   const [valid, setValid] = React.useState(true);
   const [liked, setLike] = React.useState();
+  const [myLikesArray, setLikesArray] = useState([]);
 
   const navigation = useNavigation();
 
@@ -34,6 +35,11 @@ const Post = ({ post }) => {
   let tempString = post.catch.imageUri
   let finalString = tempString.replace("fishquest/development", "development/catches")
   // setImageUrl(finalString)
+
+  React.useEffect(() => {
+    getLikes();
+    // console.log("route: " + JSON.stringify(route.params))
+  }, []);
 
   fetch(finalString)
     .then((res) => {
@@ -54,19 +60,36 @@ const Post = ({ post }) => {
       .then((res) => {
       //console.log("USERS: " + JSON.stringify(res))
       console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res))
+      getLikes();
       })
       .catch((error) => {
       console.log(error);
       })
     }
 
-    const getLikes = async (postId) => {
-      await Client.post("like/post", {
-        postId: postId,
-      })
+    const getLikes = async () => {
+      let today = new Date();
+      let dd = String(today.getDate()).padStart(2, '0');
+      let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+      let yyyy = today.getFullYear();
+      today = yyyy + '-' + mm + '-' + dd;
+
+      await Client.get("profile/likesV2/100," + today + "T21:04:30.752Z," + user.id)
       .then((res) => {
       //console.log("USERS: " + JSON.stringify(res))
-      console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res))
+      
+      const likesArray = []
+      res.data.likes.forEach(function(item){
+      console.log("likes Item: " + JSON.stringify(item.likeContent.catch.id) + "\n")
+      likesArray.push(item.likeContent.catch.id)
+      });
+
+      setLikesArray(likesArray.slice())
+
+      //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+      console.log("likesArray: " + JSON.stringify(myLikesArray))
+      console.log("post catch ID: " + post.catchId)
+
       })
       .catch((error) => {
       console.log(error);
@@ -124,8 +147,8 @@ const Post = ({ post }) => {
             source={
               valid ? {uri: finalString} : require("../../assets/no_image.png")}
           />
-          {console.log("profileUri: " + finalString + "\n\n")}
-          {console.log("ERROR: " + valid)}
+          {/* {console.log("profileUri: " + finalString + "\n\n")}
+          {console.log("ERROR: " + valid)} */}
         </View>
 
         <View style={styles.info}>
@@ -136,7 +159,8 @@ const Post = ({ post }) => {
                 activeOpacity={0.2}
                 onPress={() => {likePost(post.id)}}       //like button
               >
-                <AntDesign name="like2" size={24} color="black" />
+                {myLikesArray.includes(post.catch.id) ? <AntDesign name="like2" size={24} color="red" /> : <AntDesign name="like2" size={24} color="black" />}
+                
               </TouchableOpacity>
             </View>
             <View style={styles.item}>
