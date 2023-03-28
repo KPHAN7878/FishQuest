@@ -9,6 +9,8 @@ import { UserModule } from "./modules/user/user.module";
 import { LikeModule } from "./modules/like/like.module";
 import { CommentModule } from "./modules/comment/comment.module";
 import { ProfileModule } from "./modules/profile/profile.module";
+import { MissionsModule } from "./modules/missions/missions.module";
+
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { ProfileModule } from "./modules/profile/profile.module";
     LikeModule,
     CommentModule,
     ProfileModule,
+    MissionsModule
   ],
 })
 export class AppModule {}
