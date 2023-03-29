@@ -3,8 +3,8 @@ import { CatchEntity } from "./catch.entity";
 import { Repository } from "typeorm";
 import { Catch, Submission } from "./catch.dto";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ErrorRes, FieldError } from "../../types";
-import { __prod__ } from "../../constants";
+import { ErrorRes, FieldError, PaginatedCursor } from "../../types";
+import { dataSource, paginateLimit, __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
 import { Model } from "../../utils/ImageProc";
 import { UserEntity } from "../user/user.entity";
@@ -49,8 +49,40 @@ export class CatchService {
     return { ...res, missions: this.missionsService.allChecks(res) };
   }
 
-  async getAll(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
-    return { catches: await CatchEntity.find() }; // {where: ... }
+  async getAll(
+    { cursor, limit }: PaginatedCursor,
+    { id: myId }: UserEntity
+  ): Promise<{ catches: CatchEntity[]; hasMore: boolean }> {
+    const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+
+    const catches = await dataSource.query(
+      `
+      select
+      json_build_object(
+        'id', c."id",
+        'note', c."note",
+        'imageUri', c."imageUri",
+        'location', c."location",
+        'species', p."species"
+      ) catch
+      from prediction
+      p inner join catch_entity c on c."predictionId" = p.id
+      inner join user_entity u on u.id = p."userId"
+      ${
+        cursor
+          ? `where c."createdAt" < '${cursor}' and p."userId" = ${myId}`
+          : ""
+      }
+      order by c."createdAt" DESC
+      limit ${realLimitPlusOne}
+
+      `
+    );
+
+    return {
+      catches: catches.slice(0, realLimit),
+      hasMore: catches.length === realLimitPlusOne,
+    };
   }
 
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {
