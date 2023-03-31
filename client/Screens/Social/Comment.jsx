@@ -38,6 +38,14 @@ const Comment = () => {
           "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
         desc: "When's dinner?",
       },  
+      {
+        id: 5,
+        name: "Jake Paul",
+        userId: 5,
+        profilePic:
+          "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
+        desc: "I am the GOAT",
+      },  
   ];
   ///////////////////////////////////////////////////////
 
@@ -57,7 +65,16 @@ const Comment = () => {
                     <Text style={styles.userName}>{comment.name}</Text>
                     <Text style={styles.desc}>{comment.desc}</Text>
                 </View>
+                
+                {/* <View style={{marginLeft: 20}}>
                 <Text style={styles.date}>1 hour ago</Text>
+                <Image style={styles.img} source={require("../../assets/profilePic.jpg")} />
+                <View style={styles.info}>
+                    <Text style={styles.userName}>{comment.name}</Text>
+                    <Text style={styles.desc}>{comment.desc}</Text>
+                </View>
+                <Text style={styles.date}>1 hour ago</Text>
+                </View> */}
             </View>
         ))}
     </View>

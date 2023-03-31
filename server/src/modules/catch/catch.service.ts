@@ -8,6 +8,7 @@ import { __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
 import { Model } from "../../utils/ImageProc";
 import { UserEntity } from "../user/user.entity";
+import { dataSource, paginateLimit } from "../../constants";
 
 @Injectable()
 export class CatchService {
@@ -56,12 +57,13 @@ export class CatchService {
   }
 
   async getAll(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
-    return { catches: await CatchEntity.find() }; // {where: ... }
+    return { catches: await CatchEntity.find({relations: ["user", "prediction"]}) }; // {where: ... }
   }
 
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {
     const catchEntry = await CatchEntity.findOne({
       where: { id },
+      relations: ["user", "prediction"]
     });
 
     if (catchEntry === null) {
