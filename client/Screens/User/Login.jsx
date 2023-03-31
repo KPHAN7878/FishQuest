@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Keyboard,
   TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 
 import styles, { width, height } from "../../styles";
@@ -262,7 +263,8 @@ const Login = ({ navigation }) => {
     <View
       style={{
         marginBottom: height * 0.05,
-        display: screenState === 1 ? "block" : "none",
+        // display: screenState === 1 ? "block" : "none",
+        display: screenState === 1 ? (Platform.os === 'ios' ? 'block' : 'flex') : "none",
         visibility: screenState === 1 ? "hidden" : "visible",
       }}
     >
@@ -450,7 +452,8 @@ const Login = ({ navigation }) => {
       style={[
         {
           marginBottom: height * 0.05,
-          display: screenState === 1 ? "none" : "block",
+          // display: screenState === 1 ? "none" : "block",
+          display: screenState === 1 ? "none" : (Platform.os === 'ios' ? 'block' : 'flex'),
           visibility: screenState === 1 ? "visible" : "hidden",
         },
         formAnimatedStyle,

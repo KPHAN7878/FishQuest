@@ -103,6 +103,14 @@ const CommentContainer = ({route, navigation}) => {
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
               </View>
+              <View key={comment.id} style={styles2.comment2}>
+                  <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
+                  <View style={styles2.info}>
+                      <Text style={styles2.userName}>{comment.name}</Text>
+                      <Text style={styles2.desc}>{comment.desc}</Text>
+                  </View>
+                  <Text style={styles2.date}>1 hour ago</Text>
+              </View>
               <View style={styles2.line}/>
             </View>
 
@@ -214,6 +222,14 @@ const styles2 = StyleSheet.create({
       borderRadius: 50,
       resizeMode: "contain"
   },
+  comment2: {
+    marginTop: 25,
+    marginBottom: 0,
+    marginLeft: 45,
+    marginRight: 0,
+    display: "flex",
+    flexDirection: "row",
+},
 });
 
 export default CommentContainer;

@@ -76,7 +76,7 @@ const Post = ({ post }) => {
 
       await Client.get("profile/likesV2/100," + today + "T21:04:30.752Z," + user.id)
       .then((res) => {
-      //console.log("USERS: " + JSON.stringify(res))
+      console.log("USERS: " + JSON.stringify(res))
       
       const likesArray = []
       res.data.likes.forEach(function(item){
