@@ -35,6 +35,7 @@ export class LikeService {
         { likeValue: post!.likeValue }
       );
       this.likeRepository.remove(like);
+      return false;
     } else {
       const newLike = LikeEntity.create({
         userId: user.id,

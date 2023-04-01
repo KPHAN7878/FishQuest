@@ -1,32 +1,88 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Text, View, StyleSheet, Dimensions, Button, TextInput, ScrollView, Pressable  } from 'react-native'
 import { Client } from "../../utils/connection";
+import { UserContext } from "../../Contexts/UserContext";
 
 var { height } = Dimensions.get('window')
 var { width } = Dimensions.get('window')
 
 const UserSearch = ({navigation}) => {
   const [usersList, setUsers] = useState([])
+  const [followUsersArray, setArray] = useState([]);
+  const [onSwitch, setSwitch] = useState();
+
+  const { user, setUser } = useContext(UserContext);
 
   const searchFunction = async (input) => {
     console.log("onChangeText: " + input)
 
     if(input.length !== 0)
-    {
+    {   
+        // setArray([]);
+
         await Client.get("user/" + input)
         .then((res) => {
         //console.log("USERS: " + JSON.stringify(res))
         console.log("\n\n")
         setUsers(res.data)
+
+        })
+        .then(async () => {
+          //setArray([]);
+
+          const res = await Client.get("profile/get-usersV2/25," + JSON.stringify(user.id) + ",following");
+
+          console.log("RES: " + JSON.stringify(res.data.users) + "\n\n")
+
+          const followArray = []
+          res.data.users.forEach(function(item){
+          console.log("usersList Item: " + JSON.stringify(item.user.username) + "\n")
+          followArray.push(item.user.username)
+        });
+
+        setArray(followArray.slice())
+
+        //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+        console.log("usersArray: " + JSON.stringify(followUsersArray))
+
         })
         .catch((error) => {
         console.log(error);
         })
+
     }
     else
     {
         setUsers([])
     }
+  }
+
+  const followButton = async (userId) => {
+    await Client.post("profile/follow", {
+      userId: userId
+    })
+    .then(async () => {
+      //setArray([]);
+
+      const res = await Client.get("profile/get-usersV2/25," + JSON.stringify(user.id) + ",following");
+
+      console.log("RES: " + JSON.stringify(res.data.users) + "\n\n")
+
+      const followArray = []
+      res.data.users.forEach(function(item){
+      console.log("usersList Item: " + JSON.stringify(item.user.username) + "\n")
+      followArray.push(item.user.username)
+    });
+
+    setArray(followArray.slice())
+
+    //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
+    console.log("usersArray: " + JSON.stringify(followUsersArray))
+
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   }
 
   return (
@@ -47,8 +103,8 @@ const UserSearch = ({navigation}) => {
             <View style={styles.usersView}>
                 <Text style={{fontWeight: 'bold'}}>{item.username}</Text>
                 {/* <Button title="Follow" style={styles.followButton}/> */}
-                <Pressable style={styles.button}>
-                    <Text style={styles.text}>Follow</Text>
+                <Pressable style={styles.button} onPress={() => followButton(item.id)}>
+                    <Text style={styles.text}>{followUsersArray.includes(item.username) ? "Unfollow" : "Follow"}</Text>
                 </Pressable>
             </View>
           )
@@ -88,13 +144,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 5,
-        paddingHorizontal: 50,
+        paddingHorizontal: 40,
         borderRadius: 10,
         elevation: 3,
         backgroundColor: 'purple',
         alignSelf: 'flex-end',
         marginRight: width * 0.05,
-        marginBottom: (height * 0.05)*0.16
+        marginBottom: (height * 0.05)*0.16,
+        width: 150
       },
       text: {
         fontSize: 16,

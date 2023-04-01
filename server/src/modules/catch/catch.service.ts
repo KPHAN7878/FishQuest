@@ -93,6 +93,7 @@ export class CatchService {
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {
     const catchEntry = await CatchEntity.findOne({
       where: { id },
+      relations: ["user", "prediction"],
     });
 
     if (catchEntry === null) {
