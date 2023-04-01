@@ -9,6 +9,9 @@ import { PostEntity } from "./modules/post/post.entity";
 import { LikeEntity } from "./modules/like/like.entity";
 import { CommentEntity } from "./modules/comment/comment.entity";
 import { ReactionEntity } from "./modules/reaction/reaction.entity";
+import { AnglerEntity } from "./modules/missions/angler.entity";
+import { BiologistEntity } from "./modules/missions/biologist.entity";
+import { AdventurerEntity } from "./modules/missions/adventurer.entity";
 
 export const __prod__ = process.env.NODE_ENV === "production";
 export const MODEL_PATH = `${__dirname}/classifier/model.onnx`;
@@ -25,6 +28,9 @@ export const entities = [
   LikeEntity,
   CommentEntity,
   ReactionEntity,
+  AnglerEntity,
+  BiologistEntity,
+  AdventurerEntity
 ];
 
 export const dataSource = new DataSource({

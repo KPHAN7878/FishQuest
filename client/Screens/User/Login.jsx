@@ -30,7 +30,7 @@ import { UserContext } from "../../Contexts/UserContext";
 
 import { StackActions, NavigationActions } from "@react-navigation/native";
 
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
@@ -62,20 +62,19 @@ const Login = ({ navigation }) => {
   //location services
   React.useEffect(() => {
     (async () => {
-      
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
-      console.log(location)
+      console.log(location);
     })();
   }, []);
 
-  let text = 'Waiting..';
+  let text = "Waiting..";
   if (errorMsg) {
     text = errorMsg;
   } else if (location) {
@@ -264,7 +263,12 @@ const Login = ({ navigation }) => {
       style={{
         marginBottom: height * 0.05,
         // display: screenState === 1 ? "block" : "none",
-        display: screenState === 1 ? (Platform.os === 'ios' ? 'block' : 'flex') : "none",
+        display:
+          screenState === 1
+            ? Platform.os === "ios"
+              ? "block"
+              : "flex"
+            : "none",
         visibility: screenState === 1 ? "hidden" : "visible",
       }}
     >
@@ -453,7 +457,12 @@ const Login = ({ navigation }) => {
         {
           marginBottom: height * 0.05,
           // display: screenState === 1 ? "none" : "block",
-          display: screenState === 1 ? "none" : (Platform.os === 'ios' ? 'block' : 'flex'),
+          display:
+            screenState === 1
+              ? "none"
+              : Platform.os === "ios"
+              ? "block"
+              : "flex",
           visibility: screenState === 1 ? "visible" : "hidden",
         },
         formAnimatedStyle,

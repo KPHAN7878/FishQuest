@@ -93,6 +93,7 @@ export class UserController {
   @UseGuards(UserAuthGuard)
   @Get("status")
   async getAuthStatus(@Req() req: Request) {
+    console.log("TEST");
     return { status: req.isAuthenticated() };
   }
 
@@ -120,14 +121,14 @@ export class UserController {
   @Get(":username")
   async findUsers(@Param("username") username: string) {
     const allUsers = await this.userService.searchUsername(username);
-    let test = allUsers
-    console.log("test: " + JSON.stringify(allUsers))
+    let test = allUsers;
+    console.log("test: " + JSON.stringify(allUsers));
     const filteredUsers = allUsers.filter(function (x) {
+      return x.username.includes(username);
+    });
 
-    return x.username.includes(username)})
+    console.log("\n\nfiltered array: " + JSON.stringify(filteredUsers));
 
-    console.log("\n\nfiltered array: " + JSON.stringify(filteredUsers))
-
-    return filteredUsers
+    return filteredUsers;
   }
 }

@@ -42,6 +42,19 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   profilePicUrl: string;
 
+  @Column({ default: "0" })
+  exp: number;
+
+  //achievement ranks 0-4 none, bronze, silver, gold, diamond
+  // @Column({ default: "0" })
+  // ang: number;
+  //
+  // @Column({ default: "0" })
+  // bio: number;
+  //
+  // @Column({ default: "0" })
+  // adv: number;
+
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
 
