@@ -136,7 +136,7 @@ export const CameraView = ({ navigation }) => {
     console.log("form: " + JSON.stringify(form));
 
     submitCatch({ data: form }).then(() => {
-      uploadToS3(cache.base64, key);
+      // uploadToS3(cache.base64, key);
     });
   };
 

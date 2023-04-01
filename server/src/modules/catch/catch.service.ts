@@ -43,10 +43,15 @@ export class CatchService {
       user,
       prediction,
     });
-    await this.catchRepository.save(catchEntry);
     const res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
 
-    return { ...res, missions: this.missionsService.allChecks(res) };
+    return {
+      ...res,
+      missions: await this.missionsService.allChecks(res).then((val: any) => {
+        this.catchRepository.save(catchEntry);
+        return val;
+      }),
+    };
   }
 
   async getAll(
