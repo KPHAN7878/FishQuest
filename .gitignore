@@ -3,6 +3,8 @@ package-lock.json
 .expo
 *.jpg
 *.jpeg
+**/train
+**/valid
 **/dist
 .env
 
