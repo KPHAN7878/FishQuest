@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['bluegill', 'carp', 'catfish', 'gar', 'largemouth_bass', 'white_crappie']
+
+roboflow:
+  workspace: fish-quest
+  project: fish-quest
+  version: 7
+  license: MIT
+  url: https://universe.roboflow.com/fish-quest/fish-quest/dataset/7
