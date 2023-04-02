@@ -33,7 +33,6 @@ export class MissionsService {
         .update({ userId: postData.userId }, { value: missionsEntry.value + 1 })
         .then((val: any) => val.value);
     } else {
-      // console.log("here");
       return repo
         .insert({
           userId: postData.user.id,
@@ -71,7 +70,6 @@ export class MissionsService {
       return values.map((val: Prediction) => val.species);
     });
 
-    console.log("bio");
     if (!prevSpecs.includes(postData.species)) {
       return this.insert(postData, this.biologistRepository);
     }

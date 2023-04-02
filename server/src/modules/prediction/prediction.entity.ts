@@ -18,7 +18,7 @@ export class Prediction extends BaseEntity {
   score: number;
 
   @Column({ nullable: true })
-  status: boolean; // missing | correct | incorrect pred
+  status: boolean | null; // missing | correct | incorrect pred
 
   @Column({ nullable: true })
   species: string;
