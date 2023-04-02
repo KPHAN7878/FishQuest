@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { imagenetClasses } from "../classifier/imagenet";
+import { classList } from "../classifier/imagenet";
 import { MODEL_PATH } from "../constants";
 import * as Jimp from "jimp";
 import { Tensor, InferenceSession } from "onnxruntime-node";
@@ -141,25 +141,13 @@ export class Model {
     if (this.opts?.verbose) console.log("Inference time: " + inferenceTime);
 
     const output = outputData[session.outputNames[0]];
-    const outputSoftmax = softmax(Array.prototype.slice.call(output.data));
-    const results = imagenetClassesTopK(outputSoftmax, 5);
+    const results = prediction(output, 5);
 
     return [results, inferenceTime];
   };
 }
 
-const softmax = (resultArray: number[]): any => {
-  const largestNumber = Math.max(...resultArray);
-  const sumOfExp = resultArray
-    .map((resultItem) => Math.exp(resultItem - largestNumber))
-    .reduce((prevNumber, currentNumber) => prevNumber + currentNumber);
-
-  return resultArray.map((resultValue, index) => {
-    return Math.exp(resultValue - largestNumber) / sumOfExp;
-  });
-};
-
-const imagenetClassesTopK = (classProbabilities: any, k = 5) => {
+const prediction = (classProbabilities: any, k = 5) => {
   const probs = _.isTypedArray(classProbabilities)
     ? Array.prototype.slice.call(classProbabilities)
     : classProbabilities;
@@ -172,7 +160,7 @@ const imagenetClassesTopK = (classProbabilities: any, k = 5) => {
   );
 
   const topK = _.take(sorted, k).map((probIndex: Array<number>) => {
-    const iClass = imagenetClasses[probIndex[1]];
+    const iClass = classList[probIndex[1]];
     return {
       id: iClass[0],
       index: parseInt(probIndex[1].toString(), 10),

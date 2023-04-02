@@ -7,8 +7,7 @@ import numpy as np
 import os
 import cv2
 
-PATH = f"{os.getcwd()}/runs/detect/train/weights/best.pt"
-DATA_DIR = "/home/will/Documents/datasets/fish_dataset/largemouth"
+PATH = f"{os.getcwd()}/runs/detect/train/weights/best.onnx"
 INPUT_SIZE = 640
 CLASSES = ['bluegill', 'carp', 'catfish',
            'gar', 'largemouth_bass', 'white_crappie']
@@ -16,6 +15,7 @@ CLASSES = ['bluegill', 'carp', 'catfish',
 
 def load_image(file):
     image = Image.open(file)
+    image = image.convert("RGB")
     orig_image = np.asarray(image)
     image = image.resize((INPUT_SIZE, INPUT_SIZE))
     image = np.asarray(image).transpose(
@@ -26,10 +26,8 @@ def load_image(file):
 
 
 def with_onnx(image, orig_image):
-    orig_size = orig_image.shape[:2]
     onnx_model = onnx.load(PATH)
     onnx.checker.check_model(onnx_model)
-    # print(onnx_model.graph.input)
 
     ort_sess = ort.InferenceSession(PATH)
     output_names = ort_sess.get_outputs()
@@ -51,15 +49,6 @@ def with_onnx(image, orig_image):
     # Get bounding boxes for each object
     boxes = predictions[:, :4]
 
-    # rescale box
-    print(boxes)
-    input_shape = np.array([INPUT_SIZE] * 4)
-    boxes = np.divide(boxes, input_shape, dtype=np.float32)
-    boxes *= np.array([*orig_size, *orig_size])
-    boxes = boxes.astype(np.int32)
-
-    # Apply non-maxima suppression to suppress weak, overlapping bounding boxes
-    # indices = nms(boxes, scores, 0.3)
     i = cv2.dnn.NMSBoxes(boxes, scores, 0.5, 0.5)
 
     print(boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
@@ -69,20 +58,27 @@ def with_onnx(image, orig_image):
 def draw(image, box, score, class_name):
     image_draw = image.copy()
 
-    (centerX, centerY, width, height) = box
-    box[0] = int(centerX - (width / 2))
-    box[1] = int(centerY - (height / 2))
-    bbox = box.round().astype(np.int32).tolist()
-    color = (0, 255, 0)
+    x_scale = image.shape[1] / INPUT_SIZE
+    y_scale = image.shape[0] / INPUT_SIZE
 
-    cv2.rectangle(image_draw, tuple(bbox[:2]), tuple(bbox[2:]), color, 2)
+    (cx, cy, w, h) = box
+    w = int(w)
+    h = int(h)
+    tl = (int((cx - w * 0.5) * x_scale), int((cy - h * 0.5) * y_scale))
+    br = (int((cx + w * 0.5) * x_scale), int((cy + h * 0.5) * y_scale))
+
+    cv2.rectangle(image_draw, tl, br, (0, 255, 0), 2)
     cv2.putText(image_draw,
-                f'{class_name}:{int(score*100)}', (bbox[0], bbox[1] - 2),
+                f'{class_name}:{int(score*100)}', (tl[0], tl[1] - 2),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.60, [225, 255, 255],
                 thickness=1)
 
     image_draw = image_draw[:, :, ::-1]
+
+    cv2.namedWindow("out", cv2.WINDOW_NORMAL)
+    cv2.imshow("out", image_draw)
+    cv2.waitKey(0)
     cv2.imwrite("output.jpg", image_draw)
 
 
