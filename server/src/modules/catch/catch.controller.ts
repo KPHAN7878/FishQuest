@@ -49,7 +49,6 @@ export default class CatchController {
   )
   async submitCatch(@Body() submission: Submission, @Req() { user }: Ctx) {
     const results = await this.catchService.submitCatch(submission, user);
-    console.log(results);
     return results;
   }
 

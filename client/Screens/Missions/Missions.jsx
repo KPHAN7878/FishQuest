@@ -4,8 +4,6 @@ import {
   Text,
   View,
   FlatList,
-  Dimensions,
-  Button,
   Modal,
   Pressable,
 } from "react-native";

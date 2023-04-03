@@ -60,6 +60,7 @@ export class CatchService {
         },
         [["prediction", "modelOutput"]]
       );
+      console.log(res);
 
       return formUser(res);
     } else {

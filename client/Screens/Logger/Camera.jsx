@@ -30,8 +30,6 @@ export const CameraView = ({ navigation }) => {
   const [currentLocation, setLocation] = useState([1, 2]);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  let tempArr = [];
-
   //location services
   React.useEffect(() => {
     (async () => {
@@ -72,13 +70,10 @@ export const CameraView = ({ navigation }) => {
   useEffect(() => {
     isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
     if (catchError) {
-      console.log(catchError);
       setIsLoading(false);
     }
 
-    if (result) {
-      setIsLoading(false);
-      console.log(result.errors);
+    if (result && !isLoading) {
       result["ImageCache"] = image;
       navigation.navigate("Result", result);
     }
@@ -132,7 +127,8 @@ export const CameraView = ({ navigation }) => {
     form.append("location", currentLocation);
 
     submitCatch({ data: form }).then(() => {
-      // uploadToS3(cache.base64, key);
+      setIsLoading(false);
+      uploadToS3(cache.base64, key);
     });
   };
 

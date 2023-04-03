@@ -78,7 +78,7 @@ export class Model {
   constructor(
     private readonly opts: ModelOptions,
     private sessionCount: number = 0,
-    private confidenceThresh: number = 0.8
+    private confidenceThresh: number = 0.5
   ) {
     this.opts = { ...DEFAULT_OPTIONS, ...this.opts };
     this.loadInferenceSession();
