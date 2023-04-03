@@ -46,7 +46,6 @@ export const CameraView = ({ navigation }) => {
       });
       let finalString =
         location_.coords.latitude + "," + location_.coords.longitude;
-      console.log("final string: " + finalString);
       setLocation(finalString);
     })();
   }, []);
@@ -79,6 +78,7 @@ export const CameraView = ({ navigation }) => {
 
     if (result) {
       setIsLoading(false);
+      console.log(result.errors);
       result["ImageCache"] = image;
       navigation.navigate("Result", result);
     }
@@ -117,7 +117,7 @@ export const CameraView = ({ navigation }) => {
 
     const resizedImg = await manipulateAsync(
       cache.uri,
-      [{ resize: { width: 224, height: 224 } }], // make sure this matches input tensor dims
+      [{ resize: { width: 640, height: 640 } }], // make sure this matches input tensor dims
       { base64: true }
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
@@ -126,17 +126,13 @@ export const CameraView = ({ navigation }) => {
 
     setImage(resizedImg);
 
-    console.log("tempArr " + tempArr);
-
     const form = new FormData();
     form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
     form.append("location", currentLocation);
 
-    console.log("form: " + JSON.stringify(form));
-
     submitCatch({ data: form }).then(() => {
-      uploadToS3(cache.base64, key);
+      // uploadToS3(cache.base64, key);
     });
   };
 

@@ -32,7 +32,10 @@ export const StartScreen = ({ navigation }) => {
           textAlign: "center",
         }}
       >
-        <ActivityIndicator size="large" />
+        <ActivityIndicator
+          size="large"
+          style={{ flex: 1, justifyContent: "center" }}
+        />
       </Text>
     </View>
   );

@@ -52,7 +52,7 @@ def with_onnx(image, orig_image):
     i = cv2.dnn.NMSBoxes(boxes, scores, 0.5, 0.5)
 
     print(boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
-    draw(orig_image, boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
+    # draw(orig_image, boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
 
 
 def draw(image, box, score, class_name):

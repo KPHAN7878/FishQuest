@@ -9,6 +9,8 @@ import { Prediction } from "../prediction/prediction.entity";
 import { jimpFromData, Model } from "../../utils/ImageProc";
 import { UserEntity } from "../user/user.entity";
 import { MissionsService } from "../missions/missions.service";
+import { formErrors } from "../../utils/formError";
+import { exclude, formUser } from "../../utils/formEntity";
 
 @Injectable()
 export class CatchService {
@@ -43,15 +45,33 @@ export class CatchService {
       user,
       prediction,
     });
-    const res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
+    let res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
 
-    return {
-      ...res,
-      missions: await this.missionsService.allChecks(res).then((val: any) => {
-        this.catchRepository.save(catchEntry);
-        return val;
-      }),
-    };
+    if (prediction.status) {
+      res = exclude<any>(
+        {
+          ...res,
+          missions: await this.missionsService
+            .allChecks(res)
+            .then((val: any) => {
+              this.catchRepository.save(catchEntry);
+              return val;
+            }),
+        },
+        [["prediction", "modelOutput"]]
+      );
+
+      return formUser(res);
+    } else {
+      const errors = formErrors([
+        {
+          value: !prediction.status,
+          message: `Could not find a fish`,
+          field: "camera",
+        },
+      ]);
+      return { errors };
+    }
   }
 
   async getAll(
