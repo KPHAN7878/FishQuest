@@ -30,8 +30,6 @@ export const CameraView = ({ navigation }) => {
   const [currentLocation, setLocation] = useState([1, 2]);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  let tempArr = [];
-
   //location services
   React.useEffect(() => {
     (async () => {
@@ -46,7 +44,6 @@ export const CameraView = ({ navigation }) => {
       });
       let finalString =
         location_.coords.latitude + "," + location_.coords.longitude;
-      console.log("final string: " + finalString);
       setLocation(finalString);
     })();
   }, []);
@@ -73,12 +70,10 @@ export const CameraView = ({ navigation }) => {
   useEffect(() => {
     isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
     if (catchError) {
-      console.log(catchError);
       setIsLoading(false);
     }
 
-    if (result) {
-      setIsLoading(false);
+    if (result && !isLoading) {
       result["ImageCache"] = image;
       navigation.navigate("Result", result);
     }
@@ -117,7 +112,7 @@ export const CameraView = ({ navigation }) => {
 
     const resizedImg = await manipulateAsync(
       cache.uri,
-      [{ resize: { width: 224, height: 224 } }], // make sure this matches input tensor dims
+      [{ resize: { width: 640, height: 640 } }], // make sure this matches input tensor dims
       { base64: true }
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
@@ -126,16 +121,13 @@ export const CameraView = ({ navigation }) => {
 
     setImage(resizedImg);
 
-    console.log("tempArr " + tempArr);
-
     const form = new FormData();
     form.append("imageUri", imageUri);
     form.append("imageBase64", resizedImg);
     form.append("location", currentLocation);
 
-    console.log("form: " + JSON.stringify(form));
-
     submitCatch({ data: form }).then(() => {
+      setIsLoading(false);
       uploadToS3(cache.base64, key);
     });
   };

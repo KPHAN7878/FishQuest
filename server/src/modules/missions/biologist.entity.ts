@@ -5,13 +5,13 @@ import {
   Entity,
   JoinColumn,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
 
 @Entity()
 export class BiologistEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   userId!: number;
 
   @CreateDateColumn()

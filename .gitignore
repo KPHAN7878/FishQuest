@@ -1,7 +1,10 @@
 node_modules
 package-lock.json
 .expo
-**/imgs_dev/*.jpg
+*.jpg
+*.jpeg
+**/train
+**/valid
 **/dist
 .env
 

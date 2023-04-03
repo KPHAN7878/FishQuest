@@ -6,9 +6,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError, PaginatedCursor } from "../../types";
 import { dataSource, paginateLimit, __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
-import { Model } from "../../utils/ImageProc";
+import { jimpFromData, Model } from "../../utils/ImageProc";
 import { UserEntity } from "../user/user.entity";
 import { MissionsService } from "../missions/missions.service";
+import { formErrors } from "../../utils/formError";
+import { exclude, formUser } from "../../utils/formEntity";
 
 @Injectable()
 export class CatchService {
@@ -22,7 +24,7 @@ export class CatchService {
   async submitCatch(sub: Submission, user: UserEntity): Promise<any> {
     const data = sub.imageBase64.split(";base64,").pop() as string;
 
-    const image = await this.classifier.jimpFromData(data);
+    const image = await jimpFromData(data);
     const modelOutput = await this.classifier.submitInference(image);
     var numArr = sub.location.split(",");
 
@@ -31,9 +33,9 @@ export class CatchService {
     finalArr.push(parseFloat(numArr[1]));
 
     const prediction: Prediction = Prediction.create({
-      status: true,
-      species: "",
-      modelOutput: JSON.stringify(modelOutput),
+      status: modelOutput.prediction ? true : undefined,
+      species: modelOutput.prediction ?? "",
+      modelOutput: JSON.stringify(modelOutput.output),
       userId: user.id,
     });
 
@@ -43,15 +45,34 @@ export class CatchService {
       user,
       prediction,
     });
-    const res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
+    let res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
 
-    return {
-      ...res,
-      missions: await this.missionsService.allChecks(res).then((val: any) => {
-        this.catchRepository.save(catchEntry);
-        return val;
-      }),
-    };
+    if (prediction.status) {
+      res = exclude<any>(
+        {
+          ...res,
+          missions: await this.missionsService
+            .allChecks(res)
+            .then((val: any) => {
+              this.catchRepository.save(catchEntry);
+              return val;
+            }),
+        },
+        [["prediction", "modelOutput"]]
+      );
+      console.log(res);
+
+      return formUser(res);
+    } else {
+      const errors = formErrors([
+        {
+          value: !prediction.status,
+          message: `Could not find a fish`,
+          field: "camera",
+        },
+      ]);
+      return { errors };
+    }
   }
 
   async getAll(

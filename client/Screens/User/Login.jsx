@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   Pressable,
   TouchableOpacity,
   Keyboard,
@@ -27,8 +26,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { UserContext } from "../../Contexts/UserContext";
-
-import { StackActions, NavigationActions } from "@react-navigation/native";
 
 import * as Location from "expo-location";
 
