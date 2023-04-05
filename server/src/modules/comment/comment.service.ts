@@ -72,7 +72,8 @@ export class CommentService {
           (paginate as PaginatedCursor).cursor
         }'`
       : "";
-    const byComment = `c."commentableId" = ${input.commentableId}`;
+    const byComment = `c."commentableId" = ${input.commentableId} and
+      c."type" = '${input.type}'`;
 
     const comments = await dataSource.query(
       `

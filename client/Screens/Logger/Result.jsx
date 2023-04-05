@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
+import { setEnabled } from "react-native/Libraries/Performance/Systrace";
 import styles from "../../styles";
 import { height } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
@@ -15,7 +16,7 @@ const Result = ({ route, navigation }) => {
     }
   }, [setErrorMessage]);
 
-  return result.errors ? (
+  return errorMessage ? (
     <View
       style={{
         marginTop: height * 0.15,
@@ -31,6 +32,15 @@ const Result = ({ route, navigation }) => {
         }}
       >
         <Text style={styles.buttonText}>{"Retake photo"}</Text>
+      </Pressable>
+      <Text style={{}}>{"Continue without gaining experience"}</Text>
+      <Pressable
+        style={styles.formButton}
+        onPress={() => {
+          setErrorMessage(null);
+        }}
+      >
+        <Text style={styles.buttonText}>{"Continue"}</Text>
       </Pressable>
     </View>
   ) : (
