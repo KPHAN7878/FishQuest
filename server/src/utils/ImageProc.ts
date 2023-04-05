@@ -78,7 +78,7 @@ export class Model {
   constructor(
     private readonly opts: ModelOptions,
     private sessionCount: number = 0,
-    private confidenceThresh: number = 0.5
+    private confidenceThresh: number = 0.3
   ) {
     this.opts = { ...DEFAULT_OPTIONS, ...this.opts };
     this.loadInferenceSession();
@@ -175,20 +175,27 @@ export class Model {
       return [[], null];
     }
 
-    const classIds: number[] = predictions.map(
+    const classIds: { index: number; score: number }[] = predictions.map(
       (val: number[], index: number) => {
-        return val.findIndex((val) => val === scores[index]) - 4;
+        return {
+          index: val.findIndex((val) => val === scores[index]) - 4,
+          score: scores[index],
+        };
       }
     );
 
-    let best: number = classIds[0];
-    classIds.reduce((prev: any, curr: number) => {
+    let best: number = -1;
+    classIds.reduce((prev: any, { index: curr, score }: any) => {
       if (curr in prev) {
         prev[curr] += 1;
       } else {
         prev[curr] = 1;
       }
-      if (prev[best] < curr) best = curr;
+      if (this.opts.verbose) {
+        console.log("Guess: ", classList[curr]);
+        console.log("Score: ", score);
+      }
+      if (prev[best] < prev[curr] || best === -1) best = curr;
       return prev;
     }, {});
 

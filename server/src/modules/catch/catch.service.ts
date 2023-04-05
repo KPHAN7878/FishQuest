@@ -34,13 +34,13 @@ export class CatchService {
 
     const prediction: Prediction = Prediction.create({
       status: modelOutput.prediction ? true : undefined,
-      species: modelOutput.prediction ?? "",
+      species: modelOutput.prediction ?? undefined,
       modelOutput: JSON.stringify(modelOutput.output),
       userId: user.id,
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({
-      location: finalArr,
+      location: [1, 2],
       imageUri: sub.imageUri,
       user,
       prediction,
@@ -48,17 +48,21 @@ export class CatchService {
     let res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
 
     if (prediction.status) {
-      res = exclude<any>(
-        {
-          ...res,
-          missions: await this.missionsService
-            .allChecks(res)
-            .then((val: any) => {
-              this.catchRepository.save(catchEntry);
-              return val;
-            }),
-        },
-        [["prediction", "modelOutput"]]
+      res = formUser(
+        exclude<any>(
+          {
+            ...res,
+            ...(await this.missionsService
+              .allChecks(res)
+              .then(async (missions: any) => {
+                const { id: catchId } = await this.catchRepository.save(
+                  catchEntry
+                );
+                return { missions, catchId };
+              })),
+          },
+          [["prediction", "modelOutput"]]
+        )
       );
       console.log(res);
 

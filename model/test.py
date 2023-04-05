@@ -36,7 +36,7 @@ def with_onnx(image, orig_image):
     # input must be 4 byte float
     raw_output = ort_sess.run(output_names, {'images': image})[0]
     predictions = np.squeeze(raw_output).T
-    conf_thresold = 0.8
+    conf_thresold = 0.01
 
     # Filter out object confidence scores below threshold
     scores = np.max(predictions[:, 4:], axis=1)
@@ -51,15 +51,24 @@ def with_onnx(image, orig_image):
 
     i = cv2.dnn.NMSBoxes(boxes, scores, 0.5, 0.5)
 
-    print(boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
+    image_draw = orig_image.copy()
+    for ii in i:
+        print(image_draw, boxes[ii], scores[ii], CLASSES[class_ids[ii]])
+        image_draw = draw(
+            image_draw, boxes[ii], scores[ii], CLASSES[class_ids[ii]])
+
     # draw(orig_image, boxes[i[0]], scores[i[0]], CLASSES[class_ids[i[0]]])
 
+    image_draw = image_draw[:, :, ::-1]
+    cv2.namedWindow("out", cv2.WINDOW_NORMAL)
+    cv2.imshow("out", image_draw)
+    cv2.waitKey(0)
+    cv2.imwrite("./output.jpg", image_draw)
 
-def draw(image, box, score, class_name):
-    image_draw = image.copy()
 
-    x_scale = image.shape[1] / INPUT_SIZE
-    y_scale = image.shape[0] / INPUT_SIZE
+def draw(image_draw, box, score, class_name):
+    x_scale = image_draw.shape[1] / INPUT_SIZE
+    y_scale = image_draw.shape[0] / INPUT_SIZE
 
     (cx, cy, w, h) = box
     w = int(w)
@@ -71,15 +80,10 @@ def draw(image, box, score, class_name):
     cv2.putText(image_draw,
                 f'{class_name}:{int(score*100)}', (tl[0], tl[1] - 2),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.60, [225, 255, 255],
+                0.60, [0, 255, 0],
                 thickness=1)
 
-    image_draw = image_draw[:, :, ::-1]
-
-    cv2.namedWindow("out", cv2.WINDOW_NORMAL)
-    cv2.imshow("out", image_draw)
-    cv2.waitKey(0)
-    cv2.imwrite("output.jpg", image_draw)
+    return image_draw
 
 
 def main(file):

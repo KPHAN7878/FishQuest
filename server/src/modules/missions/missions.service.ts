@@ -29,32 +29,42 @@ export class MissionsService {
     });
 
     if (missionsEntry) {
-      return repo
-        .update({ userId: postData.userId }, { value: missionsEntry.value + 1 })
-        .then((val: any) => val.value);
+      repo.update(
+        { userId: postData.userId },
+        { value: missionsEntry.value + 1 }
+      );
+
+      return missionsEntry.value + 1;
     } else {
-      return repo
-        .insert({
-          userId: postData.user.id,
-          user: postData.user,
-        })
-        .then((val: any) => val.value);
+      repo.insert({
+        userId: postData.user.id,
+        user: postData.user,
+      });
+
+      return 1;
     }
   }
 
   async adventurerCheck(
     postData: Prediction & CatchEntity
   ): Promise<null | number> {
-    const prevLocs = await dataSource.query(
+    const prevLocs = (await dataSource.query(
       `
       select location from
       catch_entity c inner join user_entity u
       on u.id = c."userId"
       where u.id = c."userId"
       `
-    );
+    )) as { location: number[] }[];
 
-    if (!prevLocs.includes(postData.location)) {
+    if (
+      !prevLocs.some((elem: { location: number[] }) => {
+        return (
+          JSON.stringify(elem) ===
+          JSON.stringify({ location: postData.location })
+        );
+      })
+    ) {
       return this.insert(postData, this.adventurerRepository);
     }
 
@@ -66,7 +76,7 @@ export class MissionsService {
   ): Promise<null | number> {
     const prevSpecs = await Prediction.find({
       where: { userId: postData.user.id },
-    }).then((values: Prediction[]): string[] => {
+    }).then((values: Prediction[]): (null | string)[] => {
       return values.map((val: Prediction) => val.species);
     });
 

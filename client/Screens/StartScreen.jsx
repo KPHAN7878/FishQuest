@@ -8,6 +8,7 @@ export const StartScreen = ({ navigation }) => {
   const { setUser } = useContext(UserContext);
 
   useEffect(() => {
+    console.log("fetching status...");
     Client.get("user/status")
       .then(async () => {
         const res = await Client.get("user/profile");
@@ -15,6 +16,7 @@ export const StartScreen = ({ navigation }) => {
         navigation.navigate("Home");
       })
       .catch((err) => {
+        if (err.response) return;
         if (err.response.status === 403) navigation.navigate("Login");
       });
   }, []);
@@ -26,17 +28,10 @@ export const StartScreen = ({ navigation }) => {
         justifyContent: "center",
       }}
     >
-      <Text
-        style={{
-          marginTop: height * 0.15,
-          textAlign: "center",
-        }}
-      >
-        <ActivityIndicator
-          size="large"
-          style={{ flex: 1, justifyContent: "center" }}
-        />
-      </Text>
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, justifyContent: "center" }}
+      />
     </View>
   );
 };

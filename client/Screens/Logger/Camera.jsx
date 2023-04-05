@@ -11,10 +11,11 @@ import {
 import useAxios from "axios-hooks";
 import FormData from "form-data";
 import { manipulateAsync } from "expo-image-manipulator";
-import { API_URL, S3_BUCKET } from "@env";
+import { API_URL, S3_BUCKET, DEV } from "@env";
 import { S3 } from "../../utils/connection";
 import { UserContext } from "../../Contexts/UserContext";
 import { Buffer } from "buffer";
+import * as ImagePicker from "expo-image-picker";
 import { height } from "../../styles";
 
 import * as Location from "expo-location";
@@ -102,10 +103,20 @@ export const CameraView = ({ navigation }) => {
 
   const takeSubmission = async () => {
     setIsLoading(true);
-    const cache = await ref.current.takePictureAsync({
-      base64: true,
-      quality: 0.1,
-    });
+
+    let cache = null;
+    if (DEV === "true") {
+      cache = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        quality: 0.5,
+      });
+    } else {
+      cache = await ref.current.takePictureAsync({
+        base64: true,
+        quality: 0.1,
+      });
+    }
     if (cache === undefined) {
       return;
     }
@@ -119,7 +130,7 @@ export const CameraView = ({ navigation }) => {
     const key = `${Date.now()}.${user.username}.jpg`;
     const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
 
-    setImage(resizedImg);
+    setImage(cache.base64);
 
     const form = new FormData();
     form.append("imageUri", imageUri);
@@ -128,7 +139,7 @@ export const CameraView = ({ navigation }) => {
 
     submitCatch({ data: form }).then(() => {
       setIsLoading(false);
-      uploadToS3(cache.base64, key);
+      // uploadToS3(cache.base64, key);
     });
   };
 
