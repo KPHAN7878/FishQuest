@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
+import { Difficulty } from "./missionConditions";
 
 @Entity()
 class BaseMission extends BaseEntity {
@@ -44,11 +45,17 @@ export class MissionEntity extends BaseEntity {
   @Column()
   missionSpecifier: string; // json snapshot of the completion conditions
 
+  @Column()
+  difficulty: Difficulty;
+
+  @Column()
+  description: string;
+
   @Column({ default: false })
   complete: boolean;
 
-  @Column()
-  deadline: boolean;
+  @Column({ nullable: true })
+  deadline: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.missions, { cascade: true })
   user: UserEntity;
