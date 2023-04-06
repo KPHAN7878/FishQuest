@@ -5,10 +5,20 @@ type StandardDetail = {
   bonus?: number;
 };
 
+type LocationDetail = {
+  joinWith?: MissionType.biologist | MissionType.adventurer;
+} & StandardDetail;
+
+type AllDetails = LocationDetail & StandardDetail;
+
+type StandardDescGen = {
+  call: (details: AllDetails[]) => Description[];
+};
+
 export type MissionSpecifier = {
-  biologist?: StandardDetail[];
-  adventurer?: StandardDetail[];
-  angler?: StandardDetail[];
+  biologist?: { details: StandardDetail[] } & StandardDescGen;
+  angler?: { details: StandardDetail[] } & StandardDescGen;
+  adventurer?: { details: LocationDetail[] } & StandardDescGen;
 } & Object;
 
 export type MissionInfo = {
@@ -18,11 +28,11 @@ export type MissionInfo = {
   complete: boolean;
 };
 
-type AnyMission = "biologist" | "adventurer" | "angler";
+type Missions = "biologist" | "adventurer" | "angler";
 
 const NUM_MISSION_VALUES = 3;
 
-export enum MissionValueType {
+export enum MissionType {
   biologist = 1,
   adventurer,
   angler,
@@ -38,7 +48,7 @@ export enum Difficulty {
 export const generateSpecifier = (
   numSpecifiers: Difficulty
 ): MissionSpecifier => {
-  const specTypes: MissionValueType[] = [];
+  const specTypes: MissionType[] = [];
 
   for (let i = 0; i < numSpecifiers; ++i) {
     const rand = Math.ceil(Math.random() * NUM_MISSION_VALUES);
@@ -47,7 +57,7 @@ export const generateSpecifier = (
   }
 
   let specs = specTypes.reduce(
-    (specs: MissionSpecifier, specT: MissionValueType): MissionSpecifier => {
+    (specs: MissionSpecifier, specT: MissionType): MissionSpecifier => {
       let detail: StandardDetail = {
         value: Math.ceil(Math.random() * numSpecifiers),
       };
@@ -65,17 +75,17 @@ export const generateSpecifier = (
 };
 
 const resolveSpecifierTypeConflicts = (
-  specTypes: MissionValueType[],
-  specT: MissionValueType
-): MissionValueType => {
+  specTypes: MissionType[],
+  specT: MissionType
+): MissionType => {
   if (!specTypes.includes(specT)) return specT;
-  const a = specTypes.find((val) => val & MissionValueType.biologist);
-  const b = specTypes.find((val) => val & MissionValueType.adventurer);
-  const c = specTypes.find((val) => val & MissionValueType.angler);
+  const a = specTypes.find((val) => val & MissionType.biologist);
+  const b = specTypes.find((val) => val & MissionType.adventurer);
+  const c = specTypes.find((val) => val & MissionType.angler);
 
-  if (a && b && c) return MissionValueType.biologist;
-  if (a && specT & a) return MissionValueType.adventurer;
-  if (b && specT & b) return MissionValueType.biologist;
+  if (a && b && c) return MissionType.biologist;
+  if (a && specT & a) return MissionType.adventurer;
+  if (b && specT & b) return MissionType.biologist;
   return specT;
 };
 
@@ -83,48 +93,91 @@ const resolveValueConflicts = (
   specs: MissionSpecifier,
   minimumCatches: number
 ): MissionSpecifier => {
-  if (specs.angler && specs.angler[0].value < minimumCatches) {
-    specs.angler[0].value += minimumCatches;
+  if (specs.angler && specs.angler.details[0].value < minimumCatches) {
+    specs.angler.details[0].value += minimumCatches;
+  }
+  if (specs.adventurer && specs.adventurer.details[0].value === 1) {
+    specs.adventurer.details[0].value = 2;
   }
   return specs;
 };
 
 const minimumCatches = (specs: MissionSpecifier): number => {
   let count = 0;
-  if (specs.angler && specs.angler[0].value > count) {
-    count = specs.angler[0].value;
+  if (specs.angler && specs.angler.details[0].value > count) {
+    count = specs.angler.details[0].value;
   }
 
   if (specs.biologist) {
-    const sum = specs.biologist.reduce((sum: number, curr: StandardDetail) => {
-      return sum + curr.value;
-    }, 0);
+    const sum = specs.biologist.details.reduce(
+      (sum: number, curr: StandardDetail) => {
+        return sum + curr.value;
+      },
+      0
+    );
     if (sum > count) count = sum;
   }
 
-  if (specs.adventurer && specs.adventurer[0].value > count) {
-    count = specs.adventurer[0].value;
+  if (specs.adventurer && specs.adventurer.details[0].value > count) {
+    count = specs.adventurer.details[0].value;
   }
 
   return count;
 };
 
 const mapMission = (
-  val: MissionValueType,
+  val: MissionType,
   specs: MissionSpecifier,
   spec: StandardDetail
 ): MissionSpecifier => {
   switch (val) {
-    case MissionValueType.biologist:
-      specs.biologist ? specs.biologist.push(spec) : (specs.biologist = [spec]);
+    case MissionType.biologist:
+      specs.biologist
+        ? specs.biologist.details.push(spec)
+        : (specs.biologist = {
+            details: [spec],
+            call: (details: AllDetails[]): Description[] => {
+              return classList
+                .sort(() => 0.5 - Math.random())
+                .slice(0, details.length)
+                .map((val: string, idx: number): Description => {
+                  return {
+                    text: `${details[idx].value} ${val}`,
+                  };
+                });
+            },
+          });
+
       break;
-    case MissionValueType.adventurer:
+    case MissionType.adventurer:
       specs.adventurer
-        ? specs.adventurer.push(spec)
-        : (specs.adventurer = [spec]);
+        ? specs.adventurer.details.push(spec)
+        : (specs.adventurer = {
+            details: [spec],
+            call: (details: AllDetails[]): Description[] => {
+              return details.map((detail: LocationDetail) => {
+                return {
+                  pretext: "at",
+                  text: `${detail.value} different location`,
+                };
+              });
+            },
+          });
       break;
-    case MissionValueType.angler:
-      specs.angler ? specs.angler.push(spec) : (specs.angler = [spec]);
+    case MissionType.angler:
+      specs.angler
+        ? specs.angler.details.push(spec)
+        : (specs.angler = {
+            details: [spec],
+            call: (details: AllDetails[]): Description[] => {
+              return details.map((detail: StandardDetail) => {
+                return {
+                  pretext: "at least",
+                  text: `${detail.value} fish`,
+                };
+              });
+            },
+          });
       break;
   }
   return specs;
@@ -150,49 +203,17 @@ type Description = {
 };
 
 const resolveSpecifier = (
-  details: StandardDetail[],
-  mission: AnyMission,
+  values: Description[],
+  and?: boolean,
   last?: boolean
 ): string => {
-  let values: Description[] = [];
+  const size = values.length;
   let line = "";
-  switch (mission) {
-    case "biologist":
-      var missionValueLabel = "species";
-      values = classList
-        .sort(() => 0.5 - Math.random())
-        .slice(0, details.length)
-        .map((val: string, idx: number): Description => {
-          return {
-            text: `${details[idx].value} ${val}`,
-          };
-        });
-      break;
-    case "adventurer":
-      var missionValueLabel = "location";
-      for (let i = 0; i < details.length; ++i) {
-        values.push({
-          pretext: "at",
-          text: `${details[i].value} different ${missionValueLabel}`,
-        });
-      }
-      break;
-    case "angler":
-      var missionValueLabel = "fish";
-      for (let i = 0; i < details.length; ++i) {
-        values.push({
-          pretext: "at least",
-          text: `${details[i].value} ${missionValueLabel}`,
-        });
-      }
-      break;
-  }
-  const size = details.length;
   for (let i = 0; i < size; ++i) {
     const spacePre = values[i].pretext ? " " : "";
     const spacePost = values[i].postext ? " " : "";
 
-    line += `${last && size - 1 === i ? "and " : ""}${
+    line += `${(last && size - 1 === i) || (and && last) ? "and " : ""}${
       values[i].pretext ?? ""
     }${spacePre}${values[i].text}${spacePost}${values[i].postext ?? ""}${
       last && size - 1 === i ? "" : ", "
@@ -205,8 +226,10 @@ export const generateDescription = (mission: MissionSpecifier): string => {
   let result = "Catch ";
   const size = Object.keys(mission).length;
   let idx = 0;
-  for (const [m, val] of Object.entries(mission)) {
-    result += resolveSpecifier(val, m as AnyMission, idx++ === size - 1);
+  for (const key in mission) {
+    const details = mission[key as Missions]!.details;
+    const desc = mission[key as Missions]!.call(details);
+    result += resolveSpecifier(desc, details.length !== 1, idx++ === size - 1);
   }
 
   return result;
