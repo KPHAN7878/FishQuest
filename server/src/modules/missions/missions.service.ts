@@ -4,21 +4,26 @@ import { Repository } from "typeorm";
 import { dataSource } from "../../constants";
 import { CatchEntity } from "../catch/catch.entity";
 import { Prediction } from "../prediction/prediction.entity";
-import { AdventurerEntity } from "./adventurer.entity";
-import { AnglerEntity } from "./angler.entity";
-import { BiologistEntity } from "./biologist.entity";
+import { UserEntity } from "../user/user.entity";
+import {
+  AdventurerEntity,
+  AnglerEntity,
+  BiologistEntity,
+  MissionEntity,
+} from "./mission.entity";
+import { Difficulty, maxDifficulty } from "./missionConditions";
 
 @Injectable()
 export class MissionsService {
   constructor(
     @InjectRepository(AnglerEntity)
-    private readonly anglerRepository: Repository<AnglerEntity>,
-
+    private readonly anglerR: Repository<AnglerEntity>,
     @InjectRepository(BiologistEntity)
-    private readonly biologistRepository: Repository<BiologistEntity>,
-
+    private readonly biologistR: Repository<BiologistEntity>,
     @InjectRepository(AdventurerEntity)
-    private readonly adventurerRepository: Repository<AdventurerEntity>
+    private readonly adventurerR: Repository<AdventurerEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userR: Repository<UserEntity>
   ) {}
   async insert(
     postData: Prediction & CatchEntity,
@@ -65,7 +70,7 @@ export class MissionsService {
         );
       })
     ) {
-      return this.insert(postData, this.adventurerRepository);
+      return this.insert(postData, this.adventurerR);
     }
 
     return null;
@@ -81,13 +86,13 @@ export class MissionsService {
     });
 
     if (!prevSpecs.includes(postData.species)) {
-      return this.insert(postData, this.biologistRepository);
+      return this.insert(postData, this.biologistR);
     }
     return null;
   }
 
   async anglerCheck(postData: Prediction & CatchEntity): Promise<number> {
-    return this.insert(postData, this.anglerRepository);
+    return this.insert(postData, this.anglerR);
   }
 
   async allChecks(results: CatchEntity & Prediction): Promise<{
@@ -95,12 +100,37 @@ export class MissionsService {
     biologist: null | number;
     angler: number;
   } | null> {
+    // update values for missions
     if (results.status !== null)
       return {
         adventure: await this.adventurerCheck(results),
         biologist: await this.biologistCheck(results),
         angler: await this.anglerCheck(results),
       };
+
+    //  check if a mission was completed,
+    //  if complete return to user and assign new mission
+
     return null;
+  }
+
+  async updateUser(
+    user: UserEntity,
+    value: number,
+    func: (missionValue: number) => number
+  ) {
+    const newExp = user.exp + func(value);
+    const newLevel = this.levelUp(user.level, newExp);
+    this.userR.update({ id: user.id }, { exp: newExp, level: newLevel });
+  }
+
+  levelUp(level: number, exp: number) {
+    return exp >= Math.min(100 + (level - 1) * 10, 500) ? level + 1 : level;
+  }
+
+  async missionAssigner(level: number) {
+    const difficulty: Difficulty = Math.ceil(
+      Math.random() * maxDifficulty(level)
+    );
   }
 }

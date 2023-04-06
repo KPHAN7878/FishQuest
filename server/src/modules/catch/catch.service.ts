@@ -40,7 +40,7 @@ export class CatchService {
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({
-      location: [1, 2],
+      location: finalArr,
       imageUri: sub.imageUri,
       user,
       prediction,

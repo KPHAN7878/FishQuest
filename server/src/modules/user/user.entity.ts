@@ -15,6 +15,7 @@ import { TokenEntity } from "../auth/token.entity";
 import { CatchEntity } from "../catch/catch.entity";
 import { CommentEntity } from "../comment/comment.entity";
 import { LikeEntity } from "../like/like.entity";
+import { MissionEntity } from "../missions/mission.entity";
 import { PostEntity } from "../post/post.entity";
 import { ReactionEntity } from "../reaction/reaction.entity";
 
@@ -45,15 +46,11 @@ export class UserEntity extends BaseEntity {
   @Column({ default: "0" })
   exp: number;
 
-  //achievement ranks 0-4 none, bronze, silver, gold, diamond
-  // @Column({ default: "0" })
-  // ang: number;
-  //
-  // @Column({ default: "0" })
-  // bio: number;
-  //
-  // @Column({ default: "0" })
-  // adv: number;
+  @Column({ default: "1" })
+  level: number;
+
+  @OneToMany(() => MissionEntity, (mission) => mission.user)
+  missions: MissionEntity[];
 
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
