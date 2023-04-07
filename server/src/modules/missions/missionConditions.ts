@@ -1,5 +1,7 @@
 import { classList } from "../../classifier/imagenet";
 
+const NUM_MISSION_VALUES = 3;
+
 type StandardDetail = {
   value: number;
   bonus?: number;
@@ -44,7 +46,12 @@ export type MissionInfo = {
   complete: boolean;
 };
 
-const NUM_MISSION_VALUES = 3;
+type Description = {
+  pretext?: string;
+  text: string;
+  postext?: string;
+  plural?: boolean;
+};
 
 enum Difficulty {
   easy = 1,
@@ -53,29 +60,16 @@ enum Difficulty {
   expert,
 }
 
-// will add later if I have time but too much trouble
-const locSpecJoin = (
-  specifier: MissionSpecifier,
-  joiner: LocationDetail
-): LocationDetail => {
-  joiner.joinWith = Math.ceil(Math.random() * NUM_MISSION_VALUES);
-  let n: number | undefined;
-  if (MissionType.adventurer & joiner.joinWith) {
-    joiner.joinWith = undefined;
-    return joiner;
-  } else if (MissionType.angler & joiner.joinWith) {
-    n = specifier.angler?.details.length;
-  } else if (MissionType.biologist & joiner.joinWith) {
-    n = specifier.angler?.details.length;
-  }
-
-  if (n) {
-    const randidx = Math.ceil(Math.random() * n);
-    joiner.index = randidx;
+export const maxDifficulty = (level: number): Difficulty => {
+  if (level < 10) {
+    return Difficulty.easy;
+  } else if (level < 25) {
+    return Difficulty.medium;
+  } else if (level < 50) {
+    return Difficulty.hard;
   } else {
-    joiner.joinWith = undefined;
+    return Difficulty.expert;
   }
-  return joiner;
 };
 
 const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
@@ -199,25 +193,6 @@ const buildMission = (
   return specs;
 };
 
-export const maxDifficulty = (level: number): Difficulty => {
-  if (level < 10) {
-    return Difficulty.easy;
-  } else if (level < 25) {
-    return Difficulty.medium;
-  } else if (level < 50) {
-    return Difficulty.hard;
-  } else {
-    return Difficulty.expert;
-  }
-};
-
-type Description = {
-  pretext?: string;
-  text: string;
-  postext?: string;
-  plural?: boolean;
-};
-
 const resolveSpecifier = (
   values: Description[],
   and: number,
@@ -284,10 +259,9 @@ const main = async () => {
   const missions = assignMissions(amount, maxDiff);
 
   for (let i = 0; i < amount; i++) {
-    console.log(JSON.stringify(missions[i], null, 2));
     const desc = generateDescription(missions[i]);
     console.log(JSON.stringify(desc, null, 2));
-    console.log("---------------------------------");
+    console.log(JSON.stringify(missions[i], null, 2), `\n`);
   }
 };
 
