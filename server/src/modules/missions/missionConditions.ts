@@ -103,7 +103,11 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
     {}
   );
 
-  specs = resolveValueConflicts(specs, minimumCatches(specs));
+  specs = resolveValueConflicts(
+    specs,
+    minimumCatches(specs),
+    numSpecifiers * numSpecifiers
+  );
   return specs;
 };
 
@@ -124,10 +128,14 @@ const resolveSpecifierTypeConflicts = (
 
 const resolveValueConflicts = (
   specs: MissionSpecifier,
-  minimumCatches: number
+  minCatches: number,
+  maxCatches: number
 ): MissionSpecifier => {
-  if (specs.angler && specs.angler.details[0].value <= minimumCatches) {
-    specs.angler.details[0].value += minimumCatches;
+  if (specs.angler && specs.angler.details[0].value <= minCatches) {
+    specs.angler.details[0].value = Math.min(
+      specs.angler.details[0].value + minCatches,
+      maxCatches
+    );
   }
   if (specs.adventurer && specs.adventurer.details[0].value === 1) {
     specs.adventurer.details[0].value = 2;
