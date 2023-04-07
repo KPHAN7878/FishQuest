@@ -10,17 +10,32 @@ type LocationDetail = {
   index?: number;
 } & StandardDetail;
 
-type AllDetails = LocationDetail & StandardDetail;
+type SpeciesDetail = {
+  species?: string;
+} & StandardDetail;
+
+type AnyDetail = LocationDetail & StandardDetail & SpeciesDetail;
 
 type StandardDescGen = {
-  call: (details: AllDetails[]) => Description[];
+  call: (details: AnyDetail[]) => Description[];
 };
 
 type MissionSpecifier = {
-  biologist?: { details: StandardDetail[] } & StandardDescGen;
   angler?: { details: StandardDetail[] } & StandardDescGen;
+  biologist?: { details: SpeciesDetail[] } & StandardDescGen;
   adventurer?: { details: LocationDetail[] } & StandardDescGen; // no more than one
-} & Object;
+};
+type Missions = "biologist" | "adventurer" | "angler";
+enum MissionType {
+  biologist = 1,
+  adventurer,
+  angler,
+}
+const missionMap = {
+  [MissionType.biologist]: "biologist",
+  [MissionType.adventurer]: "adventurer",
+  [MissionType.angler]: "angler",
+} as Record<MissionType, string>;
 
 export type MissionInfo = {
   missionSpecifier: MissionSpecifier;
@@ -29,15 +44,7 @@ export type MissionInfo = {
   complete: boolean;
 };
 
-type Missions = "biologist" | "adventurer" | "angler";
-
 const NUM_MISSION_VALUES = 3;
-
-enum MissionType {
-  biologist = 1,
-  adventurer,
-  angler,
-}
 
 enum Difficulty {
   easy = 1,
@@ -80,13 +87,18 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
     specTypes.push(T);
   }
 
+  const classes = classList
+    .sort(() => 0.5 - Math.random())
+    .slice(0, classList.length);
   let specs = specTypes.reduce(
     (specs: MissionSpecifier, specT: MissionType): MissionSpecifier => {
       const rand = Math.ceil(Math.random() * numSpecifiers);
-      let detail: AllDetails = {
+      let detail: AnyDetail = {
         value: rand,
       };
-      // if (specT & MissionType.adventurer) detail = locSpecJoin(specs, detail);
+      if (specT & MissionType.biologist) {
+        [detail.species] = classes.splice(0, 1);
+      }
 
       if (Math.ceil(Math.random() * 5) === 5) {
         detail.bonus = Math.ceil(Math.random() * 50 * numSpecifiers);
@@ -155,58 +167,35 @@ const minimumCatches = (specs: MissionSpecifier): number => {
 const buildMission = (
   val: MissionType,
   specs: MissionSpecifier,
-  spec: StandardDetail
+  spec: AnyDetail
 ): MissionSpecifier => {
+  let mission = specs[missionMap[val] as keyof MissionSpecifier];
   switch (val) {
+    case MissionType.angler:
+      var fn: (detail: AnyDetail) => string = (detail: StandardDetail) =>
+        `a total of ${detail.value} fish`;
+      break;
     case MissionType.biologist:
-      specs.biologist
-        ? specs.biologist.details.push(spec)
-        : (specs.biologist = {
-            details: [spec],
-            call: (details: AllDetails[]): Description[] => {
-              return classList
-                .sort(() => 0.5 - Math.random())
-                .slice(0, details.length)
-                .map((val: string, idx: number): Description => {
-                  return {
-                    text: `${details[idx].value} ${val}`,
-                  };
-                });
-            },
-          });
-
+      var fn: (detail: AnyDetail) => string = (detail: SpeciesDetail) =>
+        `${detail.value} ${detail.species}`;
       break;
     case MissionType.adventurer:
-      specs.adventurer
-        ? specs.adventurer.details.push(spec)
-        : (specs.adventurer = {
-            details: [spec],
-            call: (details: AllDetails[]): Description[] => {
-              return details.map((detail: LocationDetail) => {
-                return {
-                  pretext: "from",
-                  text: `${detail.value} different locations`,
-                };
-              });
-            },
-          });
-      break;
-    case MissionType.angler:
-      specs.angler
-        ? specs.angler.details.push(spec)
-        : (specs.angler = {
-            details: [spec],
-            call: (details: AllDetails[]): Description[] => {
-              return details.map((detail: StandardDetail) => {
-                return {
-                  pretext: "a total of",
-                  text: `${detail.value} fish`,
-                };
-              });
-            },
-          });
+      var fn: (detail: AnyDetail) => string = (detail: LocationDetail) =>
+        `from ${detail.value} different locations`;
       break;
   }
+
+  mission?.details.push(spec) ??
+    (mission = {
+      details: [spec],
+      call: (details: SpeciesDetail[]): Description[] => {
+        return details.map((detail: SpeciesDetail): Description => {
+          return { text: fn(detail) };
+        });
+      },
+    });
+  specs[missionMap[val] as keyof MissionSpecifier] = mission;
+
   return specs;
 };
 
@@ -270,20 +259,33 @@ const generateDescription = (mission: MissionSpecifier): string => {
   return result.trim();
 };
 
-export const assignMissions = (difficulty: Difficulty): MissionSpecifier[] => {
-  const diffs = [...Array(difficulty + 1).keys()];
+export const assignMissions = (
+  amount: number,
+  difficulty: Difficulty
+): MissionSpecifier[] => {
+  const diffs: number[] = [...Array(difficulty + 1).keys()];
+  let take: number[] = [];
+  const diffSelections: number[] = [];
   diffs.splice(0, 1);
-  return diffs.map((val) => generateSpecifier(val));
+
+  for (let i = 0; i < amount; i++) {
+    take = [...take, ...diffs];
+    const randix = Math.floor(Math.random() * take.length);
+    diffSelections.push(...take.splice(randix, 1));
+  }
+
+  return diffSelections.map((val: number) => generateSpecifier(val));
 };
 
 const main = async () => {
-  const level = 100;
+  const level = 50;
+  const amount = 3;
   const maxDiff = maxDifficulty(level);
-  const missions = assignMissions(maxDiff);
+  const missions = assignMissions(amount, maxDiff);
 
-  for (let i = 0; i < maxDiff; i++) {
-    const desc = generateDescription(missions[i]);
+  for (let i = 0; i < amount; i++) {
     console.log(JSON.stringify(missions[i], null, 2));
+    const desc = generateDescription(missions[i]);
     console.log(JSON.stringify(desc, null, 2));
     console.log("---------------------------------");
   }
