@@ -7,6 +7,7 @@ type StandardDetail = {
 
 type LocationDetail = {
   joinWith?: MissionType.biologist | MissionType.adventurer;
+  index?: number;
 } & StandardDetail;
 
 type AllDetails = LocationDetail & StandardDetail;
@@ -15,10 +16,10 @@ type StandardDescGen = {
   call: (details: AllDetails[]) => Description[];
 };
 
-export type MissionSpecifier = {
+type MissionSpecifier = {
   biologist?: { details: StandardDetail[] } & StandardDescGen;
   angler?: { details: StandardDetail[] } & StandardDescGen;
-  adventurer?: { details: LocationDetail[] } & StandardDescGen;
+  adventurer?: { details: LocationDetail[] } & StandardDescGen; // no more than one
 } & Object;
 
 export type MissionInfo = {
@@ -32,22 +33,44 @@ type Missions = "biologist" | "adventurer" | "angler";
 
 const NUM_MISSION_VALUES = 3;
 
-export enum MissionType {
+enum MissionType {
   biologist = 1,
   adventurer,
   angler,
 }
 
-export enum Difficulty {
+enum Difficulty {
   easy = 1,
   medium,
   hard,
   expert,
 }
 
-export const generateSpecifier = (
-  numSpecifiers: Difficulty
-): MissionSpecifier => {
+const locSpecJoin = (
+  specifier: MissionSpecifier,
+  joiner: LocationDetail
+): LocationDetail => {
+  joiner.joinWith = Math.ceil(Math.random() * NUM_MISSION_VALUES);
+  let n: number | undefined;
+  if (MissionType.adventurer & joiner.joinWith) {
+    joiner.joinWith = undefined;
+    return joiner;
+  } else if (MissionType.angler & joiner.joinWith) {
+    n = specifier.angler?.details.length;
+  } else if (MissionType.biologist & joiner.joinWith) {
+    n = specifier.angler?.details.length;
+  }
+
+  if (n) {
+    const randidx = Math.ceil(Math.random() * n);
+    joiner.index = randidx;
+  } else {
+    joiner.joinWith = undefined;
+  }
+  return joiner;
+};
+
+const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
   const specTypes: MissionType[] = [];
 
   for (let i = 0; i < numSpecifiers; ++i) {
@@ -58,14 +81,16 @@ export const generateSpecifier = (
 
   let specs = specTypes.reduce(
     (specs: MissionSpecifier, specT: MissionType): MissionSpecifier => {
-      let detail: StandardDetail = {
+      let detail: AllDetails = {
         value: Math.ceil(Math.random() * numSpecifiers),
       };
+      // if (specT & MissionType.adventurer) detail = locSpecJoin(specs, detail);
+
       if (Math.ceil(Math.random() * 5) === 5) {
         detail.bonus = Math.ceil(Math.random() * 50 * numSpecifiers);
       }
 
-      return mapMission(specT, specs, detail);
+      return buildMission(specT, specs, detail);
     },
     {}
   );
@@ -125,7 +150,7 @@ const minimumCatches = (specs: MissionSpecifier): number => {
   return count;
 };
 
-const mapMission = (
+const buildMission = (
   val: MissionType,
   specs: MissionSpecifier,
   spec: StandardDetail
@@ -157,7 +182,7 @@ const mapMission = (
             call: (details: AllDetails[]): Description[] => {
               return details.map((detail: LocationDetail) => {
                 return {
-                  pretext: "at",
+                  pretext: "from",
                   text: `${detail.value} different location`,
                 };
               });
@@ -172,7 +197,7 @@ const mapMission = (
             call: (details: AllDetails[]): Description[] => {
               return details.map((detail: StandardDetail) => {
                 return {
-                  pretext: "at least",
+                  pretext: "a total of",
                   text: `${detail.value} fish`,
                 };
               });
@@ -204,8 +229,8 @@ type Description = {
 
 const resolveSpecifier = (
   values: Description[],
-  and?: boolean,
-  last?: boolean
+  and: number,
+  last: boolean
 ): string => {
   const size = values.length;
   let line = "";
@@ -213,23 +238,27 @@ const resolveSpecifier = (
     const spacePre = values[i].pretext ? " " : "";
     const spacePost = values[i].postext ? " " : "";
 
-    line += `${(last && size - 1 === i) || (and && last) ? "and " : ""}${
-      values[i].pretext ?? ""
-    }${spacePre}${values[i].text}${spacePost}${values[i].postext ?? ""}${
-      last && size - 1 === i ? "" : ", "
-    }`;
+    line += `${
+      (last && size - 1 === i) || (and - 1 === i && last) ? "and " : ""
+    }${values[i].pretext ?? ""}${spacePre}${values[i].text}${spacePost}${
+      values[i].postext ?? ""
+    }${last && size - 1 === i ? "" : ", "}`;
   }
   return line;
 };
 
-export const generateDescription = (mission: MissionSpecifier): string => {
+const generateDescription = (mission: MissionSpecifier): string => {
   let result = "Catch ";
   const size = Object.keys(mission).length;
   let idx = 0;
   for (const key in mission) {
     const details = mission[key as Missions]!.details;
     const desc = mission[key as Missions]!.call(details);
-    result += resolveSpecifier(desc, details.length !== 1, idx++ === size - 1);
+    result += resolveSpecifier(
+      desc,
+      details.length,
+      idx++ === size - 1 && size !== 1
+    );
   }
 
   return result;
@@ -240,7 +269,9 @@ export const assignMission = (level: number): MissionSpecifier => {
     Math.random() * maxDifficulty(level)
   );
 
+  console.log("difficulty: ", difficulty);
   const mission: MissionSpecifier = generateSpecifier(difficulty);
+  console.log(JSON.stringify(mission, null, 2));
   return mission;
 };
 
