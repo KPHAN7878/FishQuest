@@ -46,6 +46,7 @@ enum Difficulty {
   expert,
 }
 
+// will add later if I have time but too much trouble
 const locSpecJoin = (
   specifier: MissionSpecifier,
   joiner: LocationDetail
@@ -81,8 +82,9 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
 
   let specs = specTypes.reduce(
     (specs: MissionSpecifier, specT: MissionType): MissionSpecifier => {
+      const rand = Math.ceil(Math.random() * numSpecifiers);
       let detail: AllDetails = {
-        value: Math.ceil(Math.random() * numSpecifiers),
+        value: rand,
       };
       // if (specT & MissionType.adventurer) detail = locSpecJoin(specs, detail);
 
@@ -118,7 +120,7 @@ const resolveValueConflicts = (
   specs: MissionSpecifier,
   minimumCatches: number
 ): MissionSpecifier => {
-  if (specs.angler && specs.angler.details[0].value < minimumCatches) {
+  if (specs.angler && specs.angler.details[0].value <= minimumCatches) {
     specs.angler.details[0].value += minimumCatches;
   }
   if (specs.adventurer && specs.adventurer.details[0].value === 1) {
@@ -140,7 +142,7 @@ const minimumCatches = (specs: MissionSpecifier): number => {
       },
       0
     );
-    if (sum > count) count = sum;
+    if (sum > count) count += sum;
   }
 
   if (specs.adventurer && specs.adventurer.details[0].value > count) {
@@ -183,7 +185,7 @@ const buildMission = (
               return details.map((detail: LocationDetail) => {
                 return {
                   pretext: "from",
-                  text: `${detail.value} different location`,
+                  text: `${detail.value} different locations`,
                 };
               });
             },
@@ -233,7 +235,7 @@ const resolveSpecifier = (
   last: boolean
 ): string => {
   const size = values.length;
-  let line = "";
+  let line: string = "";
   for (let i = 0; i < size; ++i) {
     const spacePre = values[i].pretext ? " " : "";
     const spacePost = values[i].postext ? " " : "";
@@ -242,13 +244,14 @@ const resolveSpecifier = (
       (last && size - 1 === i) || (and - 1 === i && last) ? "and " : ""
     }${values[i].pretext ?? ""}${spacePre}${values[i].text}${spacePost}${
       values[i].postext ?? ""
-    }${last && size - 1 === i ? "" : ", "}`;
+    }${(last && size - 1 === i) || (last && and === 1) ? " " : ", "}`;
   }
+
   return line;
 };
 
 const generateDescription = (mission: MissionSpecifier): string => {
-  let result = "Catch ";
+  let result = "Submit ";
   const size = Object.keys(mission).length;
   let idx = 0;
   for (const key in mission) {
@@ -261,25 +264,26 @@ const generateDescription = (mission: MissionSpecifier): string => {
     );
   }
 
-  return result;
+  if (result.indexOf(",", result.indexOf(",") + 1) === -1)
+    result = result.replace(",", "");
+
+  return result.trim();
 };
 
-export const assignMission = (level: number): MissionSpecifier => {
-  const difficulty: Difficulty = Math.ceil(
-    Math.random() * maxDifficulty(level)
-  );
-
-  console.log("difficulty: ", difficulty);
-  const mission: MissionSpecifier = generateSpecifier(difficulty);
-  console.log(JSON.stringify(mission, null, 2));
-  return mission;
+export const assignMissions = (difficulty: Difficulty): MissionSpecifier[] => {
+  const diffs = [...Array(difficulty + 1).keys()];
+  diffs.splice(0, 1);
+  return diffs.map((val) => generateSpecifier(val));
 };
 
 const main = async () => {
-  for (let i = 0; i < 10; i++) {
-    const mission = assignMission(100);
+  const level = 100;
+  const maxDiff = maxDifficulty(level);
+  const missions = assignMissions(maxDiff);
 
-    const desc = generateDescription(mission);
+  for (let i = 0; i < maxDiff; i++) {
+    const desc = generateDescription(missions[i]);
+    console.log(JSON.stringify(missions[i], null, 2));
     console.log(JSON.stringify(desc, null, 2));
     console.log("---------------------------------");
   }
