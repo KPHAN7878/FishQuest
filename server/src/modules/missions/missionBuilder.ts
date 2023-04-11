@@ -12,6 +12,7 @@ import {
   NUM_MISSION_VALUES,
   SpeciesDetail,
   StandardDetail,
+  MissionEntityPrototype,
 } from "./missionTypes";
 
 export const maxDifficulty = (level: number): Difficulty => {
@@ -217,23 +218,21 @@ export const assignMissions = (
 export const formMissions = (
   level: number,
   amount: number = 3
-): MissionEntity[] => {
+): MissionEntityPrototype[] => {
   const maxDiff = maxDifficulty(level);
   const missions = assignMissions(maxDiff, amount);
 
-  const res: MissionEntity[] = [];
+  const res: MissionEntityPrototype[] = [];
   for (const [difficulty, m] of missions) {
     const description = generateDescription(m);
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + (3 * difficulty + (difficulty - 1)));
-    res.push(
-      MissionEntity.create({
-        missionSpecifier: JSON.stringify(m),
-        description,
-        difficulty,
-        deadline,
-      })
-    );
+    res.push({
+      missionSpecifier: JSON.stringify(m),
+      description,
+      difficulty,
+      deadline,
+    });
   }
 
   return res;

@@ -1,4 +1,5 @@
 export const NUM_MISSION_VALUES = 3;
+export const MAX_MISSIONS = 3;
 
 // Note: would be best to just use dates to not rely on other entites
 // if possible
@@ -38,6 +39,7 @@ export type MissionSpecifier = {
   angler?: { details: StandardDetail[] } & StandardDescGen;
   biologist?: { details: SpeciesDetail[] } & StandardDescGen;
   adventurer?: { details: LocationDetail[] } & StandardDescGen; // no more than one
+  [_: string]: any;
 };
 
 export type Missions = "biologist" | "adventurer" | "angler";
@@ -71,4 +73,16 @@ export type MissionProgress = {
   currentValue: number;
   completionValue: number;
   complete: boolean;
+};
+
+export type MissionEntityPrototype = {
+  missionSpecifier: string;
+  description: string;
+  difficulty: Difficulty;
+  deadline: Date;
+};
+
+export type DigestedProgress = {
+  fullCompletion: boolean;
+  bonusXp: number;
 };

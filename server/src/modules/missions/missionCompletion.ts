@@ -1,6 +1,6 @@
 import { dataSource } from "../../constants";
 import { UserEntity } from "../user/user.entity";
-import { AnglerEntity } from "./mission.entity";
+import { AnglerEntity, MissionEntity } from "./mission.entity";
 import {
   LocationDetail,
   MissionSpecifier,
@@ -8,6 +8,7 @@ import {
   SpeciesDetail,
   StandardDetail,
   MissionProgress,
+  DigestedProgress,
 } from "./missionTypes";
 
 export const progressCheck = async (
@@ -85,9 +86,10 @@ const diffFishSpecies = async (
   user: UserEntity
 ): Promise<MissionProgress[]> => {
   const currSpecCount = (await dataSource.query(`
-      select species, count(species) from prediction group by species;
+      select species, count(species) from prediction
+      where "userId" = '${user.id}' group by species;
       `)) as {
-    [fish: string]: number;
+    [_: string]: number;
   }[];
 
   const prevCount = currSpecCount.reduce(
@@ -97,11 +99,32 @@ const diffFishSpecies = async (
     {}
   );
 
-  return details.map((detail, index): MissionProgress => {
+  return details.map((detail: SpeciesDetail): MissionProgress => {
     const currentValue =
       prevCount[detail.species!] - prevSpecCount[detail.species!];
     const completionValue = detail.value;
     const complete = currentValue === completionValue;
     return { currentValue, completionValue, complete };
   });
+};
+
+export const digestProgress = (
+  progress: Record<string, MissionProgress[]>,
+  match: MissionSpecifier
+): DigestedProgress => {
+  const res: DigestedProgress = { fullCompletion: true, bonusXp: 0 };
+  // only return bonus xp for completed portion
+  for (const [label, progressDetails] of Object.entries(progress)) {
+    res.fullCompletion &&= progressDetails.reduce(
+      (curr: boolean, mp: MissionProgress, idx: number) => {
+        if (match[label][idx].bonus) {
+          res.bonusXp += match[label][idx].bonus ?? 0;
+          return curr;
+        }
+        return curr && mp.complete;
+      },
+      res.fullCompletion
+    );
+  }
+  return res;
 };

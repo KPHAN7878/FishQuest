@@ -43,7 +43,7 @@ export class MissionEntity extends BaseEntity {
   startSnapshot: string; // json snapshot of values when mission assigned
 
   @Column()
-  missionSpecifier: string; // json snapshot of the completion conditions
+  specifier: string; // json snapshot of the completion conditions
 
   @Column()
   difficulty: Difficulty;

@@ -1,5 +1,6 @@
 import { Catch, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { update } from "lodash";
 import { Repository } from "typeorm";
 import { dataSource } from "../../constants";
 import { CatchEntity } from "../catch/catch.entity";
@@ -11,6 +12,15 @@ import {
   BiologistEntity,
   MissionEntity,
 } from "./mission.entity";
+import { formMissions } from "./missionBuilder";
+import { digestProgress, progressCheck } from "./missionCompletion";
+import {
+  DigestedProgress,
+  MAX_MISSIONS,
+  MissionProgress,
+  MissionSpecifier,
+  MissionValueSnapshot,
+} from "./missionTypes";
 
 @Injectable()
 export class MissionsService {
@@ -141,14 +151,66 @@ export class MissionsService {
     return missions;
   }
 
-  async missionAssigner(level: number) {
+  async missionAssigner(user: UserEntity): Promise<any> {
     // check current missions to see if any passed or deadlines met
+    const missions = await this.selectMissions(user);
 
     // deadline check
 
-    // mission check
+    const now = new Date();
+    const missionsLeft = missions.filter(
+      (mission: MissionEntity) => now < mission.deadline
+    );
 
-    const amount = 3; // default, change if deadline pass or mission pass
-    formMissions(level, amount);
+    const invalidMissions = missions.filter(
+      (mission: MissionEntity) => now >= mission.deadline
+    );
+
+    const progressAll = missionsLeft.map(async (m) => {
+      return await progressCheck(
+        JSON.parse(m.startSnapshot) as MissionValueSnapshot,
+        JSON.parse(m.specifier) as MissionSpecifier,
+        user
+      );
+    });
+
+    const completionInfo = progressAll.map(
+      async (
+        value: Promise<Record<string, MissionProgress[]>>,
+        throwAway: number
+      ): Promise<{ throwAway: number } & DigestedProgress> => {
+        return {
+          throwAway,
+          ...digestProgress(
+            await value,
+            JSON.parse(missionsLeft[throwAway].specifier) as MissionSpecifier
+          ),
+        };
+      }
+    );
+
+    const completed = completionInfo.filter(
+      async (mission) => await mission.then((v) => v.fullCompletion)
+    );
+
+    const more = Math.min(
+      MAX_MISSIONS,
+      MAX_MISSIONS - (invalidMissions.length + completed.length)
+    );
+
+    if (more) {
+      let updateMissions = missionsLeft
+        .filter((_, idx) =>
+          completed.some(
+            async (info) => await info.then((v) => v.throwAway === idx)
+          )
+        )
+        .concat(invalidMissions);
+
+      const newMissions = formMissions(user.level, more);
+      updateMissions.slice(0, more).forEach((val: MissionEntity, idx) => {
+        MissionEntity.update({ id: val.id }, { ...newMissions[idx] });
+      });
+    }
   }
 }
