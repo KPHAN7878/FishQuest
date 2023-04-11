@@ -49,7 +49,7 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
         [detail.species] = classes.splice(0, 1);
       }
 
-      if (Math.ceil(Math.random() * 5) === 5) {
+      if (Math.ceil(Math.random() * 5) === 5 && numSpecifiers > 1) {
         detail.bonus = Math.ceil(Math.random() * 50 * numSpecifiers);
       }
 

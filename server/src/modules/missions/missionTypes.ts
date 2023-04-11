@@ -83,6 +83,7 @@ export type MissionEntityPrototype = {
 };
 
 export type DigestedProgress = {
+  accumlatedValue: number;
   fullCompletion: boolean;
   bonusXp: number;
 };

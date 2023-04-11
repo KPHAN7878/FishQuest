@@ -1,6 +1,5 @@
-import { Catch, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { update } from "lodash";
 import { Repository } from "typeorm";
 import { dataSource } from "../../constants";
 import { CatchEntity } from "../catch/catch.entity";
@@ -17,6 +16,7 @@ import { digestProgress, progressCheck } from "./missionCompletion";
 import {
   DigestedProgress,
   MAX_MISSIONS,
+  MissionEntityPrototype,
   MissionProgress,
   MissionSpecifier,
   MissionValueSnapshot,
@@ -126,14 +126,14 @@ export class MissionsService {
     return null;
   }
 
-  async updateUser(
-    user: UserEntity,
-    value: number,
-    fn: (missionValue: number) => number
-  ) {
-    const newExp = user.exp + fn(value);
-    const newLevel = this.levelUp(user.level, newExp);
-    this.userR.update({ id: user.id }, { exp: newExp, level: newLevel });
+  async updateUser(user: UserEntity, value: number) {
+    const newExp = user.exp + value;
+    const oldLevel = user.level;
+    const newLevel = this.levelUp(oldLevel, newExp);
+    this.userR.update(
+      { id: user.id },
+      { exp: oldLevel !== newLevel ? 0 : newExp, level: newLevel }
+    );
   }
 
   levelUp(level: number, exp: number) {
@@ -147,15 +147,20 @@ export class MissionsService {
       where m."userId" = '${user.id}' 
       `
     );
+    if (!missions) {
+      const newMissions = formMissions(user.level, MAX_MISSIONS);
+      return newMissions.map((val: MissionEntityPrototype) => {
+        const mission = MissionEntity.create({ ...val });
+        this.missionR.insert(mission);
+        return mission;
+      });
+    }
 
     return missions;
   }
 
   async missionAssigner(user: UserEntity): Promise<any> {
-    // check current missions to see if any passed or deadlines met
     const missions = await this.selectMissions(user);
-
-    // deadline check
 
     const now = new Date();
     const missionsLeft = missions.filter(
@@ -193,9 +198,21 @@ export class MissionsService {
       async (mission) => await mission.then((v) => v.fullCompletion)
     );
 
+    if (completed) {
+      completed.forEach(async (val) => {
+        const awaitedVal: { throwAway: number } & DigestedProgress = await val;
+        const { difficulty } = missionsLeft[awaitedVal.throwAway];
+        const xpValue =
+          awaitedVal.bonusXp +
+          (awaitedVal.accumlatedValue - 1) * 25 +
+          difficulty * 100;
+        this.updateUser(user, xpValue);
+      });
+    }
+
     const more = Math.min(
       MAX_MISSIONS,
-      MAX_MISSIONS - (invalidMissions.length + completed.length)
+      invalidMissions.length + completed.length
     );
 
     if (more) {
@@ -209,7 +226,7 @@ export class MissionsService {
 
       const newMissions = formMissions(user.level, more);
       updateMissions.slice(0, more).forEach((val: MissionEntity, idx) => {
-        MissionEntity.update({ id: val.id }, { ...newMissions[idx] });
+        this.missionR.update({ id: val.id }, { ...newMissions[idx] });
       });
     }
   }

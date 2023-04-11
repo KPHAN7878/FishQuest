@@ -108,20 +108,28 @@ const diffFishSpecies = async (
   });
 };
 
+const weightValues = (value: number) => {
+  return value;
+};
+
 export const digestProgress = (
   progress: Record<string, MissionProgress[]>,
   match: MissionSpecifier
 ): DigestedProgress => {
-  const res: DigestedProgress = { fullCompletion: true, bonusXp: 0 };
+  const res: DigestedProgress = {
+    fullCompletion: true,
+    bonusXp: 0,
+    accumlatedValue: 0,
+  };
   // only return bonus xp for completed portion
   for (const [label, progressDetails] of Object.entries(progress)) {
     res.fullCompletion &&= progressDetails.reduce(
       (curr: boolean, mp: MissionProgress, idx: number) => {
-        if (match[label][idx].bonus) {
+        if (match[label][idx].bonus)
           res.bonusXp += match[label][idx].bonus ?? 0;
-          return curr;
-        }
-        return curr && mp.complete;
+        else if ((curr &&= mp.complete))
+          res.accumlatedValue += mp.completionValue;
+        return curr;
       },
       res.fullCompletion
     );
