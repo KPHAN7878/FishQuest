@@ -1,64 +1,18 @@
 import { classList } from "../../classifier/imagenet";
-
-const NUM_MISSION_VALUES = 3;
-
-type StandardDetail = {
-  value: number;
-  bonus?: number;
-};
-
-type LocationDetail = {
-  joinWith?: MissionType.biologist | MissionType.adventurer;
-  index?: number;
-} & StandardDetail;
-
-type SpeciesDetail = {
-  species?: string;
-} & StandardDetail;
-
-type AnyDetail = LocationDetail & StandardDetail & SpeciesDetail;
-
-type StandardDescGen = {
-  call: (details: AnyDetail[]) => Description[];
-};
-
-type MissionSpecifier = {
-  angler?: { details: StandardDetail[] } & StandardDescGen;
-  biologist?: { details: SpeciesDetail[] } & StandardDescGen;
-  adventurer?: { details: LocationDetail[] } & StandardDescGen; // no more than one
-};
-type Missions = "biologist" | "adventurer" | "angler";
-enum MissionType {
-  biologist = 1,
-  adventurer,
-  angler,
-}
-const missionMap = {
-  [MissionType.biologist]: "biologist",
-  [MissionType.adventurer]: "adventurer",
-  [MissionType.angler]: "angler",
-} as Record<MissionType, string>;
-
-export type MissionInfo = {
-  missionSpecifier: MissionSpecifier;
-  description: string;
-  deadline: Date | null;
-  complete: boolean;
-};
-
-type Description = {
-  pretext?: string;
-  text: string;
-  postext?: string;
-  plural?: boolean;
-};
-
-enum Difficulty {
-  easy = 1,
-  medium,
-  hard,
-  expert,
-}
+import { MissionEntity } from "./mission.entity";
+import {
+  AnyDetail,
+  Description,
+  Difficulty,
+  LocationDetail,
+  missionMap,
+  Missions,
+  MissionSpecifier,
+  MissionEnum,
+  NUM_MISSION_VALUES,
+  SpeciesDetail,
+  StandardDetail,
+} from "./missionTypes";
 
 export const maxDifficulty = (level: number): Difficulty => {
   if (level < 10) {
@@ -73,7 +27,7 @@ export const maxDifficulty = (level: number): Difficulty => {
 };
 
 const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
-  const specTypes: MissionType[] = [];
+  const specTypes: MissionEnum[] = [];
 
   for (let i = 0; i < numSpecifiers; ++i) {
     const rand = Math.ceil(Math.random() * NUM_MISSION_VALUES);
@@ -85,12 +39,12 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
     .sort(() => 0.5 - Math.random())
     .slice(0, classList.length);
   let specs = specTypes.reduce(
-    (specs: MissionSpecifier, specT: MissionType): MissionSpecifier => {
+    (specs: MissionSpecifier, specT: MissionEnum): MissionSpecifier => {
       const rand = Math.ceil(Math.random() * numSpecifiers);
       let detail: AnyDetail = {
         value: rand,
       };
-      if (specT & MissionType.biologist) {
+      if (specT & MissionEnum.biologist) {
         [detail.species] = classes.splice(0, 1);
       }
 
@@ -112,17 +66,17 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
 };
 
 const resolveSpecifierTypeConflicts = (
-  specTypes: MissionType[],
-  specT: MissionType
-): MissionType => {
+  specTypes: MissionEnum[],
+  specT: MissionEnum
+): MissionEnum => {
   if (!specTypes.includes(specT)) return specT;
-  const a = specTypes.find((val) => val & MissionType.biologist);
-  const b = specTypes.find((val) => val & MissionType.adventurer);
-  const c = specTypes.find((val) => val & MissionType.angler);
+  const a = specTypes.find((val) => val & MissionEnum.biologist);
+  const b = specTypes.find((val) => val & MissionEnum.adventurer);
+  const c = specTypes.find((val) => val & MissionEnum.angler);
 
-  if (a && b && c) return MissionType.biologist;
-  if (a && specT & a) return MissionType.adventurer;
-  if (b && specT & b) return MissionType.biologist;
+  if (a && b && c) return MissionEnum.biologist;
+  if (a && specT & a) return MissionEnum.adventurer;
+  if (b && specT & b) return MissionEnum.biologist;
   return specT;
 };
 
@@ -167,21 +121,21 @@ const minimumCatches = (specs: MissionSpecifier): number => {
 };
 
 const buildMission = (
-  val: MissionType,
+  val: MissionEnum,
   specs: MissionSpecifier,
   spec: AnyDetail
 ): MissionSpecifier => {
   let mission = specs[missionMap[val] as keyof MissionSpecifier];
   switch (val) {
-    case MissionType.angler:
+    case MissionEnum.angler:
       var fn: (detail: AnyDetail) => string = (detail: StandardDetail) =>
         `a total of ${detail.value} fish`;
       break;
-    case MissionType.biologist:
+    case MissionEnum.biologist:
       var fn: (detail: AnyDetail) => string = (detail: SpeciesDetail) =>
         `${detail.value} ${detail.species}`;
       break;
-    case MissionType.adventurer:
+    case MissionEnum.adventurer:
       var fn: (detail: AnyDetail) => string = (detail: LocationDetail) =>
         `from ${detail.value} different locations`;
       break;
@@ -243,9 +197,9 @@ const generateDescription = (mission: MissionSpecifier): string => {
 };
 
 export const assignMissions = (
-  amount: number,
-  difficulty: Difficulty
-): MissionSpecifier[] => {
+  difficulty: Difficulty,
+  amount: number
+): [number, MissionSpecifier][] => {
   const diffs: number[] = [...Array(difficulty + 1).keys()];
   let take: number[] = [];
   const diffSelections: number[] = [];
@@ -257,20 +211,30 @@ export const assignMissions = (
     diffSelections.push(...take.splice(randix, 1));
   }
 
-  return diffSelections.map((val: number) => generateSpecifier(val));
+  return diffSelections.map((val: number) => [val, generateSpecifier(val)]);
 };
 
-const main = async () => {
-  const level = 50;
-  const amount = 3;
+export const formMissions = (
+  level: number,
+  amount: number = 3
+): MissionEntity[] => {
   const maxDiff = maxDifficulty(level);
-  const missions = assignMissions(amount, maxDiff);
+  const missions = assignMissions(maxDiff, amount);
 
-  for (let i = 0; i < amount; i++) {
-    const desc = generateDescription(missions[i]);
-    console.log(JSON.stringify(desc, null, 2));
-    console.log(JSON.stringify(missions[i], null, 2), `\n`);
+  const res: MissionEntity[] = [];
+  for (const [difficulty, m] of missions) {
+    const description = generateDescription(m);
+    const deadline = new Date();
+    deadline.setDate(deadline.getDate() + (3 * difficulty + (difficulty - 1)));
+    res.push(
+      MissionEntity.create({
+        missionSpecifier: JSON.stringify(m),
+        description,
+        difficulty,
+        deadline,
+      })
+    );
   }
-};
 
-main().catch((err: any) => console.log(err));
+  return res;
+};

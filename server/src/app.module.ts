@@ -11,7 +11,6 @@ import { CommentModule } from "./modules/comment/comment.module";
 import { ProfileModule } from "./modules/profile/profile.module";
 import { MissionsModule } from "./modules/missions/missions.module";
 
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -29,7 +28,7 @@ import { MissionsModule } from "./modules/missions/missions.module";
     LikeModule,
     CommentModule,
     ProfileModule,
-    MissionsModule
+    MissionsModule,
   ],
 })
 export class AppModule {}

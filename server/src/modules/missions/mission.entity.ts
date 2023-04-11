@@ -10,10 +10,10 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
-import { Difficulty } from "./missionConditions";
+import { Difficulty } from "./missionTypes";
 
 @Entity()
-class BaseMission extends BaseEntity {
+class BaseValue extends BaseEntity {
   @PrimaryColumn()
   userId!: number;
 
@@ -27,9 +27,9 @@ class BaseMission extends BaseEntity {
   @JoinColumn()
   user: UserEntity;
 }
-export class AdventurerEntity extends BaseMission {}
-export class AnglerEntity extends BaseMission {}
-export class BiologistEntity extends BaseMission {}
+export class AdventurerEntity extends BaseValue {}
+export class AnglerEntity extends BaseValue {}
+export class BiologistEntity extends BaseValue {}
 
 @Entity()
 export class MissionEntity extends BaseEntity {

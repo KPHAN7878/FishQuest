@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Catch, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { dataSource } from "../../constants";
@@ -11,7 +11,6 @@ import {
   BiologistEntity,
   MissionEntity,
 } from "./mission.entity";
-import { Difficulty, maxDifficulty } from "./missionConditions";
 
 @Injectable()
 export class MissionsService {
@@ -22,8 +21,11 @@ export class MissionsService {
     private readonly biologistR: Repository<BiologistEntity>,
     @InjectRepository(AdventurerEntity)
     private readonly adventurerR: Repository<AdventurerEntity>,
+
     @InjectRepository(UserEntity)
-    private readonly userR: Repository<UserEntity>
+    private readonly userR: Repository<UserEntity>,
+    @InjectRepository(MissionEntity)
+    private readonly missionR: Repository<MissionEntity>
   ) {}
   async insert(
     postData: Prediction & CatchEntity,
@@ -58,7 +60,7 @@ export class MissionsService {
       select location from
       catch_entity c inner join user_entity u
       on u.id = c."userId"
-      where u.id = c."userId"
+      where u.id = '${postData.user.id}'
       `
     )) as { location: number[] }[];
 
@@ -117,9 +119,9 @@ export class MissionsService {
   async updateUser(
     user: UserEntity,
     value: number,
-    func: (missionValue: number) => number
+    fn: (missionValue: number) => number
   ) {
-    const newExp = user.exp + func(value);
+    const newExp = user.exp + fn(value);
     const newLevel = this.levelUp(user.level, newExp);
     this.userR.update({ id: user.id }, { exp: newExp, level: newLevel });
   }
@@ -128,9 +130,25 @@ export class MissionsService {
     return exp >= Math.min(100 + (level - 1) * 10, 500) ? level + 1 : level;
   }
 
-  async missionAssigner(level: number) {
-    const difficulty: Difficulty = Math.ceil(
-      Math.random() * maxDifficulty(level)
+  async selectMissions(user: UserEntity): Promise<MissionEntity[]> {
+    const missions: MissionEntity[] = await dataSource.query(
+      `
+      select * from mission_entity m
+      where m."userId" = '${user.id}' 
+      `
     );
+
+    return missions;
+  }
+
+  async missionAssigner(level: number) {
+    // check current missions to see if any passed or deadlines met
+
+    // deadline check
+
+    // mission check
+
+    const amount = 3; // default, change if deadline pass or mission pass
+    formMissions(level, amount);
   }
 }
