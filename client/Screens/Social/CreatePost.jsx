@@ -68,7 +68,7 @@ const CreatePost = ({ route, navigation }) => {
         <Pressable
           style={styles.formButton}
           onPress={() => {
-            submitPost(result.id);
+            submitPost(result.catchId);
             navigation.navigate("CatchLogger");
           }}
         >

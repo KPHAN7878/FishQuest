@@ -27,12 +27,17 @@ import { UserAuthGuard } from "../auth/auth.guard";
 export default class CatchController {
   constructor(private readonly catchService: CatchService) {}
 
-  @Get()
+  @Get("allcatches")
   getAll(
     @Body() input: Paginated,
     @Req() { user }: Ctx
   ): Promise<{ catches: CatchEntity[] }> {
     return this.catchService.getAll(input, user);
+  }
+
+  @Get()
+  getAllMaps(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
+    return this.catchService.getAllMaps();
   }
 
   @Get(":id")

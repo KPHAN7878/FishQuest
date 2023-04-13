@@ -186,7 +186,8 @@ const Post = ({ post }) => {
           <TouchableOpacity
             activeOpacity={0.2}
             onPress={() => {
-              navigation.navigate('CommentContainer', {caption: postCaption});
+              // navigation.navigate('CommentContainer', {caption: postCaption});
+              navigation.navigate('CommentContainer', {caption: post});
             }}
           >
             <Text style={styles.viewCommentText}>View 4 Comments</Text>

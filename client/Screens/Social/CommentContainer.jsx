@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color } from "../../GlobalStyles";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Client } from "../../utils/connection";
+import axios from "axios";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -25,8 +27,30 @@ const CommentContainer = ({route, navigation}) => {
   //const navigation = useNavigation();
   const [text, onChangeText] = React.useState();
 
-  const {caption} = route.params;
+  const {postDetails} = route.params;
 
+  const submitComment = async () => {
+
+    console.log("in submit comment function")
+    console.log("commentableId: " + route.params.caption.id)
+    console.log("text: " + text)
+    
+    await Client.post("comment", {
+      // commentableId: route.params.caption.id,
+      // text: text,
+      // type: 'comment'
+      commentableId: 5,
+      text: text,
+      type: 'post'
+    })
+    .then((res) => {
+    //console.log("USERS: " + JSON.stringify(res))
+    console.log("\n\create comment response: " + res)
+    })
+    .catch((error) => {
+    console.log("error comment: " + error);
+    })
+  }
 
   //TEMPORARY DATABASE //////////////////////////////////
   const comments = [
@@ -68,7 +92,7 @@ const CommentContainer = ({route, navigation}) => {
   return (
     
     <View>
-
+      {console.log("COMMENTS: " + JSON.stringify(route))}
       <View style={styles2.headerBox}>
         <Text style={styles2.fishQuest}>Fish Quest</Text>
         
@@ -77,7 +101,7 @@ const CommentContainer = ({route, navigation}) => {
         </TouchableOpacity>
       </View>
       <View>
-        <Text style={styles2.postCaption}>{caption}</Text>
+        <Text style={styles2.postCaption}>{route.params.caption.text}</Text>
         <View
           style={{
             borderBottomColor: 'black',
@@ -93,7 +117,7 @@ const CommentContainer = ({route, navigation}) => {
       <ScrollView style={styles2.comments}>
 
           {comments.map((comment) => (
-
+            // <Pressable onPress={() => {navigation.navigate("CommentContainer", caption, )}}>
             <View>
               <View key={comment.id} style={styles2.comment}>
                   <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
@@ -103,16 +127,17 @@ const CommentContainer = ({route, navigation}) => {
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
               </View>
-              <View key={comment.id} style={styles2.comment2}>
+              {/* <View key={comment.id} style={styles2.comment2}>
                   <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
                   <View style={styles2.info}>
                       <Text style={styles2.userName}>{comment.name}</Text>
                       <Text style={styles2.desc}>{comment.desc}</Text>
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
-              </View>
+              </View> */}
               <View style={styles2.line}/>
             </View>
+            // </Pressable>
 
           ))}
 
@@ -121,8 +146,19 @@ const CommentContainer = ({route, navigation}) => {
 
       <View style={styles2.typeComment}>
           <Image style={styles2.img} source={require("../../assets/profilePic.jpg")}/>
-          <TextInput style={styles2.input} placeholder="write a comment..."/>
-          <Button style={styles2.send} title="Send" onPress={() => {}}/>
+          <TextInput 
+            style={styles2.input} 
+            placeholder="write a comment..." 
+            onChangeText={(text) => onChangeText(text)}/>
+          {/* <Button style={styles2.send} title="Send" onPress={this.submitComment()}/> */}
+          <Pressable
+          style={styles.formButton}
+          onPress={() => {
+            submitComment();
+          }}
+        >
+          <Text style={styles.buttonText}>{"Submit Post"}</Text>
+        </Pressable>
       </View>
     </View>
 
