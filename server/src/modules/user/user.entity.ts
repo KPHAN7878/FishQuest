@@ -17,7 +17,6 @@ import { CommentEntity } from "../comment/comment.entity";
 import { LikeEntity } from "../like/like.entity";
 import { MissionEntity } from "../missions/mission.entity";
 import { PostEntity } from "../post/post.entity";
-import { ReactionEntity } from "../reaction/reaction.entity";
 
 @Entity()
 @Unique(["username"])
@@ -84,8 +83,4 @@ export class UserEntity extends BaseEntity {
   // comments on user posts and other comments
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comments: CommentEntity[];
-
-  // reactions to a post
-  @OneToMany(() => ReactionEntity, (reaction) => reaction.user)
-  reactions: ReactionEntity[];
 }

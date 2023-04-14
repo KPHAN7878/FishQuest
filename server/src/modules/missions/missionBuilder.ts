@@ -228,7 +228,7 @@ export const formMissions = (
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + (3 * difficulty + (difficulty - 1)));
     res.push({
-      missionSpecifier: JSON.stringify(m),
+      specifier: JSON.stringify(m),
       description,
       difficulty,
       deadline,

@@ -8,17 +8,16 @@ import { UserEntity } from "./modules/user/user.entity";
 import { PostEntity } from "./modules/post/post.entity";
 import { LikeEntity } from "./modules/like/like.entity";
 import { CommentEntity } from "./modules/comment/comment.entity";
-import { ReactionEntity } from "./modules/reaction/reaction.entity";
 import {
   AdventurerEntity,
   AnglerEntity,
   BiologistEntity,
+  MissionEntity,
 } from "./modules/missions/mission.entity";
 
 export const __prod__ = process.env.NODE_ENV === "production";
 export const MODEL_PATH = `${__dirname}/classifier/model.onnx`;
 
-// FILES
 export const IMG_FILE_LIMIT = 1024 * 1024 * 4;
 export const entities = [
   SessionEntity,
@@ -29,15 +28,16 @@ export const entities = [
   PostEntity,
   LikeEntity,
   CommentEntity,
-  ReactionEntity,
   AnglerEntity,
   BiologistEntity,
   AdventurerEntity,
+  MissionEntity,
 ];
 
 export const dataSource = new DataSource({
   type: "postgres",
   url: process.env.DATABASE_URL,
+  // entities: ["dist/**/*.entity{.ts,.js}"],
   entities,
   logging: false,
   synchronize: !__prod__,

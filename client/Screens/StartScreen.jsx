@@ -16,7 +16,8 @@ export const StartScreen = ({ navigation }) => {
         navigation.navigate("Home");
       })
       .catch((err) => {
-        if (err.response) return;
+        console.log(err);
+        if (!err.response) return;
         if (err.response.status === 403) navigation.navigate("Login");
       });
   }, []);

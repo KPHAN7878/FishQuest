@@ -76,7 +76,7 @@ export type MissionProgress = {
 };
 
 export type MissionEntityPrototype = {
-  missionSpecifier: string;
+  specifier: string;
   description: string;
   difficulty: Difficulty;
   deadline: Date;

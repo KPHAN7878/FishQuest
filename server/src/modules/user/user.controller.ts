@@ -93,6 +93,7 @@ export class UserController {
   @UseGuards(UserAuthGuard)
   @Get("status")
   async getAuthStatus(@Req() req: Request) {
+    console.log("test");
     return { status: req.isAuthenticated() };
   }
 

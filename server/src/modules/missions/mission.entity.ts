@@ -12,7 +12,6 @@ import {
 import { UserEntity } from "../user/user.entity";
 import { Difficulty } from "./missionTypes";
 
-@Entity()
 class BaseValue extends BaseEntity {
   @PrimaryColumn()
   userId!: number;
@@ -27,8 +26,13 @@ class BaseValue extends BaseEntity {
   @JoinColumn()
   user: UserEntity;
 }
+@Entity()
 export class AdventurerEntity extends BaseValue {}
+
+@Entity()
 export class AnglerEntity extends BaseValue {}
+
+@Entity()
 export class BiologistEntity extends BaseValue {}
 
 @Entity()
@@ -60,3 +64,10 @@ export class MissionEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.missions, { cascade: true })
   user: UserEntity;
 }
+
+export const AllMissions = [
+  BiologistEntity,
+  AnglerEntity,
+  AdventurerEntity,
+  MissionEntity,
+];

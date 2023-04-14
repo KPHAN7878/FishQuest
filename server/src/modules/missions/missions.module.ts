@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserEntity } from "../user/user.entity";
 import {
   AdventurerEntity,
+  AllMissions,
   AnglerEntity,
   BiologistEntity,
   MissionEntity,
@@ -12,13 +13,7 @@ import { MissionsService } from "./missions.service";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      AnglerEntity,
-      BiologistEntity,
-      AdventurerEntity,
-      MissionEntity,
-      UserEntity,
-    ]),
+    TypeOrmModule.forFeature([...AllMissions, MissionEntity, UserEntity]),
   ],
   controllers: [MissionsController],
   providers: [MissionsService],

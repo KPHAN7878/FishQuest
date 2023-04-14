@@ -28,7 +28,7 @@ import { MissionsModule } from "./modules/missions/missions.module";
     LikeModule,
     CommentModule,
     ProfileModule,
-    // MissionsModule,
+    MissionsModule,
   ],
 })
 export class AppModule {}

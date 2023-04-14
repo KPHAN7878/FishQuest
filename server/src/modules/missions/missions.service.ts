@@ -12,7 +12,7 @@ import {
   MissionEntity,
 } from "./mission.entity";
 import { formMissions } from "./missionBuilder";
-import { digestProgress, progressCheck } from "./missionCompletion";
+import { digestProgress, progressCheck, snapshot } from "./missionCompletion";
 import {
   DigestedProgress,
   MAX_MISSIONS,
@@ -60,6 +60,12 @@ export class MissionsService {
 
       return 1;
     }
+  }
+
+  async initMissions(user: UserEntity) {
+    [this.anglerR, this.adventurerR, this.biologistR].map((rep) =>
+      this.insert({ user } as any, rep)
+    );
   }
 
   async adventurerCheck(
@@ -137,17 +143,23 @@ export class MissionsService {
   }
 
   async selectMissions(user: UserEntity): Promise<MissionEntity[]> {
-    const missions: MissionEntity[] = await dataSource.query(
+    const missions: MissionEntity[] = (await dataSource.query(
       `
       select * from mission_entity m
       where m."userId" = '${user.id}' 
       `
-    );
-    if (!missions) {
+    )) as MissionEntity[];
+
+    if (missions.length === 0) {
+      this.initMissions(user);
+
       const newMissions = formMissions(user.level, MAX_MISSIONS);
+      const startSnapshot = JSON.stringify(await snapshot(user));
+
       return newMissions.map((val: MissionEntityPrototype) => {
-        const mission = MissionEntity.create({ ...val });
-        this.missionR.insert(mission);
+        const mission = MissionEntity.create({ user, ...val, startSnapshot });
+        this.missionR.save(mission);
+
         return mission;
       });
     }
@@ -155,16 +167,18 @@ export class MissionsService {
     return missions;
   }
 
-  async missionAssigner(user: UserEntity): Promise<any> {
+  async missionAssigner(
+    user: UserEntity
+  ): Promise<{ validMissions: any[]; complete: any[] }> {
     const missions = await this.selectMissions(user);
 
     const now = new Date();
     const missionsLeft = missions.filter(
-      (mission: MissionEntity) => now < mission.deadline
+      (mission: MissionEntity) => now.getTime() < mission.deadline.getTime()
     );
 
     const invalidMissions = missions.filter(
-      (mission: MissionEntity) => now >= mission.deadline
+      (mission: MissionEntity) => now.getTime() >= mission.deadline.getTime()
     );
 
     const progressAll = missionsLeft.map(async (m) => {
@@ -190,18 +204,15 @@ export class MissionsService {
       }
     );
 
-    const completed = completionInfo.filter(
-      async (mission) => await mission.then((v) => v.fullCompletion)
-    );
+    const completions = [];
+    for (const v of completionInfo) completions.push(await v);
+    const completed = completions.filter((mission) => mission.fullCompletion);
 
     if (completed) {
-      completed.forEach(async (val) => {
-        const awaitedVal: { throwAway: number } & DigestedProgress = await val;
-        const { difficulty } = missionsLeft[awaitedVal.throwAway];
+      completed.forEach((val: { throwAway: number } & DigestedProgress) => {
+        const { difficulty } = missionsLeft[val.throwAway];
         const xpValue =
-          awaitedVal.bonusXp +
-          (awaitedVal.accumlatedValue - 1) * 25 +
-          difficulty * 100;
+          val.bonusXp + (val.accumlatedValue - 1) * 25 + difficulty * 100;
         this.updateUser(user, xpValue);
       });
     }
@@ -213,11 +224,7 @@ export class MissionsService {
 
     if (more) {
       let updateMissions = missionsLeft
-        .filter((_, idx) =>
-          completed.some(
-            async (info) => await info.then((v) => v.throwAway === idx)
-          )
-        )
+        .filter((_, idx) => completed.some((info) => info.throwAway === idx))
         .concat(invalidMissions);
 
       const newMissions = formMissions(user.level, more);
@@ -225,5 +232,18 @@ export class MissionsService {
         this.missionR.update({ id: val.id }, { ...newMissions[idx] });
       });
     }
+
+    const validMissions = [];
+    for (let i = 0; i < progressAll.length; i++) {
+      const progress = { ...(await progressAll[i]) };
+      const { description, deadline } = missionsLeft[i];
+
+      validMissions.push({ progress, description, deadline });
+    }
+
+    return {
+      validMissions,
+      complete: [],
+    };
   }
 }

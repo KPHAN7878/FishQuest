@@ -11,6 +11,52 @@ import {
   DigestedProgress,
 } from "./missionTypes";
 
+export const snapshot = async (
+  user: UserEntity
+): Promise<MissionValueSnapshot> => {
+  const res: MissionValueSnapshot = {};
+
+  res.angler = await anglerSnapshot(user);
+  res.biologist = await biologistSnapshot(user);
+  res.adventurer = await adventurerSnapshot(user);
+
+  return res;
+};
+
+const anglerSnapshot = async (user: UserEntity): Promise<{ value: number }> => {
+  const [value] = (await dataSource.query(
+    ` 
+    select value from angler_entity where "userId" = '${user.id}'
+    `
+  )) as { value: number }[];
+  return value;
+};
+
+const biologistSnapshot = async (
+  user: UserEntity
+): Promise<{
+  [fish: string]: number;
+}> => {
+  const currSpecCount = (
+    (await dataSource.query(`
+      select species, count(species) from prediction
+      where "userId" = '${user.id}' group by species;
+      `)) as {
+      [_: string]: number;
+    }[]
+  ).reduce((prev: Record<string, number>, curr) => {
+    return { ...prev, ...curr };
+  }, {});
+
+  return currSpecCount;
+};
+
+const adventurerSnapshot = async (
+  user: UserEntity
+): Promise<{ lastCatchDate: Date }> => {
+  return { lastCatchDate: new Date() };
+};
+
 export const progressCheck = async (
   values: MissionValueSnapshot,
   specifier: MissionSpecifier,
@@ -46,7 +92,7 @@ const diffLocations = async (
 ): Promise<MissionProgress[]> => {
   const uniqueDatesAfterSnapshot = (await dataSource.query(
     `
-      select distinct from
+      select distinct location from
       catch_entity c inner join user_entity u
       on u.id = c."userId"
       where u.id = '${user.id}' and c."createdAt" > '${JSON.stringify(
@@ -68,7 +114,7 @@ const diffAmountCaught = async (
   details: LocationDetail[],
   user: UserEntity
 ): Promise<MissionProgress[]> => {
-  const ae = await AnglerEntity.findOne({ where: { userId: user.id } });
+  const ae = await anglerSnapshot(user);
 
   return details.map((detail): MissionProgress => {
     const currentValue = ae!.value - value;
@@ -85,19 +131,7 @@ const diffFishSpecies = async (
   details: SpeciesDetail[],
   user: UserEntity
 ): Promise<MissionProgress[]> => {
-  const currSpecCount = (await dataSource.query(`
-      select species, count(species) from prediction
-      where "userId" = '${user.id}' group by species;
-      `)) as {
-    [_: string]: number;
-  }[];
-
-  const prevCount = currSpecCount.reduce(
-    (prev: Record<string, number>, curr) => {
-      return { ...prev, ...curr };
-    },
-    {}
-  );
+  const prevCount = await biologistSnapshot(user);
 
   return details.map((detail: SpeciesDetail): MissionProgress => {
     const currentValue =
@@ -108,7 +142,7 @@ const diffFishSpecies = async (
   });
 };
 
-const weightValues = (label: string, value: number) => {
+const weightedValues = (label: string, value: number) => {
   return value;
 };
 
@@ -121,15 +155,15 @@ export const digestProgress = (
     bonusXp: 0,
     accumlatedValue: 0,
   };
+
   // only return bonus xp for completed portion
   for (const [label, progressDetails] of Object.entries(progress)) {
     res.fullCompletion &&= progressDetails.reduce(
       (curr: boolean, mp: MissionProgress, idx: number) => {
-        if (match[label][idx].bonus)
+        if (match[label][idx]?.bonus)
           res.bonusXp += match[label][idx].bonus ?? 0;
-        else if ((curr &&= mp.complete))
-          res.accumlatedValue += weightValues(label, mp.completionValue);
-        return curr;
+        res.accumlatedValue += weightedValues(label, mp.completionValue);
+        return curr && mp.complete;
       },
       res.fullCompletion
     );
