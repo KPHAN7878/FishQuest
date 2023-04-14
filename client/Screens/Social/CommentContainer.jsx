@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ const windowHeight = Dimensions.get("window").height;
 const CommentContainer = ({route, navigation}) => {
   //const navigation = useNavigation();
   const [text, onChangeText] = React.useState();
+  const [commentsDB, setComments] = useState();
 
   const {postDetails} = route.params;
 
@@ -39,18 +40,39 @@ const CommentContainer = ({route, navigation}) => {
       // commentableId: route.params.caption.id,
       // text: text,
       // type: 'comment'
-      commentableId: 5,
+      commentableId: route.params.caption.id,
       text: text,
       type: 'post'
     })
     .then((res) => {
     //console.log("USERS: " + JSON.stringify(res))
-    console.log("\n\create comment response: " + res)
+    console.log("\n\create comment response: " + JSON.stringify(res))
+    //setComments(res.data.comments)
+    getComments();
     })
     .catch((error) => {
     console.log("error comment: " + error);
     })
   }
+
+  const getComments = async () => {
+
+    await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",post")
+    .then((res) => {
+      console.log("comments: " + JSON.stringify(res) + "\n\n")
+      setComments(res.data.comments)
+      console.log("comment array: " + commentsDB)
+      
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+  }
+
+  React.useEffect(() => {
+    getComments();
+    // console.log("route: " + JSON.stringify(route.params))
+  }, []);
 
   //TEMPORARY DATABASE //////////////////////////////////
   const comments = [
@@ -116,14 +138,15 @@ const CommentContainer = ({route, navigation}) => {
 
       <ScrollView style={styles2.comments}>
 
-          {comments.map((comment) => (
+          {commentsDB ? commentsDB.map((comment) => (
             // <Pressable onPress={() => {navigation.navigate("CommentContainer", caption, )}}>
             <View>
+              {console.log("commentsDB: " + JSON.stringify(commentsDB))}
               <View key={comment.id} style={styles2.comment}>
                   <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
                   <View style={styles2.info}>
-                      <Text style={styles2.userName}>{comment.name}</Text>
-                      <Text style={styles2.desc}>{comment.desc}</Text>
+                      <Text style={styles2.userName}>{comment.creator.username}</Text>
+                      <Text style={styles2.desc}>{comment.text}</Text>
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
               </View>
@@ -139,7 +162,10 @@ const CommentContainer = ({route, navigation}) => {
             </View>
             // </Pressable>
 
-          ))}
+          ))
+          :
+          <View></View>
+          }
 
           
       </ScrollView>
