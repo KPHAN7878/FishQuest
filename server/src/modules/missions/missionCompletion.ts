@@ -18,7 +18,7 @@ export const snapshot = async (
 
   res.angler = await anglerSnapshot(user);
   res.biologist = await biologistSnapshot(user);
-  res.adventurer = await adventurerSnapshot(user);
+  res.adventurer = adventurerSnapshot();
 
   return res;
 };
@@ -37,24 +37,21 @@ const biologistSnapshot = async (
 ): Promise<{
   [fish: string]: number;
 }> => {
-  const currSpecCount = (
-    (await dataSource.query(`
+  const currSpecCount = (await dataSource.query(`
       select species, count(species) from prediction
       where "userId" = '${user.id}' group by species;
       `)) as {
-      [_: string]: number;
-    }[]
-  ).reduce((prev: Record<string, number>, curr) => {
-    return { ...prev, ...curr };
+    [_: string]: number;
+  }[];
+  const res = currSpecCount.reduce((prev: Record<string, number>, curr) => {
+    return { ...prev, [curr.species]: curr.count };
   }, {});
 
-  return currSpecCount;
+  return res;
 };
 
-const adventurerSnapshot = async (
-  user: UserEntity
-): Promise<{ lastCatchDate: Date }> => {
-  return { lastCatchDate: new Date() };
+const adventurerSnapshot = (): { lastCatchDate: string } => {
+  return { lastCatchDate: new Date().toLocaleString("en-US") };
 };
 
 export const progressCheck = async (
@@ -86,7 +83,7 @@ export const progressCheck = async (
 };
 
 const diffLocations = async (
-  lastDate: Date,
+  lastDate: string,
   details: StandardDetail[],
   user: UserEntity
 ): Promise<MissionProgress[]> => {
@@ -100,11 +97,13 @@ const diffLocations = async (
     )}'
       `
   )) as { location: number[] }[];
+  console.log(JSON.stringify(lastDate));
+  console.log(new Date());
 
   return details.map((detail): MissionProgress => {
     const currentValue = uniqueDatesAfterSnapshot.length;
     const completionValue = detail.value;
-    const complete = currentValue === completionValue;
+    const complete = currentValue >= completionValue;
     return { currentValue, completionValue, complete };
   });
 };
@@ -119,7 +118,7 @@ const diffAmountCaught = async (
   return details.map((detail): MissionProgress => {
     const currentValue = ae!.value - value;
     const completionValue = detail.value;
-    const complete = currentValue === completionValue;
+    const complete = currentValue >= completionValue;
     return { currentValue, completionValue, complete };
   });
 };
@@ -135,9 +134,10 @@ const diffFishSpecies = async (
 
   return details.map((detail: SpeciesDetail): MissionProgress => {
     const currentValue =
-      prevCount[detail.species!] - prevSpecCount[detail.species!];
+      (prevCount[detail.species!] ?? 0) - (prevSpecCount[detail.species!] ?? 0);
     const completionValue = detail.value;
-    const complete = currentValue === completionValue;
+    const complete = currentValue >= completionValue;
+
     return { currentValue, completionValue, complete };
   });
 };

@@ -228,8 +228,12 @@ export class MissionsService {
         .concat(invalidMissions);
 
       const newMissions = formMissions(user.level, more);
+      const startSnapshot = JSON.stringify(await snapshot(user));
       updateMissions.slice(0, more).forEach((val: MissionEntity, idx) => {
-        this.missionR.update({ id: val.id }, { ...newMissions[idx] });
+        this.missionR.update(
+          { id: val.id },
+          { ...newMissions[idx], startSnapshot }
+        );
       });
     }
 

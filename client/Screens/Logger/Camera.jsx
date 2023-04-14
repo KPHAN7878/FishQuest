@@ -28,7 +28,7 @@ export const CameraView = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = S3.getBucketLocation().service.endpoint.host;
   const [image, setImage] = useState(null);
-  const [currentLocation, setLocation] = useState([1, 2]);
+  const [currentLocation, setLocation] = useState([1, 1]);
   const [errorMsg, setErrorMsg] = useState(null);
 
   //location services

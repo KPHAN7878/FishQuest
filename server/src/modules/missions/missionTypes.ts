@@ -9,7 +9,7 @@ export type MissionValueSnapshot = {
     [fish: string]: number;
   };
   adventurer?: {
-    lastCatchDate: Date;
+    lastCatchDate: string;
   };
 };
 
