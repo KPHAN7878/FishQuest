@@ -112,16 +112,12 @@ export class MissionsService {
     biologist: null | number;
     angler: number;
   } | null> {
-    // update values for missions
     if (results.status !== null)
       return {
         adventure: await this.adventurerCheck(results),
         biologist: await this.biologistCheck(results),
         angler: await this.anglerCheck(results),
       };
-
-    //  check if a mission was completed,
-    //  if complete return to user and assign new mission
 
     return null;
   }

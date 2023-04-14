@@ -108,7 +108,7 @@ const diffFishSpecies = async (
   });
 };
 
-const weightValues = (value: number) => {
+const weightValues = (label: string, value: number) => {
   return value;
 };
 
@@ -128,7 +128,7 @@ export const digestProgress = (
         if (match[label][idx].bonus)
           res.bonusXp += match[label][idx].bonus ?? 0;
         else if ((curr &&= mp.complete))
-          res.accumlatedValue += mp.completionValue;
+          res.accumlatedValue += weightValues(label, mp.completionValue);
         return curr;
       },
       res.fullCompletion

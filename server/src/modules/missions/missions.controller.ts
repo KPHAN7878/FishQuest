@@ -11,7 +11,7 @@ import { MissionsService } from "./missions.service";
 import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
-@Controller("missons")
+@Controller("misson")
 @UseGuards(new UserAuthGuard())
 export class MissionsController {
   constructor(private readonly missionsService: MissionsService) {}
