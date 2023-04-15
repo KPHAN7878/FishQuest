@@ -30,6 +30,7 @@ export const CameraView = ({ navigation }) => {
   const [image, setImage] = useState(null);
   const [currentLocation, setLocation] = useState([1, 2]);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [complete, setComplete] = useState(false);
 
   //location services
   React.useEffect(() => {
@@ -49,13 +50,6 @@ export const CameraView = ({ navigation }) => {
     })();
   }, []);
 
-  let text = "Waiting..";
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (currentLocation) {
-    text = JSON.stringify(currentLocation);
-  }
-
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
     useAxios(
       {
@@ -69,15 +63,11 @@ export const CameraView = ({ navigation }) => {
     );
 
   useEffect(() => {
-    isLoading ? ref.current?.pausePreview() : ref.current?.resumePreview();
-    if (catchError) {
-      setIsLoading(false);
-    }
-
-    if (result && !isLoading) {
-      result["ImageCache"] = image;
-      navigation.navigate("Result", result);
-    }
+    if (catchError) setIsLoading(false);
+    if (result && !isLoading) setComplete(true);
+    isLoading || complete
+      ? ref.current?.pausePreview()
+      : ref.current?.resumePreview();
   }, [result, isLoading, catchError]);
 
   const toggleCameraType = () => {
@@ -85,6 +75,36 @@ export const CameraView = ({ navigation }) => {
       current === CameraType.back ? CameraType.front : CameraType.back
     );
   };
+
+  const accept = () => {
+    result["ImageCache"] = image.base64;
+    navigation.navigate("Result", result);
+    setTimeout(reject, 1000);
+  };
+
+  const reject = () => {
+    setComplete(false);
+    ref.current?.resumePreview();
+  };
+
+  const fishView = (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "flex-end",
+      }}
+    >
+      <Text style={styles.bigText}>Is this a {result?.species}?</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={accept}>
+          <Text style={styles.text}>Yes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={reject}>
+          <Text style={styles.text}>No</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   const uploadToS3 = async (base64Image, Key) => {
     const Bucket = `${S3_BUCKET}/catches`;
@@ -108,29 +128,29 @@ export const CameraView = ({ navigation }) => {
     if (DEV === "true") {
       cache = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
         quality: 0.5,
       });
     } else {
       cache = await ref.current.takePictureAsync({
         base64: true,
-        quality: 0.1,
+        quality: 0.5,
       });
     }
-    if (cache === undefined) {
+    if (cache === undefined || !cache.uri) {
+      setIsLoading(false);
       return;
     }
 
     const resizedImg = await manipulateAsync(
       cache.uri,
-      [{ resize: { width: 640, height: 640 } }], // make sure this matches input tensor dims
+      [{ resize: { width: 640, height: 640 } }],
       { base64: true }
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
     const key = `${Date.now()}.${user.username}.jpg`;
     const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
 
-    setImage(cache.base64);
+    setImage(cache);
 
     const form = new FormData();
     form.append("imageUri", imageUri);
@@ -138,6 +158,7 @@ export const CameraView = ({ navigation }) => {
     form.append("location", currentLocation);
 
     submitCatch({ data: form }).then(() => {
+      setComplete(true);
       setIsLoading(false);
       // uploadToS3(cache.base64, key);
     });
@@ -158,6 +179,30 @@ export const CameraView = ({ navigation }) => {
     );
   }
 
+  const renderBoundingBox = (
+    topPosition,
+    bottomPosition,
+    leftPosition,
+    rightPosition
+  ) => {
+    return (
+      <View style={styles.imageContainer}>
+        <View
+          style={[
+            styles.rectangle,
+            {
+              top: topPosition,
+              bottom: bottomPosition,
+              left: leftPosition,
+              right: rightPosition,
+            },
+          ]}
+        />
+      </View>
+    );
+  };
+
+  // {complete && renderBoundingBox()}
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} type={type} ref={ref}>
@@ -167,7 +212,8 @@ export const CameraView = ({ navigation }) => {
           </View>
         )}
       </Camera>
-      {!isLoading && (
+      {complete && fishView}
+      {!isLoading && !complete && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
             <Text style={styles.text}>Go Back</Text>
@@ -190,7 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   camera: {
-    flex: 1,
+    flex: 5,
   },
   loadingWheel: {
     flex: 1,
@@ -201,9 +247,7 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     flex: 1,
     flexDirection: "row",
-
     alignItems: "center",
-
     postition: "absolute",
     bottom: 0,
     maxHeight: height * 0.15,
@@ -212,10 +256,28 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  bigText: {
+    fontSize: 24,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    backgroundColor: "black",
+  },
   text: {
     fontSize: 18,
     textAlign: "center",
     fontWeight: "bold",
     color: "white",
+  },
+  imageContainer: {
+    width: 300,
+    height: 250,
+    alignSelf: "center",
+  },
+  rectangle: {
+    borderWidth: 3,
+    borderColor: "red",
+    position: "absolute",
   },
 });

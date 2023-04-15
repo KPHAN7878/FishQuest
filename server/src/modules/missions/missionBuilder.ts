@@ -1,5 +1,6 @@
 import { classList } from "../../classifier/imagenet";
 import { MissionEntity } from "./mission.entity";
+import { getXp } from "./missionCompletion";
 import {
   AnyDetail,
   Description,
@@ -238,6 +239,3 @@ export const formMissions = (
 
   return res;
 };
-function getXp(numSpecifiers: Difficulty, difficulty: any): number | undefined {
-  throw new Error("Function not implemented.");
-}

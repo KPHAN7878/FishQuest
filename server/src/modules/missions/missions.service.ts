@@ -143,6 +143,13 @@ export class MissionsService {
     return exp >= Math.min(100 + (level - 1) * 10, 500) ? level + 1 : level;
   }
 
+  levelUpInfo(user: UserEntity): { currentXp: number; nextLevelXp: number } {
+    return {
+      currentXp: user.exp,
+      nextLevelXp: Math.min(100 + (user.level - 1) * 10, 500),
+    };
+  }
+
   async selectMissions(user: UserEntity): Promise<MissionEntity[]> {
     const missions: MissionEntity[] = (await dataSource.query(
       `
