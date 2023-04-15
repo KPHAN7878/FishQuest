@@ -27,6 +27,7 @@ const CommentContainer = ({route, navigation}) => {
   //const navigation = useNavigation();
   const [text, onChangeText] = React.useState();
   const [commentsDB, setComments] = useState();
+  const [isChildBool, setIsChild] = useState();
 
   const {postDetails} = route.params;
 
@@ -45,9 +46,7 @@ const CommentContainer = ({route, navigation}) => {
       type: 'post'
     })
     .then((res) => {
-    //console.log("USERS: " + JSON.stringify(res))
-    console.log("\n\create comment response: " + JSON.stringify(res))
-    //setComments(res.data.comments)
+    console.log("\n\create comment response: " + JSON.stringify(res));
     getComments();
     })
     .catch((error) => {
@@ -57,8 +56,10 @@ const CommentContainer = ({route, navigation}) => {
 
   const getComments = async () => {
 
+    if(!isChildBool) {
     await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",post")
     .then((res) => {
+      console.log("\n\NOOOOOO!!!\n\n")
       console.log("comments: " + JSON.stringify(res) + "\n\n")
       setComments(res.data.comments)
       console.log("comment array: " + commentsDB)
@@ -67,9 +68,27 @@ const CommentContainer = ({route, navigation}) => {
     .catch((error) => {
       console.log(error);
     })
+    }
+    else {
+      await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",comment")
+    .then((res) => {
+      console.log("\n\nYAY!!!\n\n")
+      console.log("comments: " + JSON.stringify(res) + "\n\n")
+      setComments(res.data.comments)
+      console.log("comment array: " + commentsDB)
+      
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+    }
   }
 
   React.useEffect(() => {
+    if (route.params.caption.isChild)
+    {
+      setIsChild(true);
+    }
     getComments();
     // console.log("route: " + JSON.stringify(route.params))
   }, []);
@@ -112,8 +131,9 @@ const CommentContainer = ({route, navigation}) => {
   ///////////////////////////////////////////////////////
 
   return (
-    
+    // <KeyboardAvoidingView style={{flex:1}} behavior="padding">
     <View>
+      
       {console.log("COMMENTS: " + JSON.stringify(route))}
       <View style={styles2.headerBox}>
         <Text style={styles2.fishQuest}>Fish Quest</Text>
@@ -123,7 +143,7 @@ const CommentContainer = ({route, navigation}) => {
         </TouchableOpacity>
       </View>
       <View>
-        <Text style={styles2.postCaption}>{route.params.caption.text}</Text>
+        {!isChildBool ? <Text style={styles2.postCaption}>{route.params.caption.text}</Text> : <View></View>}
         <View
           style={{
             borderBottomColor: 'black',
@@ -134,12 +154,13 @@ const CommentContainer = ({route, navigation}) => {
           }}
         />
       </View>
+
      
 
       <ScrollView style={styles2.comments}>
 
           {commentsDB ? commentsDB.map((comment) => (
-            // <Pressable onPress={() => {navigation.navigate("CommentContainer", caption, )}}>
+            <Pressable onPress={() => {navigation.push("CommentContainer", {caption:{id: comment.id, isChild: true}}, )}}>
             <View>
               {console.log("commentsDB: " + JSON.stringify(commentsDB))}
               <View key={comment.id} style={styles2.comment}>
@@ -160,7 +181,7 @@ const CommentContainer = ({route, navigation}) => {
               </View> */}
               <View style={styles2.line}/>
             </View>
-            // </Pressable>
+            </Pressable>
 
           ))
           :
@@ -187,6 +208,7 @@ const CommentContainer = ({route, navigation}) => {
         </Pressable>
       </View>
     </View>
+    // </KeyboardAvoidingView>
 
  
   );

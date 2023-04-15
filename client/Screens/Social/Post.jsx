@@ -23,6 +23,8 @@ var { width } = Dimensions.get('window')
 
 const Post = ({ post }) => {
 
+  post.isChild = false;
+
   // const [imageUrl, setImageUrl] = React.useState();
   const [valid, setValid] = React.useState(true);
   const [liked, setLike] = React.useState();
