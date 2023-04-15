@@ -2,6 +2,7 @@ import { width, height } from "../../styles";
 import { Camera, CameraType } from "expo-camera";
 import React, { useEffect, useState, useRef, useContext } from "react";
 import {
+  Image,
   Button,
   StyleSheet,
   Text,
@@ -94,7 +95,11 @@ export const CameraView = ({ navigation }) => {
         justifyContent: "flex-end",
       }}
     >
-      <Text style={styles.bigText}>Is this a {result?.species}?</Text>
+      <Text style={styles.headerText}>
+        {result?.species
+          ? `Is this a ${result.species}?`
+          : "No fish detected. Continue without xp?"}
+      </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={accept}>
           <Text style={styles.text}>Yes</Text>
@@ -125,17 +130,22 @@ export const CameraView = ({ navigation }) => {
     setIsLoading(true);
 
     let cache = null;
-    // if (DEV === "true") {
-    //   cache = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //     quality: 0.5,
-    //   });
-    // } else {
-    cache = await ref.current.takePictureAsync({
-      base64: true,
-      quality: 0.5,
-    });
-    // }
+    if (DEV === "true") {
+      cache = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        quality: 0.5,
+      });
+      cache = await manipulateAsync(
+        cache.uri,
+        [{ resize: { width, height } }],
+        { base64: true }
+      );
+    } else {
+      cache = await ref.current.takePictureAsync({
+        base64: true,
+        quality: 0.5,
+      });
+    }
     if (cache === undefined || !cache.uri) {
       setIsLoading(false);
       return;
@@ -189,17 +199,27 @@ export const CameraView = ({ navigation }) => {
     h = Math.ceil(h * yScale);
 
     return (
-      <View
-        style={{
-          position: "absolute",
-          top,
-          left,
-          width: w,
-          height: h,
-          borderColor: "#FFD700",
-          borderWidth: 3,
-        }}
-      />
+      <>
+        <Image
+          source={{ uri: image.uri }}
+          style={{
+            width,
+            position: "absolute",
+            height,
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            top,
+            left,
+            width: w,
+            height: h,
+            borderColor: "#FFD700",
+            borderWidth: 3,
+          }}
+        />
+      </>
     );
   };
 
@@ -247,28 +267,34 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   buttonContainer: {
-    backgroundColor: "black",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     postition: "absolute",
     bottom: 0,
     maxHeight: height * 0.15,
+    paddingBottom: 20,
   },
   button: {
     flex: 1,
     alignItems: "center",
   },
-  bigText: {
-    fontSize: 24,
+  headerText: {
+    fontSize: 22,
     textAlign: "center",
     fontWeight: "bold",
     color: "white",
     paddingTop: 10,
-    backgroundColor: "black",
+    paddingBottom: 10,
+
+    borderWidth: 3,
+    borderColor: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    background: "transparent",
   },
   text: {
-    fontSize: 18,
+    fontSize: 30,
     textAlign: "center",
     fontWeight: "bold",
     color: "white",
