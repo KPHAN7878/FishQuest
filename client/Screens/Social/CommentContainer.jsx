@@ -56,7 +56,7 @@ const CommentContainer = ({route, navigation}) => {
 
   const getComments = async () => {
 
-    if(!isChildBool) {
+    if(!route.params.caption.isChild) {
     await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",post")
     .then((res) => {
       console.log("\n\NOOOOOO!!!\n\n")
@@ -85,11 +85,21 @@ const CommentContainer = ({route, navigation}) => {
   }
 
   React.useEffect(() => {
-    if (route.params.caption.isChild)
-    {
-      setIsChild(true);
-    }
-    getComments();
+    // if (route.params.caption.isChild)
+    // {
+    //   setIsChild(true);
+    // }
+
+    console.log("\n\nUSEFFECT: " + route.params.caption.isChild)
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params.caption.isChild)
+      {
+        setIsChild(true);
+      }
+      console.log("after setchild: " + isChildBool)
+      getComments();
+    });
+    //getComments();
     // console.log("route: " + JSON.stringify(route.params))
   }, []);
 
@@ -160,7 +170,7 @@ const CommentContainer = ({route, navigation}) => {
       <ScrollView style={styles2.comments}>
 
           {commentsDB ? commentsDB.map((comment) => (
-            <Pressable onPress={() => {navigation.push("CommentContainer", {caption:{id: comment.id, isChild: true}}, )}}>
+            <Pressable onPress={() => {navigation.push("CommentContainer", {caption:{id: comment.id, isChild: true}},)}}>
             <View>
               {console.log("commentsDB: " + JSON.stringify(commentsDB))}
               <View key={comment.id} style={styles2.comment}>
