@@ -94,11 +94,15 @@ export class Model {
 
   submitInference = async (
     image: Jimp
-  ): Promise<{ output: number[]; prediction: string | null }> => {
+  ): Promise<{
+    output: number[];
+    prediction: string | null;
+    box: number[];
+  }> => {
     const [inferenceResult, inferenceTime] = await this.inferenceModel(image);
-    const [output, prediction] = inferenceResult;
+    const [output, prediction, box] = inferenceResult;
 
-    return { output, prediction };
+    return { output, prediction, box };
   };
 
   inferenceModel = async (image: Jimp): Promise<[any, number]> => {
@@ -185,20 +189,29 @@ export class Model {
     );
 
     let best: number = -1;
-    classIds.reduce((prev: any, { index: curr, score }: any) => {
-      if (curr in prev) {
-        prev[curr] += 1;
-      } else {
-        prev[curr] = 1;
-      }
-      if (this.opts.verbose) {
-        console.log("Guess: ", classList[curr]);
-        console.log("Score: ", score);
-      }
-      if (prev[best] < prev[curr] || best === -1) best = curr;
-      return prev;
-    }, {});
+    let bestPredIdx: number = -1;
+    classIds.reduce(
+      (prev: any, { index: curr, score }: any, predIdx: number) => {
+        if (curr in prev) {
+          prev[curr] += 1;
+        } else {
+          prev[curr] = 1;
+        }
+        if (this.opts.verbose) {
+          console.log("Guess: ", classList[curr]);
+          console.log("Score: ", score);
+        }
+        if (prev[best] < prev[curr] || best === -1) {
+          best = curr;
+          bestPredIdx = predIdx;
+        }
+        return prev;
+      },
+      {}
+    );
 
-    return [predictions, classList[best]];
+    const box = predictions[bestPredIdx].slice(0, 4);
+    if (this.opts.verbose) console.log("box: ", box);
+    return [predictions, classList[best], box];
   };
 }

@@ -66,7 +66,7 @@ export class CatchService {
       );
       console.log(res);
 
-      return formUser(res);
+      return { ...formUser(res), box: modelOutput.box };
     } else {
       const errors = formErrors([
         {

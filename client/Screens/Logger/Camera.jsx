@@ -1,3 +1,4 @@
+import { width, height } from "../../styles";
 import { Camera, CameraType } from "expo-camera";
 import React, { useEffect, useState, useRef, useContext } from "react";
 import {
@@ -16,7 +17,6 @@ import { S3 } from "../../utils/connection";
 import { UserContext } from "../../Contexts/UserContext";
 import { Buffer } from "buffer";
 import * as ImagePicker from "expo-image-picker";
-import { height } from "../../styles";
 
 import * as Location from "expo-location";
 
@@ -125,17 +125,17 @@ export const CameraView = ({ navigation }) => {
     setIsLoading(true);
 
     let cache = null;
-    if (DEV === "true") {
-      cache = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        quality: 0.5,
-      });
-    } else {
-      cache = await ref.current.takePictureAsync({
-        base64: true,
-        quality: 0.5,
-      });
-    }
+    // if (DEV === "true") {
+    //   cache = await ImagePicker.launchImageLibraryAsync({
+    //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+    //     quality: 0.5,
+    //   });
+    // } else {
+    cache = await ref.current.takePictureAsync({
+      base64: true,
+      quality: 0.5,
+    });
+    // }
     if (cache === undefined || !cache.uri) {
       setIsLoading(false);
       return;
@@ -179,30 +179,30 @@ export const CameraView = ({ navigation }) => {
     );
   }
 
-  const renderBoundingBox = (
-    topPosition,
-    bottomPosition,
-    leftPosition,
-    rightPosition
-  ) => {
+  const renderBoundingBox = (cx, cy, w, h) => {
+    const xScale = width / 640;
+    const yScale = height / 640;
+
+    const top = Math.ceil((cy - h * 0.5) * yScale);
+    const left = Math.ceil((cx - w * 0.5) * xScale);
+    w = Math.ceil(w * xScale);
+    h = Math.ceil(h * yScale);
+
     return (
-      <View style={styles.imageContainer}>
-        <View
-          style={[
-            styles.rectangle,
-            {
-              top: topPosition,
-              bottom: bottomPosition,
-              left: leftPosition,
-              right: rightPosition,
-            },
-          ]}
-        />
-      </View>
+      <View
+        style={{
+          position: "absolute",
+          top,
+          left,
+          width: w,
+          height: h,
+          borderColor: "#FFD700",
+          borderWidth: 3,
+        }}
+      />
     );
   };
 
-  // {complete && renderBoundingBox()}
   return (
     <View style={styles.container}>
       <Camera style={styles.camera} type={type} ref={ref}>
@@ -212,6 +212,9 @@ export const CameraView = ({ navigation }) => {
           </View>
         )}
       </Camera>
+      {complete &&
+        result.box &&
+        renderBoundingBox(...result.box.map((val) => Math.floor(val)))}
       {complete && fishView}
       {!isLoading && !complete && (
         <View style={styles.buttonContainer}>
