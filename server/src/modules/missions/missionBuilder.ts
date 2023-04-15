@@ -51,6 +51,7 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
 
       if (Math.ceil(Math.random() * 5) === 5 && numSpecifiers > 1) {
         detail.bonus = Math.ceil(Math.random() * 50 * numSpecifiers);
+        detail.bonus = getXp(rand, numSpecifiers);
       }
 
       return buildMission(specT, specs, detail);
@@ -237,3 +238,6 @@ export const formMissions = (
 
   return res;
 };
+function getXp(numSpecifiers: Difficulty, difficulty: any): number | undefined {
+  throw new Error("Function not implemented.");
+}

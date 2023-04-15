@@ -14,6 +14,7 @@ import {
 import { formMissions } from "./missionBuilder";
 import { digestProgress, progressCheck, snapshot } from "./missionCompletion";
 import {
+  Difficulty,
   DigestedProgress,
   MAX_MISSIONS,
   MissionEntityPrototype,
@@ -167,9 +168,7 @@ export class MissionsService {
     return missions;
   }
 
-  async missionAssigner(
-    user: UserEntity
-  ): Promise<{ validMissions: any[]; complete: any[] }> {
+  async missionAssigner(user: UserEntity): Promise<any> {
     const missions = await this.selectMissions(user);
 
     const now = new Date();
@@ -193,28 +192,35 @@ export class MissionsService {
       async (
         value: Promise<Record<string, MissionProgress[]>>,
         throwAway: number
-      ): Promise<{ throwAway: number } & DigestedProgress> => {
+      ): Promise<
+        { throwAway: number; difficulty: Difficulty } & DigestedProgress
+      > => {
+        const { difficulty } = missionsLeft[throwAway];
         return {
           throwAway,
           ...digestProgress(
             await value,
-            JSON.parse(missionsLeft[throwAway].specifier) as MissionSpecifier
+            JSON.parse(missionsLeft[throwAway].specifier) as MissionSpecifier,
+            difficulty
           ),
+          difficulty,
         };
       }
     );
+    // for (const v of completionInfo) console.log(await v);
 
     const completions = [];
     for (const v of completionInfo) completions.push(await v);
     const completed = completions.filter((mission) => mission.fullCompletion);
 
     if (completed) {
-      completed.forEach((val: { throwAway: number } & DigestedProgress) => {
-        const { difficulty } = missionsLeft[val.throwAway];
-        const xpValue =
-          val.bonusXp + (val.accumlatedValue - 1) * 25 + difficulty * 100;
-        this.updateUser(user, xpValue);
-      });
+      completed.forEach(
+        (
+          val: { throwAway: number; difficulty: Difficulty } & DigestedProgress
+        ) => {
+          this.updateUser(user, val.totalXp);
+        }
+      );
     }
 
     const more = Math.min(
@@ -242,12 +248,14 @@ export class MissionsService {
       const progress = { ...(await progressAll[i]) };
       const { description, deadline } = missionsLeft[i];
 
-      validMissions.push({ progress, description, deadline });
+      validMissions.push({
+        progress,
+        description,
+        deadline,
+        ...completions[i],
+      });
     }
 
-    return {
-      validMissions,
-      complete: [],
-    };
+    return validMissions;
   }
 }

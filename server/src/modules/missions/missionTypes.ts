@@ -73,6 +73,7 @@ export type MissionProgress = {
   currentValue: number;
   completionValue: number;
   complete: boolean;
+  bonus?: number;
 };
 
 export type MissionEntityPrototype = {
@@ -86,4 +87,6 @@ export type DigestedProgress = {
   accumlatedValue: number;
   fullCompletion: boolean;
   bonusXp: number;
+  baseXp: number;
+  totalXp: number;
 };

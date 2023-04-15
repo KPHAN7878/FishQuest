@@ -9,6 +9,7 @@ import {
   StandardDetail,
   MissionProgress,
   DigestedProgress,
+  Difficulty,
 } from "./missionTypes";
 
 export const snapshot = async (
@@ -79,6 +80,7 @@ export const progressCheck = async (
       user
     );
 
+  // console.log(JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -97,14 +99,12 @@ const diffLocations = async (
     )}'
       `
   )) as { location: number[] }[];
-  console.log(JSON.stringify(lastDate));
-  console.log(new Date());
 
   return details.map((detail): MissionProgress => {
     const currentValue = uniqueDatesAfterSnapshot.length;
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
-    return { currentValue, completionValue, complete };
+    return { currentValue, completionValue, complete, bonus: detail.bonus };
   });
 };
 
@@ -119,7 +119,7 @@ const diffAmountCaught = async (
     const currentValue = ae!.value - value;
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
-    return { currentValue, completionValue, complete };
+    return { currentValue, completionValue, complete, bonus: detail.bonus };
   });
 };
 
@@ -138,7 +138,7 @@ const diffFishSpecies = async (
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
 
-    return { currentValue, completionValue, complete };
+    return { currentValue, completionValue, complete, bonus: detail.bonus };
   });
 };
 
@@ -146,27 +146,42 @@ const weightedValues = (label: string, value: number) => {
   return value;
 };
 
+export const getXp = (value: number, difficulty: Difficulty): number => {
+  return (value - 1) * 25 + difficulty * 100;
+};
+
 export const digestProgress = (
   progress: Record<string, MissionProgress[]>,
-  match: MissionSpecifier
+  match: MissionSpecifier,
+  difficulty: Difficulty
 ): DigestedProgress => {
   const res: DigestedProgress = {
     fullCompletion: true,
     bonusXp: 0,
+    baseXp: 0,
+    totalXp: 0,
     accumlatedValue: 0,
   };
 
   // only return bonus xp for completed portion
   for (const [label, progressDetails] of Object.entries(progress)) {
-    res.fullCompletion &&= progressDetails.reduce(
+    res.fullCompletion = progressDetails.reduce(
       (curr: boolean, mp: MissionProgress, idx: number) => {
-        if (match[label][idx]?.bonus)
-          res.bonusXp += match[label][idx].bonus ?? 0;
-        res.accumlatedValue += weightedValues(label, mp.completionValue);
+        const { details } = match[label];
+        if (details[idx].bonus && mp.complete) {
+          res.bonusXp += details[idx].bonus;
+          return curr;
+        } else if (!details[idx].bonus) {
+          res.accumlatedValue += weightedValues(label, mp.completionValue);
+        }
+
         return curr && mp.complete;
       },
       res.fullCompletion
     );
   }
+
+  res.baseXp = getXp(res.accumlatedValue, difficulty);
+  res.totalXp = res.bonusXp + res.baseXp;
   return res;
 };
