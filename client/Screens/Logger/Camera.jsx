@@ -10,6 +10,13 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
+
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faArrowLeft,
+  faArrowsRotate,
+  faCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import useAxios from "axios-hooks";
 import FormData from "form-data";
 import { manipulateAsync } from "expo-image-manipulator";
@@ -146,6 +153,7 @@ export const CameraView = ({ navigation }) => {
         quality: 0.5,
       });
     }
+
     if (cache === undefined || !cache.uri) {
       setIsLoading(false);
       return;
@@ -239,13 +247,15 @@ export const CameraView = ({ navigation }) => {
       {!isLoading && !complete && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
-            <Text style={styles.text}>Go Back</Text>
+            <FontAwesomeIcon icon={faArrowLeft} color={"white"} size={50} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takeSubmission}>
-            <Text style={styles.text}>Take Pic</Text>
+            <View style={styles.ring}>
+              <FontAwesomeIcon icon={faCircle} color={"white"} size={50} />
+            </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <Text style={styles.text}>Flip Camera</Text>
+            <FontAwesomeIcon icon={faArrowsRotate} color={"white"} size={50} />
           </TouchableOpacity>
         </View>
       )}
@@ -254,12 +264,21 @@ export const CameraView = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  ring: {
+    padding: 2,
+    borderWidth: 3,
+    borderRadius: 100,
+    borderColor: "white",
+  },
   container: {
     flex: 1,
     justifyContent: "flex-end",
   },
   camera: {
-    flex: 5,
+    flex: 1,
+    position: "absolute",
+    width,
+    height,
   },
   loadingWheel: {
     flex: 1,
@@ -291,7 +310,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "white",
     backgroundColor: "rgba(0, 0, 0, 0.8)",
-    background: "transparent",
   },
   text: {
     fontSize: 30,

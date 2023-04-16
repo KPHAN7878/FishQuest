@@ -147,8 +147,8 @@ const buildMission = (
   mission?.details.push(spec) ??
     (mission = {
       details: [spec],
-      call: (details: SpeciesDetail[]): Description[] => {
-        return details.map((detail: SpeciesDetail): Description => {
+      call: (details: AnyDetail[]): Description[] => {
+        return details.map((detail: AnyDetail): Description => {
           return { text: fn(detail) };
         });
       },

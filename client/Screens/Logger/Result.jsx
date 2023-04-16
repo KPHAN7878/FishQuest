@@ -1,9 +1,8 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { setEnabled } from "react-native/Libraries/Performance/Systrace";
-import styles from "../../styles";
-import { height } from "../../styles";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import styles, { height, width } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
+import { AnimatedButton } from "../../Components/Button";
 
 const Result = ({ route, navigation }) => {
   const result = route.params;
@@ -16,7 +15,7 @@ const Result = ({ route, navigation }) => {
     }
   }, [setErrorMessage]);
 
-  return errorMessage ? (
+  const ProblemView = (
     <View
       style={{
         marginTop: height * 0.15,
@@ -34,48 +33,113 @@ const Result = ({ route, navigation }) => {
         <Text style={styles.buttonText}>{"Retake photo"}</Text>
       </Pressable>
       <Text style={{}}>{"Continue without gaining experience"}</Text>
-      <Pressable
+
+      <AnimatedButton
         style={styles.formButton}
-        onPress={() => {
+        next={() => {
           setErrorMessage(null);
         }}
       >
         <Text style={styles.buttonText}>{"Continue"}</Text>
-      </Pressable>
+      </AnimatedButton>
     </View>
-  ) : (
+  );
+
+  const DetailsView = (
     <View
       style={{
-        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: (height - height * 0.1) / 2,
       }}
     >
       <Text
         style={{
-          marginTop: height * 0.15,
-          textAlign: "center",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {}
+        fhasdljfhsdkajfldhsafkjllka
       </Text>
-
-      <Pressable
-        style={styles.formButton}
-        onPress={() => {
-          navigation.navigate("CreatePost", result);
-        }}
-      >
-        <Text style={styles.buttonText}>{"Post Catch"}</Text>
-      </Pressable>
-      <Pressable
-        style={styles.formButton}
-        onPress={() => {
-          navigation.navigate("CatchLogger");
-        }}
-      >
-        <Text style={styles.buttonText}>{"Continue"}</Text>
-      </Pressable>
     </View>
   );
+
+  const NormalView = (
+    <View style={myStyles.parentContainer}>
+      {DetailsView}
+      <View style={myStyles.container}>
+        <View
+          style={[
+            styles.buttonContainer,
+            {
+              backgroundColor: "white",
+              padding: 10,
+              paddingBottom: 15,
+              maxHeight: height * 0.1,
+            },
+          ]}
+        >
+          <AnimatedButton
+            style={myStyles.button}
+            next={() => {
+              navigation.navigate("CreatePost", result);
+            }}
+          >
+            <Text style={{ color: "gray", fontSize: 24, flex: 1, padding: 10 }}>
+              {"Post Catch"}
+            </Text>
+          </AnimatedButton>
+
+          <AnimatedButton
+            style={{ ...myStyles.button }}
+            next={() => {
+              navigation.navigate("CatchLogger");
+            }}
+          >
+            <Text
+              style={{
+                padding: 10,
+                color: "gray",
+                fontSize: 24,
+                flex: 1,
+              }}
+            >
+              {"Continue"}
+            </Text>
+          </AnimatedButton>
+        </View>
+      </View>
+    </View>
+  );
+
+  return errorMessage ? ProblemView : NormalView;
 };
+
+const myStyles = StyleSheet.create({
+  button: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  container: {
+    shadowColor: "gray",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flex: 1,
+    position: "absolute",
+    width,
+    height: height * 0.1,
+    bottom: 0,
+    left: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  parentContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
+  },
+});
 
 export default Result;

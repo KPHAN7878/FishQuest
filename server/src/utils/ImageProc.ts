@@ -81,16 +81,7 @@ export class Model {
     private confidenceThresh: number = 0.3
   ) {
     this.opts = { ...DEFAULT_OPTIONS, ...this.opts };
-    this.loadInferenceSession();
   }
-
-  loadInferenceSession = async () => {
-    if (this.opts?.verbose) console.log("Inference session created");
-    this.session = await InferenceSession.create(
-      MODEL_PATH,
-      this.opts?.inferenceSessionOptions
-    );
-  };
 
   submitInference = async (
     image: Jimp
@@ -99,6 +90,10 @@ export class Model {
     prediction: string | null;
     box: number[];
   }> => {
+    this.session = await InferenceSession.create(
+      MODEL_PATH,
+      this.opts?.inferenceSessionOptions
+    );
     const [inferenceResult, inferenceTime] = await this.inferenceModel(image);
     const [output, prediction, box] = inferenceResult;
 

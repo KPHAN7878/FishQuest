@@ -214,7 +214,6 @@ export class MissionsService {
         };
       }
     );
-    // for (const v of completionInfo) console.log(await v);
 
     const completions = [];
     for (const v of completionInfo) completions.push(await v);
