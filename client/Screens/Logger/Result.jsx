@@ -1,8 +1,18 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Image,
+  ScrollView,
+} from "react-native";
 import styles, { height, width } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { AnimatedButton } from "../../Components/Button";
+
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowRight, faFish } from "@fortawesome/free-solid-svg-icons";
 
 const Result = ({ route, navigation }) => {
   const result = route.params;
@@ -15,65 +25,70 @@ const Result = ({ route, navigation }) => {
     }
   }, [setErrorMessage]);
 
-  const ProblemView = (
-    <View
-      style={{
-        marginTop: height * 0.15,
-      }}
-    >
-      <Text style={styles.fieldError}>
-        {errorMessage ? errorMessage["camera"] : "Something went wrong"}
-      </Text>
-      <Pressable
-        style={styles.formButton}
-        onPress={() => {
-          navigation.goBack();
-        }}
-      >
-        <Text style={styles.buttonText}>{"Retake photo"}</Text>
-      </Pressable>
-      <Text style={{}}>{"Continue without gaining experience"}</Text>
+  const imageView = () => {
+    const viewWidth = Math.ceil(width * 0.8);
+    const viewHeight = Math.ceil(height * 0.5);
 
-      <AnimatedButton
-        style={styles.formButton}
-        next={() => {
-          setErrorMessage(null);
+    return (
+      <View
+        style={{
+          maxWidth: viewWidth,
+          maxHeight: viewHeight,
+          marginTop: 15,
+          borderRadius: 30,
+          borderWidth: 3,
+          borderColor: "lightgray",
+          justifyContent: "center",
+          alignItems: "center",
+          overflow: "hidden",
         }}
       >
-        <Text style={styles.buttonText}>{"Continue"}</Text>
-      </AnimatedButton>
-    </View>
-  );
+        <Image
+          source={{
+            uri: result.image.uri,
+            width: result.image.width,
+            width: viewWidth,
+          }}
+          style={{
+            borderRadius: 30,
+            borderWidth: 3,
+            borderColor: "lightgray",
+            // opacity: 0.25,
+            aspectRatio: result.image.width / result.image.height,
+          }}
+        />
+      </View>
+    );
+  };
 
   const DetailsView = (
     <View
       style={{
         alignItems: "center",
         justifyContent: "center",
-        marginTop: (height - height * 0.1) / 2,
+        margin: 30,
       }}
     >
-      <Text
+      <View
         style={{
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        fhasdljfhsdkajfldhsafkjllka
-      </Text>
+        {imageView()}
+      </View>
     </View>
   );
 
   const NormalView = (
     <View style={myStyles.parentContainer}>
-      {DetailsView}
+      <ScrollView>{DetailsView}</ScrollView>
       <View style={myStyles.container}>
         <View
           style={[
             styles.buttonContainer,
             {
               backgroundColor: "white",
-              padding: 10,
               paddingBottom: 15,
               maxHeight: height * 0.1,
             },
@@ -85,9 +100,10 @@ const Result = ({ route, navigation }) => {
               navigation.navigate("CreatePost", result);
             }}
           >
-            <Text style={{ color: "gray", fontSize: 24, flex: 1, padding: 10 }}>
-              {"Post Catch"}
-            </Text>
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <FontAwesomeIcon icon={faFish} size={25} />
+              <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
+            </View>
           </AnimatedButton>
 
           <AnimatedButton
@@ -96,29 +112,33 @@ const Result = ({ route, navigation }) => {
               navigation.navigate("CatchLogger");
             }}
           >
-            <Text
-              style={{
-                padding: 10,
-                color: "gray",
-                fontSize: 24,
-                flex: 1,
-              }}
-            >
-              {"Continue"}
-            </Text>
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <FontAwesomeIcon icon={faArrowRight} size={25} />
+              <Text
+                style={{
+                  fontSize: 20,
+                  flex: 1,
+                }}
+              >
+                {"Continue"}
+              </Text>
+            </View>
           </AnimatedButton>
         </View>
       </View>
     </View>
   );
 
-  return errorMessage ? ProblemView : NormalView;
+  return NormalView;
 };
 
 const myStyles = StyleSheet.create({
   button: {
     flex: 1,
     alignItems: "center",
+
+    marginVertical: 10,
+    marginHorizontal: 10,
   },
 
   container: {

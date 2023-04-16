@@ -85,7 +85,7 @@ export const CameraView = ({ navigation }) => {
   };
 
   const accept = () => {
-    result["ImageCache"] = image.base64;
+    result["image"] = image;
     navigation.navigate("Result", result);
     setTimeout(reject, 1000);
   };

@@ -23,22 +23,22 @@ const CreatePost = ({ route, navigation }) => {
   const [text, onChangeText] = React.useState("");
 
   const result = route.params;
-  const imageUrl = result.ImageCache;
+  const imageUrl = result.image.uri;
 
   const submitPost = async (catchID) => {
-    console.log("catchId: " + catchID + "\n\ntext: " + text)
+    console.log("catchId: " + catchID + "\n\ntext: " + text);
     await Client.post("post/create", {
       catchId: catchID,
       text: text,
     })
-    .then((res) => {
-    //console.log("USERS: " + JSON.stringify(res))
-    console.log("\n\nsubmit post response: " + res)
-    })
-    .catch((error) => {
-    console.log(error);
-    })
-  }
+      .then((res) => {
+        //console.log("USERS: " + JSON.stringify(res))
+        console.log("\n\nsubmit post response: " + res);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <>
