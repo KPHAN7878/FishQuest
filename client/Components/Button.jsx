@@ -4,14 +4,11 @@ import { useSharedValue } from "react-native-reanimated";
 import { height, width } from "../styles";
 
 export const AnimatedButton = (props) => {
-  const buttonOpacity = useSharedValue(1);
-
   return (
     <TouchableHighlight
       underlayColor={"gray"}
       style={[myStyles.button, props.style]}
       onPress={() => {
-        buttonOpacity.value = 1;
         props.next();
       }}
     >

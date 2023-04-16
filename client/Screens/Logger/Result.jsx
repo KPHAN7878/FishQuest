@@ -10,9 +10,9 @@ import {
 import styles, { height, width } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { AnimatedButton } from "../../Components/Button";
-
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowRight, faFish } from "@fortawesome/free-solid-svg-icons";
+import ImageView from "../../Components/ImageView";
 
 const Result = ({ route, navigation }) => {
   const result = route.params;
@@ -24,42 +24,6 @@ const Result = ({ route, navigation }) => {
       setErrorMessage(errors);
     }
   }, [setErrorMessage]);
-
-  const imageView = () => {
-    const viewWidth = Math.ceil(width * 0.8);
-    const viewHeight = Math.ceil(height * 0.5);
-
-    return (
-      <View
-        style={{
-          maxWidth: viewWidth,
-          maxHeight: viewHeight,
-          marginTop: 15,
-          borderRadius: 30,
-          borderWidth: 3,
-          borderColor: "lightgray",
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-        }}
-      >
-        <Image
-          source={{
-            uri: result.image.uri,
-            width: result.image.width,
-            width: viewWidth,
-          }}
-          style={{
-            borderRadius: 30,
-            borderWidth: 3,
-            borderColor: "lightgray",
-            // opacity: 0.25,
-            aspectRatio: result.image.width / result.image.height,
-          }}
-        />
-      </View>
-    );
-  };
 
   const DetailsView = (
     <View
@@ -75,7 +39,7 @@ const Result = ({ route, navigation }) => {
           justifyContent: "center",
         }}
       >
-        {imageView()}
+        <ImageView result={result} />
       </View>
     </View>
   );
