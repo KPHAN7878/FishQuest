@@ -1,22 +1,30 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Image,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Keyboard } from "react-native";
 import styles, { height, width } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { AnimatedButton } from "../../Components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowRight, faFish } from "@fortawesome/free-solid-svg-icons";
+import { InputField } from "../../Components/InputField";
 import ImageView from "../../Components/ImageView";
+
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  withTiming,
+  withDelay,
+} from "react-native-reanimated";
+
+const DELAY_AMOUNT = 250;
 
 const Result = ({ route, navigation }) => {
   const result = route.params;
   const [errorMessage, setErrorMessage] = React.useState(null);
+  const [timeDate, setTimeDate] = React.useState(new Date());
+  const [fishName, setFishName] = React.useState("");
+  const [selected, setSelected] = React.useState(true);
+  const [screenState, setScreenState] = React.useState(0);
+  const fishNameRef = React.createRef();
 
   React.useEffect(() => {
     if (result.errors) {
@@ -25,75 +33,139 @@ const Result = ({ route, navigation }) => {
     }
   }, [setErrorMessage]);
 
-  const DetailsView = (
-    <View
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        margin: 30,
+  const animateDetails = useAnimatedStyle(() => {
+    const interpolation = interpolate(screenState, [0, 1], [0, -100]);
+
+    return {
+      transform: [{ translateY: withTiming(interpolation, { duration: 250 }) }],
+    };
+  });
+
+  const InputFish = (
+    <InputField
+      {...{
+        onChangeText: (text) => setFishName(text),
+        onFocus: () => {
+          setScreenState(1);
+        },
+        onSubmitEditing: () => {
+          setScreenState(0);
+          Keyboard.dismiss();
+        },
+        error: errorMessage,
+        placeholder: "Fish name",
+        name: "species",
+        ref: fishNameRef,
       }}
-    >
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <ImageView result={result} />
-      </View>
-    </View>
+      styleView={{ flex: 1 }}
+      pretext={"Enter the name of the fish"}
+    />
   );
 
-  const NormalView = (
-    <View style={myStyles.parentContainer}>
-      <ScrollView>{DetailsView}</ScrollView>
-      <View style={myStyles.container}>
-        <View
-          style={[
-            styles.buttonContainer,
-            {
-              backgroundColor: "white",
-              paddingBottom: 15,
-              maxHeight: height * 0.1,
-            },
-          ]}
-        >
-          <AnimatedButton
-            style={myStyles.button}
-            next={() => {
-              navigation.navigate("CreatePost", result);
-            }}
-          >
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <FontAwesomeIcon icon={faFish} size={25} />
-              <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
-            </View>
-          </AnimatedButton>
-
-          <AnimatedButton
-            style={{ ...myStyles.button }}
-            next={() => {
-              navigation.navigate("CatchLogger");
-            }}
-          >
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <FontAwesomeIcon icon={faArrowRight} size={25} />
-              <Text
-                style={{
-                  fontSize: 20,
-                  flex: 1,
-                }}
-              >
-                {"Continue"}
-              </Text>
-            </View>
-          </AnimatedButton>
+  const DetailsView = (
+    <Animated.View style={[myStyles.split, animateDetails]}>
+      {!result.species ? (
+        <View style={{ display: "flex", flexDirection: "row" }}>
+          {InputFish}
         </View>
+      ) : (
+        <Text
+          style={{
+            fontWeight: "bold",
+            fontSize: 24,
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          {`You caught a ${result.species}!`}
+        </Text>
+      )}
+      <View style={{ marginTop: 50, flexDirection: "row" }}>
+        <Text style={myStyles.detailText}>
+          Time: {timeDate.toLocaleTimeString()}
+        </Text>
+
+        <Text style={myStyles.detailText}>
+          Date: {timeDate.toLocaleDateString()}
+        </Text>
+      </View>
+
+      <View style={{ marginTop: 50, flexDirection: "row" }}>
+        <Text style={myStyles.detailText}>Location: {result.location}</Text>
+      </View>
+    </Animated.View>
+  );
+
+  const ChoiceButtons = (
+    <View style={myStyles.container}>
+      <View
+        style={[
+          styles.buttonContainer,
+          {
+            backgroundColor: "white",
+            paddingBottom: 15,
+            maxHeight: height * 0.1,
+          },
+        ]}
+      >
+        <AnimatedButton
+          style={myStyles.button}
+          next={() => {
+            navigation.navigate("CreatePost", result);
+          }}
+        >
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <FontAwesomeIcon icon={faFish} size={25} />
+            <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
+          </View>
+        </AnimatedButton>
+
+        <AnimatedButton
+          style={{ ...myStyles.button }}
+          next={() => {
+            navigation.navigate("CatchLogger");
+          }}
+        >
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <FontAwesomeIcon icon={faArrowRight} size={25} />
+            <Text
+              style={{
+                fontSize: 20,
+                flex: 1,
+              }}
+            >
+              {"Continue"}
+            </Text>
+          </View>
+        </AnimatedButton>
       </View>
     </View>
   );
 
-  return NormalView;
+  const FullView = (
+    <View style={myStyles.parentContainer}>
+      <ScrollView>
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            margin: 30,
+            marginTop: selected ? 50 : 0,
+          }}
+        >
+          <ImageView
+            delayAnimationAmount={DELAY_AMOUNT}
+            setter={(select) => setSelected(select)}
+            image={result.image}
+          />
+        </View>
+        {selected ? DetailsView : <></>}
+      </ScrollView>
+      {ChoiceButtons}
+    </View>
+  );
+
+  return FullView;
 };
 
 const myStyles = StyleSheet.create({
@@ -120,9 +192,32 @@ const myStyles = StyleSheet.create({
     alignItems: "center",
   },
 
+  split: {
+    backgroundColor: "white",
+    height: "100%",
+    shadowColor: "gray",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    display: "flex",
+    flexDirection: "column",
+    alignSelf: "stretch",
+    padding: 20,
+  },
+
+  resultText: {
+    flex: 1,
+    fontSize: 20,
+  },
+
   parentContainer: {
     flex: 1,
+    display: "flex",
     justifyContent: "flex-start",
+  },
+  detailText: {
+    flex: 1,
+    fontSize: 18,
+    textAlign: "center",
   },
 });
 

@@ -2,54 +2,95 @@ import { height, width } from "../styles";
 import React from "react";
 import { View, Image, TouchableHighlight } from "react-native";
 
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  withTiming,
+  withDelay,
+} from "react-native-reanimated";
+
+const viewWidth = Math.ceil(width * 0.8);
+const viewHeight = Math.ceil(height * 0.5);
+const DELAY_AMOUNT = 250;
+
 const ImageView = (props) => {
-  const viewWidth = Math.ceil(width * 0.8);
-  const viewHeight = Math.ceil(height * 0.5);
-  const { image } = props.result;
+  const { image } = props;
   const [selected, setSelected] = React.useState(false);
+  const [buttonWidth, setButtonWidth] = React.useState(1);
+  const [buttonHeight, setButtonHeight] = React.useState(1);
+  const [borderRadius, setBorderRadius] = React.useState(true);
+  const addedDelay = props.delayAnimationAmount ?? 0;
+
+  const interpolateWidth = interpolate(buttonWidth, [0, 1], [width, viewWidth]);
+
+  const animateView = useAnimatedStyle(() => {
+    const interpolateHeight = interpolate(
+      buttonHeight,
+      [0, 1],
+      [height, viewHeight]
+    );
+
+    const timeWidth = withTiming(interpolateWidth, { duration: DELAY_AMOUNT });
+    const delayWidth = withDelay(DELAY_AMOUNT, timeWidth);
+
+    return {
+      maxWidth: selected ? timeWidth : delayWidth,
+      maxHeight: withTiming(interpolateHeight, { duration: DELAY_AMOUNT }),
+    };
+  });
+
+  const animateImage = useAnimatedStyle(() => {
+    const timeWidth = withTiming(interpolateWidth, { duration: DELAY_AMOUNT });
+    return {
+      width: timeWidth,
+    };
+  });
 
   return (
     <TouchableHighlight
       underlayColor={"black"}
       activeOpacity={0.6}
       style={{
-        marginTop: selected ? 0 : 15,
-        borderRadius: 5,
         flex: 1,
         alignItems: "center",
-        borderRadius: 30,
         overflow: "hidden",
+        borderRadius: borderRadius ? 30 : 0,
       }}
       onPress={() => {
-        setSelected(!selected);
+        setTimeout(() => {
+          props.setter(selected);
+          setSelected(!selected);
+          setButtonWidth(buttonWidth ? 0 : 1);
+          setButtonHeight(buttonHeight ? 0 : 1);
+          setBorderRadius(!borderRadius);
+        }, addedDelay);
       }}
     >
-      <View
-        style={{
-          maxWidth: selected ? width : viewWidth,
-          maxHeight: selected ? height : viewHeight,
-          borderRadius: 30,
-          borderWidth: selected ? 0 : 3,
-          borderColor: "lightgray",
-          justifyContent: selected ? undefined : "center",
-          alignItems: selected ? undefined : "center",
-          overflow: "hidden",
-        }}
+      <Animated.View
+        elevation={5}
+        style={[
+          {
+            borderRadius: borderRadius ? 30 : 0,
+            borderColor: "lightgray",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          },
+          animateView,
+        ]}
       >
-        <Image
+        <Animated.Image
           source={{
             uri: image.uri,
-            width: selected ? width : viewWidth,
           }}
-          style={{
-            borderRadius: 30,
-            borderWidth: 3,
-            borderWidth: selected ? 3 : 1,
-            borderColor: "lightgray",
-            aspectRatio: image.width / image.height,
-          }}
+          style={[
+            {
+              aspectRatio: image.width / image.height,
+            },
+            animateImage,
+          ]}
         />
-      </View>
+      </Animated.View>
     </TouchableHighlight>
   );
 };

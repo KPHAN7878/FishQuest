@@ -17,7 +17,7 @@ export const InputField = React.forwardRef((props, ref) => {
   }, [props]);
 
   return (
-    <View>
+    <View style={field.styleView}>
       {field.pretext !== undefined && (
         <Text style={styles.pretext}>{field.pretext}</Text>
       )}
