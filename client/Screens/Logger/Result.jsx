@@ -27,6 +27,19 @@ const Result = ({ route, navigation }) => {
   const fishNameRef = React.createRef();
 
   React.useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardWillHide",
+      () => {
+        setScreenState(0);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  React.useEffect(() => {
     if (result.errors) {
       const errors = toErrorMap(result.errors);
       setErrorMessage(errors);
@@ -47,10 +60,6 @@ const Result = ({ route, navigation }) => {
         onChangeText: (text) => setFishName(text),
         onFocus: () => {
           setScreenState(1);
-        },
-        onSubmitEditing: () => {
-          setScreenState(0);
-          Keyboard.dismiss();
         },
         error: errorMessage,
         placeholder: "Fish name",
@@ -80,18 +89,28 @@ const Result = ({ route, navigation }) => {
           {`You caught a ${result.species}!`}
         </Text>
       )}
-      <View style={{ marginTop: 50, flexDirection: "row" }}>
-        <Text style={myStyles.detailText}>
-          Time: {timeDate.toLocaleTimeString()}
-        </Text>
+      <View
+        style={{
+          marginHorizontal: 20,
+          marginBottom: height * 0.1,
+          marginTop: 25,
+        }}
+      >
+        <View style={{ flexDirection: "row" }}>
+          <Text style={[myStyles.detailText, { textAlign: "left" }]}>
+            Time: {timeDate.toLocaleTimeString()}
+          </Text>
 
-        <Text style={myStyles.detailText}>
-          Date: {timeDate.toLocaleDateString()}
-        </Text>
-      </View>
+          <Text style={[myStyles.detailText, { textAlign: "right" }]}>
+            Date: {timeDate.toLocaleDateString()}
+          </Text>
+        </View>
 
-      <View style={{ marginTop: 50, flexDirection: "row" }}>
-        <Text style={myStyles.detailText}>Location: {result.location}</Text>
+        <View style={{ marginTop: 50, flexDirection: "row" }}>
+          <Text style={[myStyles.detailText, { textAlign: "left" }]}>
+            Location: {result.location}
+          </Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -208,7 +227,6 @@ const myStyles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
   },
-
   parentContainer: {
     flex: 1,
     display: "flex",

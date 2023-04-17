@@ -3,6 +3,9 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import styles, { height, width } from "../../styles";
 import { AnimatedButton } from "../../Components/Button";
 
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
+
 const Logger = ({ navigation }) => {
   const ToCamera = (
     <View style={myStyles.container}>
@@ -20,14 +23,23 @@ const Logger = ({ navigation }) => {
               padding: 10,
               paddingBottom: 15,
               maxHeight: height * 0.1,
+              flexDirection: "row",
             },
           ]}
         >
-          <Text
-            style={{ color: "", fontSize: 24, textAlign: "center", flex: 1 }}
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            {"Submit a Catch"}
-          </Text>
+            <FontAwesomeIcon icon={faCamera} size={25} />
+            <Text
+              style={{
+                fontSize: 20,
+                flex: 1,
+              }}
+            >
+              {"Submit a Catch"}
+            </Text>
+          </View>
         </View>
       </AnimatedButton>
     </View>

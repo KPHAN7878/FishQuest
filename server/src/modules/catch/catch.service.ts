@@ -75,7 +75,7 @@ export class CatchService {
           field: "camera",
         },
       ]);
-      return { errors };
+      return { errors, location: finalArr };
     }
   }
 

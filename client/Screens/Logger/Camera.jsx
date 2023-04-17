@@ -247,15 +247,15 @@ export const CameraView = ({ navigation }) => {
       {!isLoading && !complete && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={navigation.goBack}>
-            <FontAwesomeIcon icon={faArrowLeft} color={"white"} size={50} />
+            <FontAwesomeIcon icon={faArrowLeft} color={"white"} size={40} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takeSubmission}>
             <View style={styles.ring}>
-              <FontAwesomeIcon icon={faCircle} color={"white"} size={50} />
+              <FontAwesomeIcon icon={faCircle} color={"white"} size={60} />
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-            <FontAwesomeIcon icon={faArrowsRotate} color={"white"} size={50} />
+            <FontAwesomeIcon icon={faArrowsRotate} color={"white"} size={40} />
           </TouchableOpacity>
         </View>
       )}
