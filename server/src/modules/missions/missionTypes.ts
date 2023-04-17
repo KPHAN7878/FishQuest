@@ -74,6 +74,7 @@ export type MissionProgress = {
   completionValue: number;
   complete: boolean;
   bonus?: number;
+  label: string;
 };
 
 export type MissionEntityPrototype = {

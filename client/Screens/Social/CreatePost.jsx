@@ -23,6 +23,7 @@ const CreatePost = ({ route, navigation }) => {
   const captionRef = React.createRef();
 
   const result = route.params;
+  console.log(result.catchId);
 
   React.useEffect(() => {
     const keyboardDidHideListener = Keyboard.addListener(
@@ -86,7 +87,7 @@ const CreatePost = ({ route, navigation }) => {
         <AnimatedButton
           style={{ ...myStyles.button }}
           next={() => {
-            submitPost(result.id);
+            submitPost(result.catchId);
             navigation.navigate("CatchLogger");
           }}
         >
@@ -137,9 +138,6 @@ const CreatePost = ({ route, navigation }) => {
 
                 onFocus: () => {
                   setScreenState(1);
-                },
-                onSubmitEditing: () => {
-                  Keyboard.dismiss();
                 },
                 error: errorMessage,
                 placeholder: "Type here",

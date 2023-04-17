@@ -14,6 +14,7 @@ import Animated, {
   withTiming,
   withDelay,
 } from "react-native-reanimated";
+import Missions from "../Missions/Missions";
 
 const DELAY_AMOUNT = 250;
 
@@ -71,28 +72,43 @@ const Result = ({ route, navigation }) => {
     />
   );
 
+  const Progress = (
+    <View
+      style={{
+        borderBottomWidth: 1,
+        marginVertical: 25,
+      }}
+    >
+      <Text style={myStyles.header}>Progress</Text>
+    </View>
+  );
+
   const DetailsView = (
     <Animated.View style={[myStyles.split, animateDetails]}>
       {!result.species ? (
-        <View style={{ display: "flex", flexDirection: "row" }}>
+        <View
+          stle={{
+            display: "flex",
+            flexDirection: "row",
+            borderBottomWidth: 1,
+          }}
+        >
           {InputFish}
         </View>
       ) : (
-        <Text
+        <View
           style={{
-            fontWeight: "bold",
-            fontSize: 24,
-            width: "100%",
-            textAlign: "center",
+            borderBottomWidth: 1,
           }}
         >
-          {`You caught a ${result.species}!`}
-        </Text>
+          <Text style={myStyles.header}>
+            {`You caught a ${result.species}!`}
+          </Text>
+        </View>
       )}
       <View
         style={{
           marginHorizontal: 20,
-          marginBottom: height * 0.1,
           marginTop: 25,
         }}
       >
@@ -106,12 +122,16 @@ const Result = ({ route, navigation }) => {
           </Text>
         </View>
 
-        <View style={{ marginTop: 50, flexDirection: "row" }}>
-          <Text style={[myStyles.detailText, { textAlign: "left" }]}>
-            Location: {result.location}
-          </Text>
-        </View>
+        {
+          //<View style={{ marginTop: 50, flexDirection: "row" }}>
+          //    <Text style={[myStyles.detailText, { textAlign: "left" }]}>
+          //      Location: {result.location}
+          //   </Text>
+          // </View>
+        }
       </View>
+      {Progress}
+      <Missions navigation={navigation} />
     </Animated.View>
   );
 
@@ -213,7 +233,6 @@ const myStyles = StyleSheet.create({
 
   split: {
     backgroundColor: "white",
-    height: "100%",
     shadowColor: "gray",
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -221,6 +240,9 @@ const myStyles = StyleSheet.create({
     flexDirection: "column",
     alignSelf: "stretch",
     padding: 20,
+    height: "100%",
+
+    marginBottom: height * 0.1,
   },
 
   resultText: {
@@ -235,6 +257,12 @@ const myStyles = StyleSheet.create({
   detailText: {
     flex: 1,
     fontSize: 18,
+    textAlign: "center",
+  },
+  header: {
+    fontWeight: "bold",
+    fontSize: 24,
+    width: "100%",
     textAlign: "center",
   },
 });

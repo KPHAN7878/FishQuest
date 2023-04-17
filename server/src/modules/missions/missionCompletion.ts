@@ -104,7 +104,13 @@ const diffLocations = async (
     const currentValue = uniqueDatesAfterSnapshot.length;
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
-    return { currentValue, completionValue, complete, bonus: detail.bonus };
+    return {
+      currentValue,
+      completionValue,
+      complete,
+      bonus: detail.bonus,
+      label: completionValue > 1 ? "locations" : "location",
+    };
   });
 };
 
@@ -119,7 +125,13 @@ const diffAmountCaught = async (
     const currentValue = ae!.value - value;
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
-    return { currentValue, completionValue, complete, bonus: detail.bonus };
+    return {
+      currentValue,
+      completionValue,
+      complete,
+      bonus: detail.bonus,
+      label: "fish",
+    };
   });
 };
 
@@ -138,7 +150,13 @@ const diffFishSpecies = async (
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
 
-    return { currentValue, completionValue, complete, bonus: detail.bonus };
+    return {
+      currentValue,
+      completionValue,
+      complete,
+      bonus: detail.bonus,
+      label: detail.species!,
+    };
   });
 };
 

@@ -6,96 +6,119 @@ import {
   FlatList,
   Modal,
   Pressable,
+  ScrollView,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import { FontFamily } from "../../GlobalStyles";
+import { Client } from "../../utils/connection";
 
-const MISSIONS_DATA = [
-  {
-    id: 1,
-    title: "New Fishing Spot",
-    description: "Catch a fish in a new location to earn +25xp",
-    progressPercentage: 0.0,
-  },
-  {
-    id: 2,
-    title: "New Species Caught",
-    description: "Catch a new species to earn +50xp",
-    progressPercentage: 1,
-  },
-  {
-    id: 3,
-    title: "Every 5 Fish",
-    description: "Catch 5 fish to earn +100xp",
-    progressPercentage: 0.2,
-  },
-];
-
-const Missions = () => {
+const Missions = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(true);
+  const [items, setItems] = useState();
 
-  const renderItem = ({ item }) => (
-    <View>
-      <View style={styles.missionBox}>
-        <View style={styles.missionItem}>
-          <Text style={styles.missionTitle}>{item.title}</Text>
-          <Text style={styles.missionDescription}>{item.description}</Text>
-          <Progress.Bar
-            progress={item.progressPercentage}
-            width={200}
-            height={10}
-          />
-          <Text>{item.progressPercentage * 100}%</Text>
-        </View>
-      </View>
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      Client.get("mission", {}).then(({ data }) => {
+        console.log(data);
+        setItems(data);
+      });
+    });
+    return unsubscribe;
+  }, [navigation]);
 
-      {/* The popup for mission completion: */}
-      <View style={{}}>
-        {(() => {
-          if (item.progressPercentage == 1) {
+  const renderItem = (item) => (
+    <View style={styles.missionBox}>
+      <View style={styles.missionItem}>
+        <Text style={styles.missionTitle}>{item.description}</Text>
+        {Object.entries(item.progress).map(([_, details], index) => {
+          return details.map((info, index) => {
+            const percent = info.currentValue / info.completionValue;
             return (
-              <View style={{ margin: 0 }}>
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={modalVisible}
+              <View key={index}>
+                <Text style={styles.missionDescription}>
+                  {`${info.completionValue} ${info.label}`}
+                </Text>
+                <Progress.Bar
+                  color={info.complete ? "green" : undefined}
+                  progress={percent}
+                  width={200}
+                  height={10}
+                />
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignContent: "center",
+                  }}
                 >
-                  <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                      <Text style={styles.modalText}>
-                        Congrats! You completed this mission!
-                      </Text>
-                      <Pressable
-                        style={[styles.button, styles.buttonClose]}
-                        onPress={() => setModalVisible(!modalVisible)}
-                      >
-                        <Text style={styles.textStyle}>Continue</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </Modal>
+                  <Text
+                    style={{ fontWeight: info.complete ? "bold" : undefined }}
+                  >
+                    {info.complete ? "completed" : `${percent * 100}% complete`}
+                  </Text>
+                  <Text style={{ marginLeft: 10 }}>
+                    {info.bonus ? `+${info.bonus} bonus xp` : ""}
+                  </Text>
+                </View>
               </View>
             );
-          }
-        })()}
+          });
+        })}
       </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.missions}>Level 1</Text>
-      <Text style={styles.xp}>0/100 xp</Text>
-      <FlatList
-        data={MISSIONS_DATA}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.missionsList}
-        e
-      />
-    </View>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.missions}>Level 1</Text>
+        <Text style={styles.xp}>0/100 xp</Text>
+        {items ? (
+          items.map((item, index) => {
+            return (
+              <View style={styles.missionsList} key={index}>
+                {renderItem(item)}
+              </View>
+            );
+          })
+        ) : (
+          <></>
+        )}
+      </View>
+    </ScrollView>
   );
 };
+
+// <View style={{}}>
+//   {(() => {
+//     if (item.progressPercentage == 1) {
+//       return (
+//         <View style={{ margin: 0 }}>
+//           <Modal
+//             animationType="slide"
+//             transparent={true}
+//             visible={modalVisible}
+//           >
+//             <View style={styles.centeredView}>
+//               <View style={styles.modalView}>
+//                 <Text style={styles.modalText}>
+//                   Congrats! You completed this mission!
+//                 </Text>
+//                 <Pressable
+//                   style={[styles.button, styles.buttonClose]}
+//                   onPress={() => setModalVisible(!modalVisible)}
+//                 >
+//                   <Text style={styles.textStyle}>Continue</Text>
+//                 </Pressable>
+//               </View>
+//             </View>
+//           </Modal>
+//         </View>
+//       );
+//     }
+//   })()}
+// </View>;
 
 const styles = StyleSheet.create({
   container: {
@@ -111,7 +134,6 @@ const styles = StyleSheet.create({
   missions: {
     alignSelf: "center",
     fontSize: 40,
-    marginTop: 40,
     fontFamily: FontFamily.interRegular,
   },
   xp: {
@@ -126,13 +148,11 @@ const styles = StyleSheet.create({
   missionsList: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    marginTop: 50,
   },
   missionBox: {
     backgroundColor: "#c2e4f2",
     padding: 15,
     borderRadius: 8,
-    marginBottom: 20,
     alignItems: "center",
   },
   missionItem: {
@@ -140,13 +160,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   missionTitle: {
-    fontSize: 18,
+    textAlign: "center",
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   missionDescription: {
-    fontSize: 14,
-    marginBottom: 15,
+    fontSize: 18,
+    marginVertical: 15,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   footer: {
     flexDirection: "row",

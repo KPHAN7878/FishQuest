@@ -14,7 +14,7 @@ import { exclude, formUser } from "../../utils/formEntity";
 
 @Injectable()
 export class CatchService {
-  private classifier: Model = new Model({ verbose: false });
+  private classifier: Model = new Model({ verbose: true });
   constructor(
     @InjectRepository(CatchEntity)
     private readonly catchRepository: Repository<CatchEntity>,
@@ -64,7 +64,6 @@ export class CatchService {
           [["prediction", "modelOutput"]]
         )
       );
-      console.log(res);
 
       return { ...formUser(res), box: modelOutput.box };
     } else {
