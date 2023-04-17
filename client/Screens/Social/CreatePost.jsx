@@ -23,7 +23,6 @@ const CreatePost = ({ route, navigation }) => {
   const captionRef = React.createRef();
 
   const result = route.params;
-  console.log(result.catchId);
 
   React.useEffect(() => {
     const keyboardDidHideListener = Keyboard.addListener(

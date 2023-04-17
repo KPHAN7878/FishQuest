@@ -13,6 +13,12 @@ export type MissionValueSnapshot = {
   };
 };
 
+export type UserExpInfo = {
+  currentLevel: number;
+  currentXp: number;
+  nextLevelXp: number;
+};
+
 export type StandardDetail = {
   value: number;
   bonus?: number;

@@ -3,28 +3,34 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
-  Modal,
-  Pressable,
+  ActivityIndicator,
   ScrollView,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import { FontFamily } from "../../GlobalStyles";
 import { Client } from "../../utils/connection";
+import toDifficultyMap from "../../utils/toDifficultyMap";
 
 const Missions = ({ navigation }) => {
-  const [modalVisible, setModalVisible] = useState(true);
   const [items, setItems] = useState();
+  const [exp, setExp] = useState();
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      Client.get("mission", {}).then(({ data }) => {
-        console.log(data);
-        setItems(data);
-      });
+      Client.get("mission", {})
+        .then(({ data }) => {
+          setItems(data);
+        })
+        .then(() => {
+          Client.get("mission/experience", {}).then(({ data }) => {
+            setExp(data);
+          });
+        });
     });
     return unsubscribe;
   }, [navigation]);
+
+  React.useEffect(() => {}, [exp]);
 
   const renderItem = (item) => (
     <View style={styles.missionBox}>
@@ -65,27 +71,60 @@ const Missions = ({ navigation }) => {
             );
           });
         })}
+
+        <View style={{ marginTop: 20, flexDirection: "row" }}>
+          <Text
+            style={{ textAlign: "left", flex: 1 }}
+          >{`Difficulty: ${toDifficultyMap(item.difficulty)}`}</Text>
+
+          <Text
+            style={{ textAlign: "right", flex: 1 }}
+          >{`+${item.totalXp} xp`}</Text>
+        </View>
       </View>
     </View>
   );
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Text style={styles.missions}>Level 1</Text>
-        <Text style={styles.xp}>0/100 xp</Text>
-        {items ? (
-          items.map((item, index) => {
-            return (
-              <View style={styles.missionsList} key={index}>
-                {renderItem(item)}
-              </View>
-            );
-          })
-        ) : (
-          <></>
-        )}
-      </View>
+    <ScrollView
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        backgroundColor: "white",
+      }}
+    >
+      {!exp || !items ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator
+            size="large"
+            style={{ flex: 1, justifyContent: "center" }}
+          />
+        </View>
+      ) : (
+        <View style={styles.container}>
+          <Text style={styles.missions}>Level {exp?.currentLevel ?? ""}</Text>
+          <Text style={styles.xp}>
+            {exp?.currentXp ?? ""}/{exp?.nextLevelXp ?? ""} xp
+          </Text>
+          {items ? (
+            items.map((item, index) => {
+              return (
+                <View style={styles.missionsList} key={index}>
+                  {renderItem(item)}
+                </View>
+              );
+            })
+          ) : (
+            <></>
+          )}
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -122,6 +161,7 @@ const Missions = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 10,
     flex: 1,
     backgroundColor: "#fff",
   },

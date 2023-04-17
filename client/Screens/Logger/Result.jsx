@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, Keyboard } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Keyboard,
+  Platform,
+} from "react-native";
 import styles, { height, width } from "../../styles";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { AnimatedButton } from "../../Components/Button";
@@ -189,7 +196,7 @@ const Result = ({ route, navigation }) => {
             alignItems: "center",
             justifyContent: "center",
             margin: 30,
-            marginTop: selected ? 50 : 0,
+            marginVertical: selected ? 50 : 0,
           }}
         >
           <ImageView
@@ -198,7 +205,7 @@ const Result = ({ route, navigation }) => {
             image={result.image}
           />
         </View>
-        {selected ? DetailsView : <></>}
+        {DetailsView}
       </ScrollView>
       {ChoiceButtons}
     </View>

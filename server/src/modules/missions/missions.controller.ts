@@ -12,4 +12,9 @@ export class MissionsController {
   async createPost(@Req() { user }: Ctx) {
     return await this.missionsService.missionAssigner(user);
   }
+
+  @Get("experience")
+  async experience(@Req() { user }: Ctx) {
+    return this.missionsService.levelUpInfo(user);
+  }
 }
