@@ -114,6 +114,12 @@ export class CatchService {
     };
   }
 
+  async getAllMaps(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
+    return {
+      catches: await CatchEntity.find({ relations: ["user", "prediction"] }),
+    }; // {where: ... }
+  }
+
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {
     const catchEntry = await CatchEntity.findOne({
       where: { id },

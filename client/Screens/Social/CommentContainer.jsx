@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color } from "../../GlobalStyles";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Client } from "../../utils/connection";
+import axios from "axios";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -24,9 +26,82 @@ const windowHeight = Dimensions.get("window").height;
 const CommentContainer = ({route, navigation}) => {
   //const navigation = useNavigation();
   const [text, onChangeText] = React.useState();
+  const [commentsDB, setComments] = useState();
+  const [isChildBool, setIsChild] = useState();
 
-  const {caption} = route.params;
+  const {postDetails} = route.params;
 
+  const submitComment = async () => {
+
+    console.log("in submit comment function")
+    console.log("commentableId: " + route.params.caption.id)
+    console.log("text: " + text)
+    
+    await Client.post("comment", {
+      // commentableId: route.params.caption.id,
+      // text: text,
+      // type: 'comment'
+      commentableId: route.params.caption.id,
+      text: text,
+      type: 'post'
+    })
+    .then((res) => {
+    console.log("\n\create comment response: " + JSON.stringify(res));
+    getComments();
+    })
+    .catch((error) => {
+    console.log("error comment: " + error);
+    })
+  }
+
+  const getComments = async () => {
+
+    if(!route.params.caption.isChild) {
+    await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",post")
+    .then((res) => {
+      console.log("\n\NOOOOOO!!!\n\n")
+      console.log("comments: " + JSON.stringify(res) + "\n\n")
+      setComments(res.data.comments)
+      console.log("comment array: " + commentsDB)
+      
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+    }
+    else {
+      await Client.get("comment/get-commentsV2/100," + route.params.caption.id + ",comment")
+    .then((res) => {
+      console.log("\n\nYAY!!!\n\n")
+      console.log("comments: " + JSON.stringify(res) + "\n\n")
+      setComments(res.data.comments)
+      console.log("comment array: " + commentsDB)
+      
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+    }
+  }
+
+  React.useEffect(() => {
+    // if (route.params.caption.isChild)
+    // {
+    //   setIsChild(true);
+    // }
+
+    console.log("\n\nUSEFFECT: " + route.params.caption.isChild)
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params.caption.isChild)
+      {
+        setIsChild(true);
+      }
+      console.log("after setchild: " + isChildBool)
+      getComments();
+    });
+    //getComments();
+    // console.log("route: " + JSON.stringify(route.params))
+  }, []);
 
   //TEMPORARY DATABASE //////////////////////////////////
   const comments = [
@@ -66,9 +141,10 @@ const CommentContainer = ({route, navigation}) => {
   ///////////////////////////////////////////////////////
 
   return (
-    
+    // <KeyboardAvoidingView style={{flex:1}} behavior="padding">
     <View>
-
+      
+      {console.log("COMMENTS: " + JSON.stringify(route))}
       <View style={styles2.headerBox}>
         <Text style={styles2.fishQuest}>Fish Quest</Text>
         
@@ -77,7 +153,7 @@ const CommentContainer = ({route, navigation}) => {
         </TouchableOpacity>
       </View>
       <View>
-        <Text style={styles2.postCaption}>{caption}</Text>
+        {!isChildBool ? <Text style={styles2.postCaption}>{route.params.caption.text}</Text> : <View></View>}
         <View
           style={{
             borderBottomColor: 'black',
@@ -88,43 +164,61 @@ const CommentContainer = ({route, navigation}) => {
           }}
         />
       </View>
+
      
 
       <ScrollView style={styles2.comments}>
 
-          {comments.map((comment) => (
-
+          {commentsDB ? commentsDB.map((comment) => (
+            <Pressable onPress={() => {navigation.push("CommentContainer", {caption:{id: comment.id, isChild: true}},)}}>
             <View>
+              {console.log("commentsDB: " + JSON.stringify(commentsDB))}
               <View key={comment.id} style={styles2.comment}>
                   <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
                   <View style={styles2.info}>
-                      <Text style={styles2.userName}>{comment.name}</Text>
-                      <Text style={styles2.desc}>{comment.desc}</Text>
+                      <Text style={styles2.userName}>{comment.creator.username}</Text>
+                      <Text style={styles2.desc}>{comment.text}</Text>
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
               </View>
-              <View key={comment.id} style={styles2.comment2}>
+              {/* <View key={comment.id} style={styles2.comment2}>
                   <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
                   <View style={styles2.info}>
                       <Text style={styles2.userName}>{comment.name}</Text>
                       <Text style={styles2.desc}>{comment.desc}</Text>
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
-              </View>
+              </View> */}
               <View style={styles2.line}/>
             </View>
+            </Pressable>
 
-          ))}
+          ))
+          :
+          <View></View>
+          }
 
           
       </ScrollView>
 
       <View style={styles2.typeComment}>
           <Image style={styles2.img} source={require("../../assets/profilePic.jpg")}/>
-          <TextInput style={styles2.input} placeholder="write a comment..."/>
-          <Button style={styles2.send} title="Send" onPress={() => {}}/>
+          <TextInput 
+            style={styles2.input} 
+            placeholder="write a comment..." 
+            onChangeText={(text) => onChangeText(text)}/>
+          {/* <Button style={styles2.send} title="Send" onPress={this.submitComment()}/> */}
+          <Pressable
+          style={styles.formButton}
+          onPress={() => {
+            submitComment();
+          }}
+        >
+          <Text style={styles.buttonText}>{"Submit Post"}</Text>
+        </Pressable>
       </View>
     </View>
+    // </KeyboardAvoidingView>
 
  
   );

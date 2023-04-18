@@ -12,6 +12,7 @@ export const StartScreen = ({ navigation }) => {
     Client.get("user/status")
       .then(async () => {
         const res = await Client.get("user/profile");
+        console.log(res);
         setUser(res.data);
         navigation.navigate("Home");
       })
