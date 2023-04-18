@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { classList } from "./imagenet";
+import { classList } from "./classList";
 import { MODEL_PATH } from "../constants";
 import * as Jimp from "jimp";
 import { Tensor, InferenceSession } from "onnxruntime-node";

@@ -6,7 +6,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError, PaginatedCursor } from "../../types";
 import { dataSource, paginateLimit, __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
-import { jimpFromData, Model } from "../../utils/ImageProc";
+import { jimpFromData } from "../../classifier/inferenceRunner";
 import { UserEntity } from "../user/user.entity";
 import { MissionsService } from "../missions/missions.service";
 import { formErrors } from "../../utils/formError";

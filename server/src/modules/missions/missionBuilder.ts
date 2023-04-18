@@ -1,5 +1,4 @@
-import { classList } from "../../classifier/imagenet";
-import { MissionEntity } from "./mission.entity";
+import { classListMutable } from "../../classifier/classList";
 import { getXp } from "./missionCompletion";
 import {
   AnyDetail,
@@ -37,9 +36,9 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
     specTypes.push(T);
   }
 
-  const classes = [...classList]
+  const classes = classListMutable
     .sort(() => 0.5 - Math.random())
-    .slice(0, classList.length);
+    .slice(0, classListMutable.length);
   let specs = specTypes.reduce(
     (specs: MissionSpecifier, specT: MissionEnum): MissionSpecifier => {
       const rand = Math.ceil(Math.random() * numSpecifiers);
@@ -220,18 +219,27 @@ export const assignMissions = (
   }
 
   const toMS: { [_: string]: [number, MissionSpecifier] } = {};
+  let serialized: string[] = [];
   let tries = 0;
-  while (Object.keys(toMS).length < amount && tries++ < 10) {
-    diffSelections.forEach((val: number) => {
-      const spec: [number, MissionSpecifier] = [val, generateSpecifier(val)];
-      const token = JSON.stringify(spec);
-      toMS[token] = spec;
+  while (serialized.length < amount && tries++ < 10) {
+    serialized = Array.from(
+      new Set([
+        ...serialized,
+        ...diffSelections.map((val: number) => {
+          const spec: [number, MissionSpecifier] = [
+            val,
+            generateSpecifier(val),
+          ];
+          const token = JSON.stringify(spec);
+          toMS[token] = spec;
 
-      return token;
-    });
+          return token;
+        }),
+      ])
+    ).slice(0, amount);
   }
-  const res = Object.entries(toMS).map(
-    ([_, spec]: [string, [number, MissionSpecifier]]) => spec
+  const res = serialized.map(
+    (spec: string): [number, MissionSpecifier] => toMS[spec]
   );
 
   return res;
@@ -260,4 +268,5 @@ export const formMissions = (
   return res;
 };
 
-// console.log(JSON.stringify(formMissions(30, 5), null, 2));
+for (let i = 0; i < 10; i++)
+  console.log(JSON.stringify(formMissions(1, 3), null, 2));
