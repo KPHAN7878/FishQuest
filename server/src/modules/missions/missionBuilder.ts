@@ -218,7 +218,8 @@ export const assignMissions = (
   }
 
   const toMS: { [_: string]: [number, MissionSpecifier] } = {};
-  while (Object.keys(toMS).length < amount) {
+  let tries = 0;
+  while (Object.keys(toMS).length < amount && tries++ < 10) {
     diffSelections.forEach((val: number) => {
       const spec: [number, MissionSpecifier] = [val, generateSpecifier(val)];
       const token = JSON.stringify(spec);
@@ -256,3 +257,5 @@ export const formMissions = (
 
   return res;
 };
+
+console.log(JSON.stringify(formMissions(1, 4)));
