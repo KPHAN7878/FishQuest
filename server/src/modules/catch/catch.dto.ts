@@ -21,7 +21,4 @@ export class Catch {
   note: string;
   location: number[];
   imageUri: string;
-  //imageBase64: string;
-  //creatorUsername: string;
-  //predDataId: number;
 }

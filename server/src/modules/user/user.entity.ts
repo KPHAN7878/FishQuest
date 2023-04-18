@@ -15,8 +15,8 @@ import { TokenEntity } from "../auth/token.entity";
 import { CatchEntity } from "../catch/catch.entity";
 import { CommentEntity } from "../comment/comment.entity";
 import { LikeEntity } from "../like/like.entity";
+import { MissionEntity } from "../missions/mission.entity";
 import { PostEntity } from "../post/post.entity";
-import { ReactionEntity } from "../reaction/reaction.entity";
 
 @Entity()
 @Unique(["username"])
@@ -41,6 +41,15 @@ export class UserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   profilePicUrl: string;
+
+  @Column({ default: "0" })
+  exp: number;
+
+  @Column({ default: "1" })
+  level: number;
+
+  @OneToMany(() => MissionEntity, (mission) => mission.user)
+  missions: MissionEntity[];
 
   @OneToMany(() => TokenEntity, (userToken) => userToken.user)
   tokens: TokenEntity[];
@@ -74,8 +83,4 @@ export class UserEntity extends BaseEntity {
   // comments on user posts and other comments
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comments: CommentEntity[];
-
-  // reactions to a post
-  @OneToMany(() => ReactionEntity, (reaction) => reaction.user)
-  reactions: ReactionEntity[];
 }

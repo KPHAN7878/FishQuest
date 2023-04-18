@@ -1,13 +1,13 @@
 import React, { useState, createRef, useContext } from "react";
 import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   Text,
   View,
-  Dimensions,
   Pressable,
-  TouchableOpacity,
   Keyboard,
-  TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 
 import styles, { width, height } from "../../styles";
@@ -27,9 +27,7 @@ import Animated, {
 import { toErrorMap } from "../../utils/toErrorMap";
 import { UserContext } from "../../Contexts/UserContext";
 
-import { StackActions, NavigationActions } from "@react-navigation/native";
-
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 const Login = ({ navigation }) => {
   const [screenState, setScreenState] = useState(1);
@@ -61,20 +59,18 @@ const Login = ({ navigation }) => {
   //location services
   React.useEffect(() => {
     (async () => {
-      
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
-      console.log(location)
     })();
   }, []);
 
-  let text = 'Waiting..';
+  let text = "Waiting..";
   if (errorMsg) {
     text = errorMsg;
   } else if (location) {
@@ -215,10 +211,9 @@ const Login = ({ navigation }) => {
 
         buttonOpacity.value = 1;
 
-        //let test = JSON.stringify(res.data)
         let currentUser = res.data;
         setUser(currentUser);
-        console.log("FINAL STRING: " + currentUser);
+        Client.get("mission", {}); // should handle this on backend later
       })
       .catch((err) => {
         if (err.response.status === 401) {
@@ -235,7 +230,6 @@ const Login = ({ navigation }) => {
         console.log(err);
       }
     );
-    console.log(res.data.errors);
 
     if (res?.data.errors) {
       const errors = toErrorMap(res.data.errors);
@@ -262,7 +256,13 @@ const Login = ({ navigation }) => {
     <View
       style={{
         marginBottom: height * 0.05,
-        display: screenState === 1 ? "block" : "none",
+        // display: screenState === 1 ? "block" : "none",
+        display:
+          screenState === 1
+            ? Platform.os === "ios"
+              ? "block"
+              : "flex"
+            : "none",
         visibility: screenState === 1 ? "hidden" : "visible",
       }}
     >
@@ -450,7 +450,13 @@ const Login = ({ navigation }) => {
       style={[
         {
           marginBottom: height * 0.05,
-          display: screenState === 1 ? "none" : "block",
+          // display: screenState === 1 ? "none" : "block",
+          display:
+            screenState === 1
+              ? "none"
+              : Platform.os === "ios"
+              ? "block"
+              : "flex",
           visibility: screenState === 1 ? "visible" : "hidden",
         },
         formAnimatedStyle,

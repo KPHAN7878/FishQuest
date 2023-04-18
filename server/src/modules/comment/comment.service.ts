@@ -72,13 +72,14 @@ export class CommentService {
           (paginate as PaginatedCursor).cursor
         }'`
       : "";
-    const byComment = `c."commentableId" = ${input.commentableId}`;
+    const byComment = `c."commentableId" = ${input.commentableId} and
+      c."type" = '${input.type}'`;
 
     const comments = await dataSource.query(
       `
     select * from (
     select distinct on (c.id) c.text, c.id, c."commentableId",
-    c."createdAt", c."likeValue", c."commentValue",
+    c."createdAt", c."likeValue", c."commentValue", c."type",
     json_build_object(
       'id', u.id,
       'username', u.username,

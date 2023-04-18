@@ -46,11 +46,14 @@ export default function App() {
             <Stack.Screen name="Login" component={Login} />
           </Stack.Group>
           <Stack.Group>
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="CommentContainer" component={CommentContainer} />
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen
+              name="CommentContainer"
+              component={CommentContainer}
+            />
           </Stack.Group>
           <Stack.Group>
-          <Stack.Screen name="UserSearch" component={UserSearch} />
+            <Stack.Screen name="UserSearch" component={UserSearch} />
           </Stack.Group>
           <Stack.Group>
             <Stack.Screen name="CameraView" component={CameraView} />

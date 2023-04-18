@@ -12,14 +12,14 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { Catch, Pred, Submission } from "./catch.dto";
+import { Catch, Submission } from "./catch.dto";
 import multer, { diskStorage } from "multer";
 import { __prod__, IMG_FILE_LIMIT } from "../../constants";
 import { CatchService } from "./catch.service";
 import { CatchEntity } from "./catch.entity";
 import path, { join } from "path";
 import { v4 as uuidv4 } from "uuid";
-import { Ctx } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 @Controller("catch")
@@ -27,9 +27,17 @@ import { UserAuthGuard } from "../auth/auth.guard";
 export default class CatchController {
   constructor(private readonly catchService: CatchService) {}
 
+  @Get("allcatches")
+  getAll(
+    @Body() input: Paginated,
+    @Req() { user }: Ctx
+  ): Promise<{ catches: CatchEntity[] }> {
+    return this.catchService.getAll(input, user);
+  }
+
   @Get()
-  getAll(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
-    return this.catchService.getAll();
+  getAllMaps(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
+    return this.catchService.getAllMaps();
   }
 
   @Get(":id")
@@ -46,18 +54,15 @@ export default class CatchController {
   )
   async submitCatch(@Body() submission: Submission, @Req() { user }: Ctx) {
     const results = await this.catchService.submitCatch(submission, user);
-    // ...
-    console.log(results);
     return results;
   }
 
-  //testing catch logger API that saves data to database
   @Post("testlogger")
   @UseInterceptors(
     FileInterceptor("file", {
       storage: diskStorage({
         destination: "./uploads/profileimages",
-        filename: (req, file, cb) => {
+        filename: (_, file, cb) => {
           const filename: string =
             path.parse(file.originalname).name.replace(/\s/g, "") + uuidv4();
           const extension: string = path.parse(file.originalname).ext;

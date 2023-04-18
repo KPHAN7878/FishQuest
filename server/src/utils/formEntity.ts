@@ -1,4 +1,5 @@
 import { BaseEntity } from "typeorm";
+import { UserEntity } from "../modules/user/user.entity";
 
 export const include = <T extends BaseEntity>(
   entity: T,
@@ -40,4 +41,15 @@ export const exclude = <T extends BaseEntity>(
   });
 
   return excluded as T;
+};
+
+export const formUser = (val: any & { user: UserEntity }) => {
+  const retUser = include<UserEntity>(val.user, [
+    "username",
+    "id",
+    "profilePicUrl",
+  ]);
+  val.user = retUser;
+
+  return val;
 };

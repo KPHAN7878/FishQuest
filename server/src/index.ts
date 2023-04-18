@@ -14,7 +14,6 @@ import ClassValidationPipe from "./utils/ClassValidatorPipe";
 
 const main = async () => {
   const server = express();
-  // server.set("proxy", 1);
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
   try {

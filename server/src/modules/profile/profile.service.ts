@@ -17,6 +17,8 @@ export class ProfileService {
   ) {}
 
   async follow(followId: number, user: UserEntity): Promise<boolean> {
+    console.log("followId: " + followId)
+    console.log("current user: " + JSON.stringify(user))
     if (followId === user.id) {
       return false;
     }
@@ -39,6 +41,7 @@ export class ProfileService {
       await dataSource.query(query);
     } catch (err: any) {
       if (err.code === "23505") {
+        console.log("FOLLOW ERROR: " + err);
         const query1 =
           `delete from rfollowers ` +
           `where "userEntityId_1" = '${user.id}' and "userEntityId_2" = '${followId}'`;
@@ -48,7 +51,7 @@ export class ProfileService {
         await dataSource.query(query1);
         await dataSource.query(query2);
       } else {
-        console.log(err);
+        console.log("FOLLOW ERROR: " + err);
       }
     }
 

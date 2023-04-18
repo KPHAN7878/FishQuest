@@ -131,10 +131,11 @@ const styles = StyleSheet.create({
   testContainer: {
     flex: 1,
     backgroundColor: 'gainsboro',
-    height: '100%'
+    height: '100%',
+    //padding: 5
   },
   listContainer: {
-    height: height,
+    //height: height,
     flex: 1,
     flexDirection: "row",
     alignItems: "flex-start",
