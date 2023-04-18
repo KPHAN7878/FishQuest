@@ -25,11 +25,13 @@ def load_image(file):
     return orig_image, image
 
 
+ort_sess = ort.InferenceSession(PATH)
+
+
 def with_onnx(image, orig_image):
     onnx_model = onnx.load(PATH)
     onnx.checker.check_model(onnx_model)
 
-    ort_sess = ort.InferenceSession(PATH)
     output_names = ort_sess.get_outputs()
     output_names = [i.name for i in output_names]
 
@@ -53,7 +55,7 @@ def with_onnx(image, orig_image):
 
     image_draw = orig_image.copy()
     for ii in i:
-        print(image_draw, boxes[ii], scores[ii], CLASSES[class_ids[ii]])
+        print(CLASSES[class_ids[ii]])
         image_draw = draw(
             image_draw, boxes[ii], scores[ii], CLASSES[class_ids[ii]])
 
@@ -92,4 +94,5 @@ def main(file):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    for arg in sys.argv[1:]:
+        main(arg)

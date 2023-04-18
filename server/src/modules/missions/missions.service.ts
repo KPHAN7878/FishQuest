@@ -44,12 +44,12 @@ export class MissionsService {
     repo: Repository<AdventurerEntity | BiologistEntity | AnglerEntity>
   ): Promise<number> {
     const missionsEntry: any = await repo.findOne({
-      where: { userId: postData.userId },
+      where: { userId: postData.user.id },
     });
 
     if (missionsEntry) {
       repo.update(
-        { userId: postData.userId },
+        { userId: postData.user.id },
         { value: missionsEntry.value + 1 }
       );
 
@@ -65,7 +65,7 @@ export class MissionsService {
   }
 
   async initMissions(user: UserEntity) {
-    [this.anglerR, this.adventurerR, this.biologistR].map((rep) =>
+    [this.anglerR, this.adventurerR, this.biologistR].forEach((rep) =>
       this.insert({ user } as any, rep)
     );
   }
@@ -133,15 +133,17 @@ export class MissionsService {
   async updateUser(user: UserEntity, value: number) {
     const newExp = user.exp + value;
     const oldLevel = user.level;
-    const newLevel = this.levelUp(oldLevel, newExp);
-    this.userR.update(
-      { id: user.id },
-      { exp: oldLevel !== newLevel ? 0 : newExp, level: newLevel }
-    );
+    const { level: newLevel, exp: remExp } = this.levelUp(oldLevel, newExp);
+
+    this.userR.update({ id: user.id }, { exp: remExp, level: newLevel });
   }
 
   levelUp(level: number, exp: number) {
-    return exp >= Math.min(100 + (level - 1) * 10, 500) ? level + 1 : level;
+    while (exp >= Math.min(100 + (level - 1) * 10, 500)) {
+      exp -= Math.min(100 + (level - 1) * 10, 500);
+      level += 1;
+    }
+    return { level, exp };
   }
 
   levelUpInfo(user: UserEntity): UserExpInfo {
@@ -161,7 +163,7 @@ export class MissionsService {
     )) as MissionEntity[];
 
     if (missions.length === 0) {
-      this.initMissions(user);
+      await this.initMissions(user);
 
       const newMissions = formMissions(user.level, MAX_MISSIONS);
       const startSnapshot = JSON.stringify(await snapshot(user));

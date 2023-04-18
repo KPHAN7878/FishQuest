@@ -19,7 +19,7 @@ class BaseValue extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: "1" })
+  @Column({ default: "0" })
   value!: number;
 
   @OneToOne(() => UserEntity, { cascade: true })

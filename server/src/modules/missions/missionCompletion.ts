@@ -1,6 +1,5 @@
 import { dataSource } from "../../constants";
 import { UserEntity } from "../user/user.entity";
-import { AnglerEntity, MissionEntity } from "./mission.entity";
 import {
   LocationDetail,
   MissionSpecifier,
@@ -30,7 +29,7 @@ const anglerSnapshot = async (user: UserEntity): Promise<{ value: number }> => {
     select value from angler_entity where "userId" = '${user.id}'
     `
   )) as { value: number }[];
-  return value;
+  return value ?? { value: 0 };
 };
 
 const biologistSnapshot = async (
@@ -80,7 +79,6 @@ export const progressCheck = async (
       user
     );
 
-  // console.log(JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -125,6 +123,7 @@ const diffAmountCaught = async (
     const currentValue = ae!.value - value;
     const completionValue = detail.value;
     const complete = currentValue >= completionValue;
+
     return {
       currentValue,
       completionValue,
@@ -165,7 +164,7 @@ const weightedValues = (label: string, value: number) => {
 };
 
 export const getXp = (value: number, difficulty: Difficulty): number => {
-  return (value - 1) * 25 + difficulty * 100;
+  return (value - 1) * 20 + difficulty * 100;
 };
 
 export const digestProgress = (

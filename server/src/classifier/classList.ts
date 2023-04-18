@@ -3,7 +3,7 @@ export const classList = [
   "Carp",
   "Catfish",
   "Gar",
-  "Largemouth Bass",
+  "Largemouth bass",
   "Crappie",
 ] as const;
 
@@ -12,6 +12,6 @@ export const classListMutable = [
   "Carp",
   "Catfish",
   "Gar",
-  "Largemouth Bass",
+  "Largemouth bass",
   "Crappie",
 ];

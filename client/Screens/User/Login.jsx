@@ -67,7 +67,6 @@ const Login = ({ navigation }) => {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
-      console.log(location);
     })();
   }, []);
 
@@ -212,10 +211,9 @@ const Login = ({ navigation }) => {
 
         buttonOpacity.value = 1;
 
-        //let test = JSON.stringify(res.data)
         let currentUser = res.data;
         setUser(currentUser);
-        console.log("FINAL STRING: " + currentUser);
+        Client.get("mission", {}); // should handle this on backend later
       })
       .catch((err) => {
         if (err.response.status === 401) {
@@ -232,7 +230,6 @@ const Login = ({ navigation }) => {
         console.log(err);
       }
     );
-    console.log(res.data.errors);
 
     if (res?.data.errors) {
       const errors = toErrorMap(res.data.errors);

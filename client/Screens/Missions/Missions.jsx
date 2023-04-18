@@ -47,7 +47,7 @@ const Missions = ({ navigation }) => {
                 <Progress.Bar
                   color={info.complete ? "green" : undefined}
                   progress={percent}
-                  width={200}
+                  width={300}
                   height={10}
                 />
 
@@ -80,6 +80,11 @@ const Missions = ({ navigation }) => {
           <Text
             style={{ textAlign: "right", flex: 1 }}
           >{`+${item.totalXp} xp`}</Text>
+        </View>
+        <View style={{ marginTop: 20, flexDirection: "row" }}>
+          <Text style={{ textAlign: "left", flex: 1 }}>{`Deadline: ${new Date(
+            item.deadline
+          ).toLocaleDateString()}`}</Text>
         </View>
       </View>
     </View>

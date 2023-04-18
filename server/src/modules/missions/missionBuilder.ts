@@ -50,7 +50,7 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
       }
 
       if (Math.ceil(Math.random() * 5) === 5 && numSpecifiers > 1) {
-        detail.bonus = Math.ceil(Math.random() * 50 * numSpecifiers);
+        detail.bonus = Math.ceil(Math.random() * 25 * numSpecifiers);
         detail.bonus = getXp(rand, numSpecifiers);
       }
 
@@ -268,5 +268,5 @@ export const formMissions = (
   return res;
 };
 
-for (let i = 0; i < 10; i++)
-  console.log(JSON.stringify(formMissions(1, 3), null, 2));
+// for (let i = 0; i < 10; i++)
+//   console.log(JSON.stringify(formMissions(1, 3), null, 2));
