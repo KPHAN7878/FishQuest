@@ -66,6 +66,7 @@ export type Description = {
   text: string;
   postext?: string;
   plural?: boolean;
+  bonus?: boolean;
 };
 
 export enum Difficulty {

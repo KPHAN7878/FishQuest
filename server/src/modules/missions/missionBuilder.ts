@@ -37,7 +37,7 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
     specTypes.push(T);
   }
 
-  const classes = classList
+  const classes = [...classList]
     .sort(() => 0.5 - Math.random())
     .slice(0, classList.length);
   let specs = specTypes.reduce(
@@ -152,7 +152,7 @@ const buildMission = (
       details: [spec],
       call: (details: AnyDetail[]): Description[] => {
         return details.map((detail: AnyDetail): Description => {
-          return { text: fn(detail) };
+          return { text: fn(detail), bonus: !!detail.bonus };
         });
       },
     });
@@ -176,7 +176,9 @@ const resolveSpecifier = (
       (last && size - 1 === i) || (and - 1 === i && last) ? "and " : ""
     }${values[i].pretext ?? ""}${spacePre}${values[i].text}${spacePost}${
       values[i].postext ?? ""
-    }${(last && size - 1 === i) || (last && and === 1) ? " " : ", "}`;
+    }${values[i].bonus ? " (optional)" : ""}${
+      (last && size - 1 === i) || (last && and === 1) ? " " : ", "
+    }`;
   }
 
   return line;
@@ -258,4 +260,4 @@ export const formMissions = (
   return res;
 };
 
-console.log(JSON.stringify(formMissions(1, 4)));
+// console.log(JSON.stringify(formMissions(30, 5), null, 2));

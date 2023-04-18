@@ -11,10 +11,10 @@ import { UserEntity } from "../user/user.entity";
 import { MissionsService } from "../missions/missions.service";
 import { formErrors } from "../../utils/formError";
 import { exclude, formUser } from "../../utils/formEntity";
+import { submitInference } from "../../classifier/inferenceRunner";
 
 @Injectable()
 export class CatchService {
-  private classifier: Model = new Model({ verbose: true });
   constructor(
     @InjectRepository(CatchEntity)
     private readonly catchRepository: Repository<CatchEntity>,
@@ -25,7 +25,7 @@ export class CatchService {
     const data = sub.imageBase64.split(";base64,").pop() as string;
 
     const image = await jimpFromData(data);
-    const modelOutput = await this.classifier.submitInference(image);
+    const modelOutput = await submitInference(image);
     var numArr = sub.location.split(",");
 
     var finalArr = [];
