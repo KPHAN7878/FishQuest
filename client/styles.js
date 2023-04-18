@@ -33,6 +33,17 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+  buttonContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    postition: "absolute",
+    bottom: 0,
+    maxHeight: height * 0.15,
+    paddingBottom: 20,
+  },
+
   fieldError: {
     minHeight: 35,
     textAlign: "center",

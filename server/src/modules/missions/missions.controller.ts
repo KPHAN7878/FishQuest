@@ -1,23 +1,20 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Req, UseGuards } from "@nestjs/common";
 import { MissionsService } from "./missions.service";
 import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
-@Controller("missons")
+@Controller("mission")
 @UseGuards(new UserAuthGuard())
 export class MissionsController {
   constructor(private readonly missionsService: MissionsService) {}
 
-  @Post("create")
-  async createPost(@Body() missionsData: {}, @Req() { user }: Ctx) {
-    //return await this.missionsService.insert(missionsData, user);
+  @Get()
+  async createPost(@Req() { user }: Ctx) {
+    return await this.missionsService.missionAssigner(user);
+  }
+
+  @Get("experience")
+  async experience(@Req() { user }: Ctx) {
+    return this.missionsService.levelUpInfo(user);
   }
 }

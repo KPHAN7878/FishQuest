@@ -6,15 +6,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError, PaginatedCursor } from "../../types";
 import { dataSource, paginateLimit, __prod__ } from "../../constants";
 import { Prediction } from "../prediction/prediction.entity";
-import { jimpFromData, Model } from "../../utils/ImageProc";
+import { jimpFromData } from "../../classifier/inferenceRunner";
 import { UserEntity } from "../user/user.entity";
 import { MissionsService } from "../missions/missions.service";
 import { formErrors } from "../../utils/formError";
 import { exclude, formUser } from "../../utils/formEntity";
+import { submitInference } from "../../classifier/inferenceRunner";
 
 @Injectable()
 export class CatchService {
-  private classifier: Model = new Model({ verbose: true });
   constructor(
     @InjectRepository(CatchEntity)
     private readonly catchRepository: Repository<CatchEntity>,
@@ -25,7 +25,7 @@ export class CatchService {
     const data = sub.imageBase64.split(";base64,").pop() as string;
 
     const image = await jimpFromData(data);
-    const modelOutput = await this.classifier.submitInference(image);
+    const modelOutput = await submitInference(image);
     var numArr = sub.location.split(",");
 
     var finalArr = [];
@@ -40,7 +40,7 @@ export class CatchService {
     });
 
     const catchEntry: CatchEntity = CatchEntity.create({
-      location: [1, 2],
+      location: finalArr,
       imageUri: sub.imageUri,
       user,
       prediction,
@@ -64,9 +64,8 @@ export class CatchService {
           [["prediction", "modelOutput"]]
         )
       );
-      console.log(res);
 
-      return formUser(res);
+      return { ...formUser(res), box: modelOutput.box };
     } else {
       const errors = formErrors([
         {
@@ -75,7 +74,7 @@ export class CatchService {
           field: "camera",
         },
       ]);
-      return { errors };
+      return { errors, location: finalArr };
     }
   }
 
@@ -116,9 +115,10 @@ export class CatchService {
   }
 
   async getAllMaps(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
-    return { catches: await CatchEntity.find({relations: ["user", "prediction"]}) }; // {where: ... }
+    return {
+      catches: await CatchEntity.find({ relations: ["user", "prediction"] }),
+    }; // {where: ... }
   }
-
 
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {
     const catchEntry = await CatchEntity.findOne({

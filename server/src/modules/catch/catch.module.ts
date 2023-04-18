@@ -1,9 +1,13 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AdventurerEntity } from "../missions/adventurer.entity";
-import { AnglerEntity } from "../missions/angler.entity";
-import { BiologistEntity } from "../missions/biologist.entity";
+import {
+  AdventurerEntity,
+  AnglerEntity,
+  BiologistEntity,
+  MissionEntity,
+} from "../missions/mission.entity";
 import { MissionsService } from "../missions/missions.service";
+import { UserEntity } from "../user/user.entity";
 import CatchController from "./catch.controller";
 import { CatchEntity } from "./catch.entity";
 import { CatchService } from "./catch.service";
@@ -15,6 +19,8 @@ import { CatchService } from "./catch.service";
       AnglerEntity,
       BiologistEntity,
       AdventurerEntity,
+      UserEntity,
+      MissionEntity,
     ]),
   ],
   controllers: [CatchController],

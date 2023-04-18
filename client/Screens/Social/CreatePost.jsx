@@ -1,95 +1,211 @@
 import React from "react";
-import {
-  Pressable,
-  Text,
-  View,
-  TextInput,
-  Image,
-  ScrollView,
-  StyleSheet,
-  StatusBar,
-  SafeAreaView,
-} from "react-native";
-import styles from "../../styles";
-import { Dimensions } from "react-native";
-import { FontFamily, Color } from "../../GlobalStyles";
-import { Client } from "../../utils/connection";
-import axios from "axios";
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  withTiming,
+  withDelay,
+} from "react-native-reanimated";
+import { InputField } from "../../Components/InputField";
+import ImageView from "../../Components/ImageView";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faFish, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { AnimatedButton } from "../../Components/Button";
+import { Keyboard, Text, View, ScrollView, StyleSheet } from "react-native";
+import styles, { height, width } from "../../styles";
+import { Client } from "../../utils/connection";
 
 const CreatePost = ({ route, navigation }) => {
-  const [text, onChangeText] = React.useState("");
+  const [text, setCaption] = React.useState("");
+  const [selected, setSelected] = React.useState(true);
+  const [errorMessage, setErrorMessage] = React.useState(null);
+  const [screenState, setScreenState] = React.useState(0);
+  const captionRef = React.createRef();
 
   const result = route.params;
-  const imageUrl = result.ImageCache;
+
+  React.useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardWillHide",
+      () => {
+        setScreenState(0);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const submitPost = async (catchID) => {
-    console.log("catchId: " + catchID + "\n\ntext: " + text)
+    console.log("catchId: " + catchID + "\n\ntext: " + text);
     await Client.post("post/create", {
       catchId: catchID,
       text: text,
     })
-    .then((res) => {
-    //console.log("USERS: " + JSON.stringify(res))
-    console.log("\n\nsubmit post response: " + res)
-    })
-    .catch((error) => {
-    console.log(error);
-    })
-  }
+      .then((res) => {
+        console.log("\n\nsubmit post response: " + res);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
-  return (
-    <>
-      <ScrollView style={styles2.scrollView}>
-        <View style={{ marginLeft: 25, marginRight: 25 }}>
-          <TextInput
-            onChangeText={(caption) => onChangeText(caption)}
-            value={text}
-            multiline={true}
-            placeholder="Type here"
-            style={{ fontSize: 17 }}
-          />
-        </View>
+  const animateDetails = useAnimatedStyle(() => {
+    const interpolation = interpolate(screenState, [0, 1], [-125, -350]);
 
-        {/* {console.log(JSON.stringify(text))} */}
+    return {
+      transform: [{ translateY: withTiming(interpolation, { duration: 250 }) }],
+    };
+  });
 
-        <View style={{ marginTop: 5, marginLeft: 20 }}>
-          <Image
-            source={{ uri: imageUrl }}
-            resizeMode="contain"
-            style={{ width: 250, height: 450, aspectRatio: 0.85 }}
-          />
-        </View>
-      </ScrollView>
+  const ChoiceButtons = (
+    <View style={myStyles.container}>
+      <View
+        style={[
+          styles.buttonContainer,
+          {
+            backgroundColor: "white",
+            paddingBottom: 15,
+            maxHeight: height * 0.1,
+          },
+        ]}
+      >
+        <AnimatedButton
+          style={myStyles.button}
+          next={() => {
+            navigation.goBack();
+          }}
+        >
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <FontAwesomeIcon icon={faArrowLeft} size={25} />
+            <Text style={{ fontSize: 20, flex: 1 }}>{"Back"}</Text>
+          </View>
+        </AnimatedButton>
 
-      <View style={{ marginBottom: 25 }}>
-        <Pressable
-          style={styles.formButton}
-          onPress={() => {
+        <AnimatedButton
+          style={{ ...myStyles.button }}
+          next={() => {
             submitPost(result.catchId);
             navigation.navigate("CatchLogger");
           }}
         >
-          <Text style={styles.buttonText}>{"Submit Post"}</Text>
-        </Pressable>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <FontAwesomeIcon icon={faFish} size={25} />
+            <Text
+              style={{
+                fontSize: 20,
+                flex: 1,
+              }}
+            >
+              {"Post"}
+            </Text>
+          </View>
+        </AnimatedButton>
       </View>
-    </>
+    </View>
+  );
+
+  return (
+    <View style={myStyles.parentContainer}>
+      <ScrollView>
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            margin: 30,
+            marginTop: selected ? 50 : 0,
+          }}
+        >
+          <ImageView
+            setter={(select) => setSelected(select)}
+            image={result.image}
+          />
+        </View>
+
+        <Animated.View style={[myStyles.split, animateDetails]}>
+          <View
+            style={{
+              marginTop: 0.025 * height,
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <InputField
+              {...{
+                onChangeText: (caption) => setCaption(caption),
+
+                onFocus: () => {
+                  setScreenState(1);
+                },
+                error: errorMessage,
+                placeholder: "Type here",
+                placeholderTextColor: "gray",
+                name: "caption",
+                ref: captionRef,
+                multiline: true,
+                height: 300,
+              }}
+              styleView={{ flex: 1 }}
+              pretext={"Post Caption"}
+            />
+          </View>
+        </Animated.View>
+      </ScrollView>
+
+      {ChoiceButtons}
+    </View>
   );
 };
 
-const styles2 = StyleSheet.create({
-  container: {
+const myStyles = StyleSheet.create({
+  button: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
+    alignItems: "center",
+
+    marginVertical: 10,
+    marginHorizontal: 10,
   },
-  scrollView: {
-    backgroundColor: "##85c8f2",
-    marginTop: 0.08 * windowHeight,
+
+  container: {
+    shadowColor: "gray",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    flex: 1,
+    position: "absolute",
+    width,
+    height: height * 0.1,
+    bottom: 0,
+    left: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  text: {
-    fontSize: 42,
+
+  split: {
+    backgroundColor: "white",
+    height: "100%",
+    shadowColor: "gray",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    display: "flex",
+    flexDirection: "column",
+    alignSelf: "stretch",
+  },
+
+  resultText: {
+    flex: 1,
+    fontSize: 20,
+  },
+  parentContainer: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "flex-start",
+  },
+  detailText: {
+    flex: 1,
+    fontSize: 18,
+    textAlign: "center",
   },
 });
 
