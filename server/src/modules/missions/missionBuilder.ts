@@ -46,7 +46,7 @@ const generateSpecifier = (numSpecifiers: Difficulty): MissionSpecifier => {
       let detail: AnyDetail = {
         value: rand,
       };
-      if (specT & MissionEnum.biologist) {
+      if (specT === MissionEnum.biologist) {
         [detail.species] = classes.splice(0, 1);
       }
 
@@ -73,13 +73,13 @@ const resolveSpecifierTypeConflicts = (
   specT: MissionEnum
 ): MissionEnum => {
   if (!specTypes.includes(specT)) return specT;
-  const a = specTypes.find((val) => val & MissionEnum.biologist);
-  const b = specTypes.find((val) => val & MissionEnum.adventurer);
-  const c = specTypes.find((val) => val & MissionEnum.angler);
+  const A = specTypes.find((val) => val & MissionEnum.biologist);
+  const B = specTypes.find((val) => val & MissionEnum.adventurer);
+  const C = specTypes.find((val) => val & MissionEnum.angler);
 
-  if (a && b && c) return MissionEnum.biologist;
-  if (a && specT & a) return MissionEnum.adventurer;
-  if (b && specT & b) return MissionEnum.biologist;
+  if (A && B && C) return MissionEnum.biologist;
+  if (A && specT & A) return MissionEnum.adventurer;
+  if (B && specT & B) return MissionEnum.biologist;
   return specT;
 };
 
@@ -93,6 +93,9 @@ const resolveValueConflicts = (
       specs.angler.details[0].value + minCatches,
       maxCatches
     );
+  }
+  if (specs.angler && specs.angler.details[0].value === 1) {
+    specs.angler.details[0].value = 2;
   }
   if (specs.adventurer && specs.adventurer.details[0].value === 1) {
     specs.adventurer.details[0].value = 2;
@@ -214,7 +217,21 @@ export const assignMissions = (
     diffSelections.push(...take.splice(randix, 1));
   }
 
-  return diffSelections.map((val: number) => [val, generateSpecifier(val)]);
+  const toMS: { [_: string]: [number, MissionSpecifier] } = {};
+  while (Object.keys(toMS).length < amount) {
+    diffSelections.forEach((val: number) => {
+      const spec: [number, MissionSpecifier] = [val, generateSpecifier(val)];
+      const token = JSON.stringify(spec);
+      toMS[token] = spec;
+
+      return token;
+    });
+  }
+  const res = Object.entries(toMS).map(
+    ([_, spec]: [string, [number, MissionSpecifier]]) => spec
+  );
+
+  return res;
 };
 
 export const formMissions = (
