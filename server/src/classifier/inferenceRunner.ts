@@ -77,14 +77,14 @@ const confidenceThresh: number = 0.3;
 export const submitInference = async (
   image: Jimp
 ): Promise<{
-  output: number[];
+  score: number;
   prediction: string | null;
   box: number[];
 }> => {
   const [inferenceResult, inferenceTime] = await inferenceModel(image);
-  const [output, prediction, box] = inferenceResult;
+  const [score, prediction, box] = inferenceResult;
 
-  return { output, prediction, box };
+  return { score, prediction, box };
 };
 
 const inferenceModel = async (image: Jimp): Promise<[any, number]> => {
@@ -148,7 +148,7 @@ const decodeAndPredict = (results: Tensor) => {
   });
 
   if (predictions.length === 0) {
-    return [[], null];
+    return [null, null, null];
   }
 
   const classIds: { index: number; score: number }[] = predictions.map(
@@ -176,5 +176,5 @@ const decodeAndPredict = (results: Tensor) => {
   }, {});
 
   const box = predictions[bestPredIdx].slice(0, 4);
-  return [predictions, classList[best], box];
+  return [scores[best], classList[best], box];
 };

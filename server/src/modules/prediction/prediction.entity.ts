@@ -23,6 +23,9 @@ export class Prediction extends BaseEntity {
   @Column({ nullable: true })
   species: string;
 
-  @Column()
-  modelOutput?: string; // output tensor representation
+  @Column({ type: "float", nullable: true })
+  confidence: number;
+
+  @Column("float", { array: true, nullable: true })
+  box: number[];
 }

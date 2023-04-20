@@ -38,4 +38,13 @@ export class CatchEntity extends BaseEntity {
 
   @Column()
   imageUri: string;
+
+  @Column({ nullable: true })
+  notes: string;
+
+  @Column({ nullable: true })
+  string: string;
+
+  @Column("float", { nullable: true })
+  weight: number;
 }

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CatchEntity } from "./catch.entity";
 import { Repository } from "typeorm";
-import { Catch, Submission } from "./catch.dto";
+import { AdditionalInfo, Catch, Submission } from "./catch.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ErrorRes, FieldError, PaginatedCursor } from "../../types";
 import { dataSource, paginateLimit, __prod__ } from "../../constants";
@@ -35,9 +35,12 @@ export class CatchService {
     const prediction: Prediction = Prediction.create({
       status: modelOutput.prediction ? true : undefined,
       species: modelOutput.prediction ?? undefined,
-      modelOutput: JSON.stringify(modelOutput.output),
+      box: modelOutput?.box,
+      confidence: modelOutput?.score,
       userId: user.id,
     });
+
+    console.log(prediction);
 
     const catchEntry: CatchEntity = CatchEntity.create({
       location: finalArr,
@@ -118,6 +121,30 @@ export class CatchService {
     return {
       catches: await CatchEntity.find({ relations: ["user", "prediction"] }),
     }; // {where: ... }
+  }
+
+  async additionalInfo(
+    addInfo: AdditionalInfo,
+    species: string
+  ): Promise<boolean | ErrorRes> {
+    const entry = await this.catchRepository.findOne({
+      where: { id: addInfo.id },
+      relations: ["prediction"],
+    });
+
+    const errors = formErrors([
+      {
+        value: !species,
+        message: `species name required`,
+        field: "species",
+      },
+    ]);
+    if (errors.length) return { errors };
+
+    entry!.prediction.species = species;
+    this.catchRepository.save({ ...addInfo, prediction: entry!.prediction });
+
+    return true;
   }
 
   async getCatch(id: number): Promise<CatchEntity | ErrorRes> {

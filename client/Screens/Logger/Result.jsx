@@ -29,10 +29,20 @@ const Result = ({ route, navigation }) => {
   const result = route.params;
   const [errorMessage, setErrorMessage] = React.useState(null);
   const [timeDate, setTimeDate] = React.useState(new Date());
-  const [fishName, setFishName] = React.useState("");
   const [selected, setSelected] = React.useState(true);
   const [screenState, setScreenState] = React.useState(0);
+
   const fishNameRef = React.createRef();
+  const [fishName, setFishName] = React.useState("");
+
+  const weightRef = React.createRef();
+  const [weight, setWeight] = React.useState("");
+
+  const baitRef = React.createRef();
+  const [bait, setBait] = React.useState("");
+
+  const notesRef = React.createRef();
+  const [notes, setNotes] = React.useState("");
 
   React.useEffect(() => {
     const keyboardDidHideListener = Keyboard.addListener(
@@ -62,6 +72,23 @@ const Result = ({ route, navigation }) => {
     };
   });
 
+  const inputProps = (label, setter, ref) => {
+    return {
+      onFocus: () => {
+        setScreenState(2);
+      },
+      onSubmitEditing: () => {
+        setScreenState(0);
+        Keyboard.dismiss();
+      },
+      onChangeText: (text) => setter(text),
+      error: errorMessage,
+      placeholder: label,
+      name: label.toLowerCase(),
+      ref,
+    };
+  };
+
   const InputFish = (
     <InputField
       {...{
@@ -77,6 +104,28 @@ const Result = ({ route, navigation }) => {
       styleView={{ flex: 1 }}
       pretext={"Enter the name of the fish"}
     />
+  );
+
+  const AdditionalDetails = (
+    <View style={{ marginTop: 50 }}>
+      <InputField
+        {...inputProps("Weight (lbs)", setWeight, weightRef)}
+        pretext={"Weight of the fish (optional)"}
+      />
+      <InputField
+        {...inputProps("Bait", setBait, baitRef)}
+        pretext={"Bait used (optional)"}
+      />
+      <InputField
+        {...inputProps("Notes", setNotes, notesRef)}
+        {...{
+          multiline: true,
+          height: 200,
+          maxLength: 500,
+        }}
+        pretext={"Additional notes (optional)"}
+      />
+    </View>
   );
 
   const Progress = (
@@ -113,6 +162,8 @@ const Result = ({ route, navigation }) => {
           </Text>
         </View>
       )}
+
+      {AdditionalDetails}
       <View
         style={{
           marginHorizontal: 20,

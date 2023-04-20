@@ -18,7 +18,15 @@ export class Pred {
 
 export class Catch {
   creatorId: number;
-  note: string;
+  notes: string;
   location: number[];
   imageUri: string;
+}
+
+export class AdditionalInfo {
+  id: number;
+  notes?: string;
+  weight?: number;
+  bait?: string;
+  // species?: string;
 }

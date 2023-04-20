@@ -12,13 +12,11 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { Catch, Submission } from "./catch.dto";
+import { AdditionalInfo, Catch, Submission } from "./catch.dto";
 import multer, { diskStorage } from "multer";
 import { __prod__, IMG_FILE_LIMIT } from "../../constants";
 import { CatchService } from "./catch.service";
 import { CatchEntity } from "./catch.entity";
-import path, { join } from "path";
-import { v4 as uuidv4 } from "uuid";
 import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
@@ -27,7 +25,7 @@ import { UserAuthGuard } from "../auth/auth.guard";
 export default class CatchController {
   constructor(private readonly catchService: CatchService) {}
 
-  @Get("allcatches")
+  @Get("my-catches")
   getAll(
     @Body() input: Paginated,
     @Req() { user }: Ctx
@@ -57,31 +55,11 @@ export default class CatchController {
     return results;
   }
 
-  @Post("testlogger")
-  @UseInterceptors(
-    FileInterceptor("file", {
-      storage: diskStorage({
-        destination: "./uploads/profileimages",
-        filename: (_, file, cb) => {
-          const filename: string =
-            path.parse(file.originalname).name.replace(/\s/g, "") + uuidv4();
-          const extension: string = path.parse(file.originalname).ext;
-
-          cb(null, `${filename}${extension}`);
-        },
-      }),
-    })
-  )
-  async testSubmitCatch(
-    @Body() catchLog: Catch,
-    @UploadedFile() file: Express.Multer.File
+  @Post("add-info")
+  async addInfo(
+    @Body() info: AdditionalInfo,
+    @Body() { species }: { species: string }
   ) {
-    const filepath = join(
-      process.cwd(),
-      "uploads/profileimages/" + file.filename
-    );
-    const results = await this.catchService.testSubmitCatch(catchLog, filepath);
-
-    return results;
+    return await this.catchService.additionalInfo(info, species);
   }
 }
