@@ -38,7 +38,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    postition: "absolute",
     bottom: 0,
     maxHeight: height * 0.15,
     paddingBottom: 20,

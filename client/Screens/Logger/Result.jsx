@@ -128,14 +128,6 @@ const Result = ({ route, navigation }) => {
             Date: {timeDate.toLocaleDateString()}
           </Text>
         </View>
-
-        {
-          //<View style={{ marginTop: 50, flexDirection: "row" }}>
-          //    <Text style={[myStyles.detailText, { textAlign: "left" }]}>
-          //      Location: {result.location}
-          //   </Text>
-          // </View>
-        }
       </View>
       {Progress}
       <Missions navigation={navigation} />
