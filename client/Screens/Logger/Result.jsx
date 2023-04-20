@@ -1,4 +1,5 @@
 import React from "react";
+import { Client } from "../../utils/connection";
 import {
   View,
   Text,
@@ -36,13 +37,13 @@ const Result = ({ route, navigation }) => {
   const [fishName, setFishName] = React.useState("");
 
   const weightRef = React.createRef();
-  const [weight, setWeight] = React.useState("");
+  const [weight, setWeight] = React.useState();
 
   const baitRef = React.createRef();
-  const [bait, setBait] = React.useState("");
+  const [bait, setBait] = React.useState();
 
   const notesRef = React.createRef();
-  const [notes, setNotes] = React.useState("");
+  const [notes, setNotes] = React.useState();
 
   React.useEffect(() => {
     const keyboardDidHideListener = Keyboard.addListener(
@@ -72,6 +73,25 @@ const Result = ({ route, navigation }) => {
     };
   });
 
+  const addInfo = async () => {
+    const info = {
+      species: fishName === "" ? result.species : fishName,
+      id: result.catchId,
+      weight,
+      bait,
+      notes,
+    };
+
+    const res = await Client.post("catch/add-info", info);
+    if (res?.data.errors) {
+      const errors = toErrorMap(res.data.errors);
+      setErrorMessage(errors);
+      return;
+    } else {
+      setErrorMessage(null);
+    }
+  };
+
   const inputProps = (label, setter, ref) => {
     return {
       onFocus: () => {
@@ -96,6 +116,10 @@ const Result = ({ route, navigation }) => {
         onFocus: () => {
           setScreenState(1);
         },
+        onSubmitEditing: () => {
+          setScreenState(0);
+          Keyboard.dismiss();
+        },
         error: errorMessage,
         placeholder: "Fish name",
         name: "species",
@@ -107,9 +131,10 @@ const Result = ({ route, navigation }) => {
   );
 
   const AdditionalDetails = (
-    <View style={{ marginTop: 50 }}>
+    <View style={{ marginTop: !!!result.errors ? 50 : 0 }}>
       <InputField
         {...inputProps("Weight (lbs)", setWeight, weightRef)}
+        {...{ keyboardType: "numeric" }}
         pretext={"Weight of the fish (optional)"}
       />
       <InputField
@@ -128,25 +153,27 @@ const Result = ({ route, navigation }) => {
     </View>
   );
 
-  const Progress = (
-    <View
-      style={{
-        borderBottomWidth: 1,
-        marginVertical: 25,
-      }}
-    >
-      <Text style={myStyles.header}>Progress</Text>
-    </View>
+  const ProgressView = (
+    <>
+      <View
+        style={{
+          borderBottomWidth: 1,
+          marginVertical: 25,
+        }}
+      >
+        <Text style={myStyles.header}>Progress</Text>
+      </View>
+      <Missions navigation={navigation} />
+    </>
   );
 
-  const DetailsView = (
-    <Animated.View style={[myStyles.split, animateDetails]}>
+  const AllDetails = (
+    <>
       {!result.species ? (
         <View
-          stle={{
+          style={{
             display: "flex",
             flexDirection: "row",
-            borderBottomWidth: 1,
           }}
         >
           {InputFish}
@@ -180,8 +207,13 @@ const Result = ({ route, navigation }) => {
           </Text>
         </View>
       </View>
-      {Progress}
-      <Missions navigation={navigation} />
+    </>
+  );
+
+  const DetailsView = (
+    <Animated.View style={[myStyles.split, animateDetails]}>
+      {AllDetails}
+      {ProgressView}
     </Animated.View>
   );
 
@@ -212,7 +244,10 @@ const Result = ({ route, navigation }) => {
         <AnimatedButton
           style={{ ...myStyles.button }}
           next={() => {
-            navigation.navigate("CatchLogger");
+            addInfo();
+
+            if (!!!errorMessage || fishName) navigation.navigate("CatchLogger");
+            else fishNameRef.current.focus();
           }}
         >
           <View style={{ justifyContent: "center", alignItems: "center" }}>

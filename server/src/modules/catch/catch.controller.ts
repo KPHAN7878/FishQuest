@@ -60,6 +60,7 @@ export default class CatchController {
     @Body() info: AdditionalInfo,
     @Body() { species }: { species: string }
   ) {
+    console.log(info, species);
     return await this.catchService.additionalInfo(info, species);
   }
 }

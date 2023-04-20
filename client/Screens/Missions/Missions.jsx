@@ -33,7 +33,12 @@ const Missions = ({ navigation }) => {
   React.useEffect(() => {}, [exp]);
 
   const renderItem = (item) => (
-    <View style={styles.missionBox}>
+    <View
+      style={[
+        styles.missionBox,
+        { backgroundColor: item.fullCompletion ? "#CCFFE5" : "#c2e4f2" },
+      ]}
+    >
       <View style={styles.missionItem}>
         <Text style={styles.missionTitle}>{item.description}</Text>
         {Object.entries(item.progress).map(([_, details], index) => {
@@ -117,6 +122,15 @@ const Missions = ({ navigation }) => {
           <Text style={styles.xp}>
             {exp?.currentXp ?? ""}/{exp?.nextLevelXp ?? ""} xp
           </Text>
+
+          <View style={{ alignItems: "center", marginVertical: 5 }}>
+            <Progress.Bar
+              color={"blue"}
+              progress={exp?.currentXp / exp?.nextLevelXp}
+              width={300}
+              height={10}
+            />
+          </View>
           {items ? (
             items.map((item, index) => {
               return (

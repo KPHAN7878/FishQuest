@@ -142,7 +142,6 @@ const CreatePost = ({ route, navigation }) => {
       </Animated.View>
       <View
         style={{
-          marginTop: 0.025 * height,
           display: "flex",
           flexDirection: "column",
         }}

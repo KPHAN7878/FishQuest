@@ -49,25 +49,24 @@ export class CatchService {
       prediction,
     });
     let res = { ...prediction, ...catchEntry } as CatchEntity & Prediction;
+    res = formUser(
+      exclude<any>(
+        {
+          ...res,
+          ...(await this.missionsService
+            .allChecks(res)
+            .then(async (missions: any) => {
+              const { id: catchId } = await this.catchRepository.save(
+                catchEntry
+              );
+              return { missions, catchId };
+            })),
+        },
+        [["prediction", "modelOutput"]]
+      )
+    );
 
     if (prediction.status) {
-      res = formUser(
-        exclude<any>(
-          {
-            ...res,
-            ...(await this.missionsService
-              .allChecks(res)
-              .then(async (missions: any) => {
-                const { id: catchId } = await this.catchRepository.save(
-                  catchEntry
-                );
-                return { missions, catchId };
-              })),
-          },
-          [["prediction", "modelOutput"]]
-        )
-      );
-
       return { ...formUser(res), box: modelOutput.box };
     } else {
       const errors = formErrors([
@@ -77,7 +76,7 @@ export class CatchService {
           field: "camera",
         },
       ]);
-      return { errors, location: finalArr };
+      return { errors, ...formUser, ...res, location: finalArr };
     }
   }
 
