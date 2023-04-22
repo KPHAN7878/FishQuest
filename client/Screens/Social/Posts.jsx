@@ -16,7 +16,8 @@ const Posts = () => {
     today = yyyy + "-" + mm + "-" + dd;
     //await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
     console.log("TODAY: " + today);
-    await Client.get("profile/feedV2/100," + today + "T21:04:30.752Z")
+    // await Client.get("profile/feedV2/100," + today + "T21:04:30.752Z")
+    await Client.get("profile/feedV2/100," + "2023-04-21" + "T21:04:30.752Z")
       .then((res) => {
         console.log("profile feed: " + JSON.stringify(res.data.posts));
         setPosts(res.data.posts);
