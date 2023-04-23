@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
+export const { height, width } = Dimensions.get("window");
 import {
   View,
   Text,
@@ -11,95 +12,88 @@ import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontFamily } from "../../GlobalStyles";
-import CommentContainer from "./CommentContainer";
 import { Client } from "../../utils/connection";
-import axios from "axios";
 import { UserContext } from "../../Contexts/UserContext";
+import ImageView from "../../Components/ImageView";
 
 import { useNavigation } from "@react-navigation/native";
 
-var { height } = Dimensions.get('window')
-var { width } = Dimensions.get('window')
-
 const Post = ({ post }) => {
-
   post.isChild = false;
 
-  // const [imageUrl, setImageUrl] = React.useState();
-  const [valid, setValid] = React.useState(true);
+  const [valid, setValid] = React.useState(false);
   const [liked, setLike] = React.useState();
   const [myLikesArray, setLikesArray] = useState([]);
+  const [screenState, setScreenState] = React.useState(0);
 
   const navigation = useNavigation();
 
   const { user, setUser } = useContext(UserContext);
 
-  let tempString = post.catch.imageUri
-  let finalString = tempString.replace("fishquest/development", "development/catches")
+  let tempString = post.catch.imageUri;
+  let finalString = tempString.replace(
+    "fishquest/development",
+    "development/catches"
+  );
   // setImageUrl(finalString)
 
   React.useEffect(() => {
     getLikes();
     // console.log("route: " + JSON.stringify(route.params))
-  }, []);
+  }, [valid]);
 
   fetch(finalString)
     .then((res) => {
-      if (res.status === 403)
-      {
-        setValid(false)
+      if (res.status === 403) {
+        setValid(false);
+      } else {
+        setValid(true);
       }
-      console.log("FETCH URL RESPONSE: " + JSON.stringify(res))
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
     });
 
-    const likePost = async (postId) => {
-      await Client.post("like/post", {
-        postId: postId,
-      })
+  // Use like:
+
+  const likePost = async (postId) => {
+    await Client.post("like/post", {
+      postId: postId,
+    })
       .then((res) => {
-      //console.log("USERS: " + JSON.stringify(res))
-      console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res))
-      getLikes();
+        //console.log("USERS: " + JSON.stringify(res))
+        console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res));
+        getLikes();
       })
       .catch((error) => {
-      console.log(error);
-      })
-    }
-
-    const getLikes = async () => {
-      let today = new Date();
-      let dd = String(today.getDate()).padStart(2, '0');
-      let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-      let yyyy = today.getFullYear();
-      today = yyyy + '-' + mm + '-' + dd;
-
-      await Client.get("profile/likesV2/100," + today + "T21:04:30.752Z," + user.id)
-      .then((res) => {
-      console.log("USERS: " + JSON.stringify(res))
-      
-      const likesArray = []
-      res.data.likes.forEach(function(item){
-      console.log("likes Item: " + JSON.stringify(item.likeContent.catch.id) + "\n")
-      likesArray.push(item.likeContent.catch.id)
+        console.log(error);
       });
+  };
 
-      setLikesArray(likesArray.slice())
+  const getLikes = async () => {
+    let today = new Date();
+    let dd = String(today.getDate()).padStart(2, "0");
+    let mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+    let yyyy = today.getFullYear();
+    today = yyyy + "-" + mm + "-" + dd;
 
-      //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
-      console.log("likesArray: " + JSON.stringify(myLikesArray))
-      console.log("post catch ID: " + post.catchId)
+    await Client.get(
+      "profile/likesV2/100," + today + "T21:04:30.752Z," + user.id
+    )
+      .then((res) => {
+        const likesArray = [];
+        res.data.likes.forEach(function (item) {
+          likesArray.push(item.likeContent.catch.id);
+        });
 
+        setLikesArray(likesArray.slice());
       })
       .catch((error) => {
-      console.log(error);
-      })
-    }
+        console.log(error);
+      });
+  };
 
-
-    const postCaption = post.text;
+  const postCaption = post.text;
 
   return (
     <View
@@ -138,19 +132,15 @@ const Post = ({ post }) => {
           </TouchableOpacity>
         </View>
 
-        {/* <View style={styles.content}> */}
-        <View style={styles.testContainer}>
-          <Image            
-            // style={styles.postImage}
-            style={styles.testImage}
-            resizeMode="cover"
-            // source={require("../../assets/no_image.png")}
-            // source={require("../../assets/post_pic.png")}
-            source={
-              valid ? {uri: finalString} : require("../../assets/no_image.png")}
+        <View
+          style={{
+            marginVertical: 10,
+          }}
+        >
+          <ImageView
+            setter={setScreenState}
+            image={valid ? { uri: finalString } : undefined}
           />
-          {/* {console.log("profileUri: " + finalString + "\n\n")}
-          {console.log("ERROR: " + valid)} */}
         </View>
 
         <View style={styles.info}>
@@ -159,10 +149,15 @@ const Post = ({ post }) => {
               <TouchableOpacity
                 style={styles.like}
                 activeOpacity={0.2}
-                onPress={() => {likePost(post.id)}}       //like button
+                onPress={() => {
+                  likePost(post.id);
+                }} //like button
               >
-                {myLikesArray.includes(post.catch.id) ? <AntDesign name="like2" size={24} color="red" /> : <AntDesign name="like2" size={24} color="black" />}
-                
+                {myLikesArray.includes(post.catch.id) ? (
+                  <AntDesign name="like2" size={24} color="red" />
+                ) : (
+                  <AntDesign name="like2" size={24} color="black" />
+                )}
               </TouchableOpacity>
             </View>
             <View style={styles.item}>
@@ -189,7 +184,7 @@ const Post = ({ post }) => {
             activeOpacity={0.2}
             onPress={() => {
               // navigation.navigate('CommentContainer', {caption: postCaption});
-              navigation.navigate('CommentContainer', {caption: post});
+              navigation.navigate("CommentContainer", { caption: post });
             }}
           >
             <Text style={styles.viewCommentText}>View 4 Comments</Text>
@@ -279,24 +274,17 @@ const styles = StyleSheet.create({
     color: "#828282",
   },
   testContainer: {
-    width: 350,
-    height: 450,
-    paddingLeft: 2,
-    paddingRight: 2,
-    marginTop: 10,
-    marginBottom: 10,
-    alignItems: 'center',
-    overflow: 'hidden',
-    position: 'relative',
-    elevation: 8,
+    marginVertical: 10,
+    alignItems: "center",
+    position: "relative",
   },
   testImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    alignSelf: 'center',
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+    alignSelf: "center",
     borderRadius: 20,
-  }
+  },
 });
 
 export default Post;

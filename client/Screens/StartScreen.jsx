@@ -12,12 +12,10 @@ export const StartScreen = ({ navigation }) => {
     Client.get("user/status")
       .then(async () => {
         const res = await Client.get("user/profile");
-        console.log(res);
         setUser(res.data);
         navigation.navigate("Home");
       })
       .catch((err) => {
-        console.log(err);
         if (!err.response) return;
         if (err.response.status === 403) navigation.navigate("Login");
       });

@@ -94,7 +94,10 @@ export class CatchService {
         'note', c."note",
         'imageUri', c."imageUri",
         'location', c."location",
-        'species', p."species"
+        'species', p."species",
+        'weight', c."weight",
+        'bait', c."bait",
+        'date', c."createdAt"
       ) catch
       from prediction
       p inner join catch_entity c on c."predictionId" = p.id

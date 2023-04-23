@@ -9,16 +9,17 @@ import Animated, {
   withDelay,
 } from "react-native-reanimated";
 
-const viewWidth = Math.ceil(width * 0.8);
-const viewHeight = Math.ceil(height * 0.5);
 const DELAY_AMOUNT = 250;
 
 const ImageView = (props) => {
+  const viewWidth = Math.ceil(width * 0.8 * (props.scaleView ?? 1));
+  const viewHeight = Math.ceil(height * 0.5 * (props.scaleView ?? 1));
   const { image } = props;
   const [selected, setSelected] = React.useState(false);
   const [buttonWidth, setButtonWidth] = React.useState(1);
   const [buttonHeight, setButtonHeight] = React.useState(1);
   const [borderRadius, setBorderRadius] = React.useState(true);
+  const [animated, _] = React.useState(props.animated ?? true);
   const addedDelay = props.delayAnimationAmount ?? 0;
 
   const interpolateWidth = interpolate(buttonWidth, [0, 1], [width, viewWidth]);
@@ -55,14 +56,17 @@ const ImageView = (props) => {
         alignItems: "center",
         overflow: "hidden",
         borderRadius: borderRadius ? 30 : 0,
+        backgroundColor: "black",
       }}
       onPress={() => {
         setTimeout(() => {
-          props.setter(selected);
+          if (!!props.setter) props.setter(selected);
           setSelected(!selected);
-          setButtonWidth(buttonWidth ? 0 : 1);
-          setButtonHeight(buttonHeight ? 0 : 1);
-          setBorderRadius(!borderRadius);
+          if (animated) {
+            setButtonWidth(buttonWidth ? 0 : 1);
+            setButtonHeight(buttonHeight ? 0 : 1);
+            setBorderRadius(!borderRadius);
+          }
         }, addedDelay);
       }}
     >
@@ -80,15 +84,25 @@ const ImageView = (props) => {
         ]}
       >
         <Animated.Image
-          source={{
-            uri: image.uri,
-          }}
+          source={
+            image
+              ? {
+                  uri: image.uri,
+                }
+              : require("../assets/no_image.png")
+          }
           style={[
-            {
-              aspectRatio: image.width / image.height,
-            },
+            image?.width
+              ? {
+                  aspectRatio: image.width / image.height,
+                }
+              : {
+                  width,
+                  height,
+                },
             animateImage,
           ]}
+          resizeMode={"contain"}
         />
       </Animated.View>
     </TouchableHighlight>

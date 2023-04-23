@@ -23,9 +23,6 @@ export class CatchEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.catches, { cascade: true })
   user: UserEntity;
 
-  @Column({ nullable: true })
-  note?: string;
-
   @Column("float", { array: true, nullable: true })
   location: number[];
 
@@ -40,10 +37,10 @@ export class CatchEntity extends BaseEntity {
   imageUri: string;
 
   @Column({ nullable: true })
-  notes: string;
+  note?: string;
 
   @Column({ nullable: true })
-  string: string;
+  bait: string;
 
   @Column("float", { nullable: true })
   weight: number;

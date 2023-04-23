@@ -15,10 +15,8 @@ const Posts = () => {
     let yyyy = today.getFullYear();
     today = yyyy + "-" + mm + "-" + dd;
     //await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
-    console.log("TODAY: " + today);
     await Client.get("profile/feedV2/100," + today + "T21:04:30.752Z")
       .then((res) => {
-        console.log("profile feed: " + JSON.stringify(res.data.posts));
         setPosts(res.data.posts);
       })
       .catch((error) => {
@@ -68,7 +66,6 @@ const Posts = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {console.log("\n\nPOSTS" + JSON.stringify(postsPostgres) + "\n\n")}
       {postsPostgres ? (
         postsPostgres.map((post) => <Post post={post} key={post.id} />)
       ) : (

@@ -130,16 +130,17 @@ const CreatePost = ({ route, navigation }) => {
 
   const SplitView = (
     <Animated.View style={[myStyles.split, animateDetails]}>
-      <Animated.View style={[styles.closeButtonContainer, dropPrompt]}>
-        <TouchableOpacity
-          onPress={() => {
-            Keyboard.dismiss();
-            setOpacity(opacity === 0 ? 1 : 0);
-          }}
-        >
+      <TouchableOpacity
+        style={{ border: 3 }}
+        onPress={() => {
+          Keyboard.dismiss();
+          setOpacity(opacity === 0 ? 1 : 0);
+        }}
+      >
+        <Animated.View style={[styles.closeButtonContainer, dropPrompt]}>
           <FontAwesomeIcon icon={faChevronDown} size={25} />
-        </TouchableOpacity>
-      </Animated.View>
+        </Animated.View>
+      </TouchableOpacity>
       <View
         style={{
           display: "flex",
