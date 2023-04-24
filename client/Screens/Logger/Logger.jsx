@@ -17,8 +17,7 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
 const Logger = ({ navigation }) => {
   const [catches, setCatches] = React.useState([]);
-  const [selection, setSelection] = React.useState();
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [isFetching, setIsFetching] = React.useState(false);
   const [cursor, setCursor] = React.useState(
     new Date().toISOString().slice(0, 19)
   );
@@ -29,9 +28,10 @@ const Logger = ({ navigation }) => {
     if (!more && !refresh) return;
     const useCursor = refresh ? new Date().toISOString().slice(0, 19) : cursor;
 
+    setIsFetching(true);
     Client.get("catch/my-catches", {
       params: {
-        limit: 8,
+        limit: 16,
         cursor: useCursor,
       },
     })
@@ -56,10 +56,10 @@ const Logger = ({ navigation }) => {
   };
 
   const onRefresh = () => {
-    setRefreshing(true);
+    setIsFetching(true);
     getCatches(true);
     setTimeout(() => {
-      setRefreshing(false);
+      setIsFetching(false);
     }, 2000);
   };
 
@@ -98,15 +98,22 @@ const Logger = ({ navigation }) => {
             <ImageView
               scaleView={0.4}
               animated={false}
-              setter={() => setSelection(idx)}
+              setter={() => {
+                console.log(catches[idx]);
+                navigation.navigate("CatchDetail", catches[idx]);
+              }}
               image={valid ? { uri: finalString } : undefined}
             />
-            <Text>{c.id}</Text>
+            <Text>{new Date(c.date).toLocaleDateString()}</Text>
+            <Text>{c.species}</Text>
           </View>
         );
       })
     )
-      .then((newComps) => setComps(newComps))
+      .then((newComps) => {
+        setIsFetching(false);
+        setComps(newComps);
+      })
       .catch((error) => {
         console.log(error);
       });
@@ -154,7 +161,7 @@ const Logger = ({ navigation }) => {
     contentOffset,
     contentSize,
   }) => {
-    const paddingToBottom = 50;
+    const paddingToBottom = 100;
     return (
       layoutMeasurement.height + contentOffset.y >=
       contentSize.height - paddingToBottom
@@ -165,10 +172,12 @@ const Logger = ({ navigation }) => {
     <View style={myStyles.parentContainer}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent)) getCatches(false);
+          if (isCloseToBottom(nativeEvent) && !isFetching) {
+            getCatches(false);
+          }
         }}
         scrollEventThrottle={400}
       >

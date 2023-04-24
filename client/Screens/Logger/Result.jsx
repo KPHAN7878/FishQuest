@@ -79,7 +79,7 @@ const Result = ({ route, navigation }) => {
       id: result.catchId,
       weight,
       bait,
-      notes,
+      note: notes,
     };
 
     const res = await Client.post("catch/add-info", info);
