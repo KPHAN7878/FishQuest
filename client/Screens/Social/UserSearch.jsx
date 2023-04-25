@@ -15,12 +15,12 @@ const UserSearch = ({navigation}) => {
 
   const searchFunction = async (input) => {
     console.log("onChangeText: " + input)
-
+    const getData = setTimeout(() => {
     if(input.length !== 0)
     {   
         // setArray([]);
-
-        await Client.get("user/" + input)
+        
+        Client.get("user/" + input)
         .then((res) => {
         //console.log("USERS: " + JSON.stringify(res))
         console.log("\n\n")
@@ -49,12 +49,18 @@ const UserSearch = ({navigation}) => {
         .catch((error) => {
         console.log(error);
         })
+      // }, 300)
+
+      return () => clearTimeout(getData)
 
     }
     else
     {
         setUsers([])
+        console.log("cleared")
+        console.log("cleared users list: " + JSON.stringify(usersList))
     }
+  }, 1000)
   }
 
   const followButton = async (userId) => {

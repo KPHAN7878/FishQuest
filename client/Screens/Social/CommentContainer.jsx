@@ -37,6 +37,7 @@ const CommentContainer = ({route, navigation}) => {
     console.log("commentableId: " + route.params.caption.id)
     console.log("text: " + text)
     
+    if (!route.params.caption.isChild){
     await Client.post("comment", {
       // commentableId: route.params.caption.id,
       // text: text,
@@ -51,7 +52,24 @@ const CommentContainer = ({route, navigation}) => {
     })
     .catch((error) => {
     console.log("error comment: " + error);
-    })
+    })}
+    else{
+      await Client.post("comment", {
+        // commentableId: route.params.caption.id,
+        // text: text,
+        // type: 'comment'
+        commentableId: route.params.caption.id,
+        text: text,
+        type: 'comment'
+      })
+      .then((res) => {
+      console.log("\n\create comment response: " + JSON.stringify(res));
+      getComments();
+      })
+      .catch((error) => {
+      console.log("error comment: " + error);
+      })
+    }
   }
 
   const getComments = async () => {
