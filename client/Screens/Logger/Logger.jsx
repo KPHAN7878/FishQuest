@@ -58,9 +58,6 @@ const Logger = ({ navigation }) => {
   const onRefresh = () => {
     setIsFetching(true);
     getCatches(true);
-    setTimeout(() => {
-      setIsFetching(false);
-    }, 2000);
   };
 
   React.useEffect(() => {
@@ -91,7 +88,10 @@ const Logger = ({ navigation }) => {
             style={{
               alignItems: "center",
               justifyContent: "center",
-              margin: 30,
+              backgroundColor: "#c2e4f2",
+              padding: 10,
+              borderRadius: 30,
+              margin: 10,
             }}
             key={idx}
           >
@@ -99,7 +99,6 @@ const Logger = ({ navigation }) => {
               scaleView={0.4}
               animated={false}
               setter={() => {
-                console.log(catches[idx]);
                 navigation.navigate("CatchDetail", catches[idx]);
               }}
               image={valid ? { uri: finalString } : undefined}
@@ -161,7 +160,7 @@ const Logger = ({ navigation }) => {
     contentOffset,
     contentSize,
   }) => {
-    const paddingToBottom = 100;
+    const paddingToBottom = height;
     return (
       layoutMeasurement.height + contentOffset.y >=
       contentSize.height - paddingToBottom
