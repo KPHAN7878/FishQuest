@@ -20,7 +20,6 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   withTiming,
-  withDelay,
 } from "react-native-reanimated";
 import Missions from "../Missions/Missions";
 

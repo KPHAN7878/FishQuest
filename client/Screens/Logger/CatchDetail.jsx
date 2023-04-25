@@ -1,4 +1,5 @@
 import React from "react";
+import { InputField } from "../../Components/InputField";
 import {
   View,
   Text,
@@ -9,16 +10,14 @@ import {
 import styles, { height, width } from "../../styles";
 import { AnimatedButton } from "../../Components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRight, faFish } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faFish } from "@fortawesome/free-solid-svg-icons";
 import ImageView from "../../Components/ImageView";
 
 import Animated, {
   useAnimatedStyle,
   interpolate,
   withTiming,
-  withDelay,
 } from "react-native-reanimated";
-import Missions from "../Missions/Missions";
 
 const DELAY_AMOUNT = 250;
 
@@ -28,6 +27,8 @@ const CatchDetail = ({ route, navigation }) => {
   const [screenState, setScreenState] = React.useState(0);
   const [imageView, setImageView] = React.useState();
 
+  const notesRef = React.createRef();
+
   const animateDetails = useAnimatedStyle(() => {
     const interpolation = interpolate(screenState, [0, 1], [0, -100]);
 
@@ -36,44 +37,71 @@ const CatchDetail = ({ route, navigation }) => {
     };
   });
 
+  const inputProps = (label, setter, ref) => {
+    return {
+      onFocus: () => {
+        setScreenState(2);
+      },
+      onSubmitEditing: () => {
+        setScreenState(0);
+        Keyboard.dismiss();
+      },
+      onChangeText: (text) => setter(text),
+      placeholder: label,
+      name: label.toLowerCase(),
+      ref,
+    };
+  };
+
   const AdditionalDetails = (
-    <View style={{ marginTop: !!!result.errors ? 50 : 0 }}>
-      {result.weight && <Text>Weight: {result.weight} (lbs)</Text>}
-      {result.bait && <Text>Bait used: {result.bait}</Text>}
-      {result.note && <Text>Notes: {result.note}</Text>}
+    <View style={{ marginVertical: !!!result.errors ? 50 : 0 }}>
+      {result.weight && (
+        <Text
+          style={[myStyles.detailText, { textAlign: "left", marginBottom: 10 }]}
+        >
+          Weight: {result.weight} (lbs)
+        </Text>
+      )}
+      {result.bait && (
+        <Text
+          style={[myStyles.detailText, { textAlign: "left", marginBottom: 10 }]}
+        >
+          Bait used: {result.bait}
+        </Text>
+      )}
+      {result.note && (
+        <InputField
+          {...inputProps("Notes", undefined, undefined)}
+          {...{
+            multiline: true,
+            height: 200,
+            maxLength: 500,
+            value: result.note,
+            editable: false,
+          }}
+          pretext={"Notes"}
+        />
+      )}
     </View>
   );
 
   const AllDetails = (
     <>
-      {!result.species ? (
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
-          {InputFish}
-        </View>
-      ) : (
-        <View
-          style={{
-            borderBottomWidth: 1,
-          }}
-        >
-          <Text style={myStyles.header}>
-            {`You caught a ${result.species}!`}
-          </Text>
-        </View>
-      )}
+      <View
+        style={{
+          borderBottomWidth: 1,
+        }}
+      >
+        <Text style={myStyles.header}>{`You caught a ${result.species}!`}</Text>
+      </View>
 
-      {AdditionalDetails}
       <View
         style={{
           marginHorizontal: 20,
-          marginTop: 25,
+          marginVertical: 25,
         }}
       >
+        {AdditionalDetails}
         <View style={{ flexDirection: "row" }}>
           <Text style={[myStyles.detailText, { textAlign: "left" }]}>
             Time: {new Date(result.date).toLocaleTimeString()}
@@ -105,17 +133,20 @@ const CatchDetail = ({ route, navigation }) => {
           },
         ]}
       >
-        <AnimatedButton
-          style={myStyles.button}
-          next={() => {
-            navigation.navigate("CreatePost", result);
-          }}
-        >
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <FontAwesomeIcon icon={faFish} size={25} />
-            <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
-          </View>
-        </AnimatedButton>
+        {
+          // <AnimatedButton
+          //   style={myStyles.button}
+          //   next={() => {
+          //     navigation.navigate("CreatePost", result);
+          //   }}
+          // >
+          //
+          //   <View style={{ justifyContent: "center", alignItems: "center" }}>
+          //     <FontAwesomeIcon icon={faFish} size={25} />
+          //     <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
+          //   </View>
+          // </AnimatedButton>
+        }
 
         <AnimatedButton
           style={{ ...myStyles.button }}
@@ -124,14 +155,14 @@ const CatchDetail = ({ route, navigation }) => {
           }}
         >
           <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <FontAwesomeIcon icon={faArrowRight} size={25} />
+            <FontAwesomeIcon icon={faArrowLeft} size={25} />
             <Text
               style={{
                 fontSize: 20,
                 flex: 1,
               }}
             >
-              {"Continue"}
+              {"Back"}
             </Text>
           </View>
         </AnimatedButton>

@@ -35,11 +35,9 @@ const Post = ({ post }) => {
     "fishquest/development",
     "development/catches"
   );
-  // setImageUrl(finalString)
 
   React.useEffect(() => {
     getLikes();
-    // console.log("route: " + JSON.stringify(route.params))
   }, [valid]);
 
   fetch(finalString)
@@ -135,9 +133,13 @@ const Post = ({ post }) => {
         <View
           style={{
             marginVertical: 10,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
           <ImageView
+            animated={false}
             setter={setScreenState}
             image={valid ? { uri: finalString } : undefined}
           />
@@ -197,6 +199,7 @@ const Post = ({ post }) => {
 
 const styles = StyleSheet.create({
   container: {
+    display: "flex",
     padding: 20,
   },
   user: {
