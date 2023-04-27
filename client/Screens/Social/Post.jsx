@@ -28,6 +28,7 @@ const Post = ({ post }) => {
   // const [imageUrl, setImageUrl] = React.useState();
   const [valid, setValid] = React.useState(true);
   const [liked, setLike] = React.useState();
+  const [likeQauntity, setLikeQauntity] = React.useState();
   const [myLikesArray, setLikesArray] = useState([]);
 
   const navigation = useNavigation();
@@ -175,8 +176,8 @@ const Post = ({ post }) => {
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={{ marginRight: 10, fontFamily: FontFamily.interMedium }}>
-            14 Likes
+          <Text style={{ marginRight: 10, fontFamily: FontFamily.interMedium, fontWeight: 'bold' }}>
+            {post.likeValue + " Likes"}
           </Text>
         </View>
 
@@ -192,7 +193,7 @@ const Post = ({ post }) => {
               navigation.navigate('CommentContainer', {caption: post});
             }}
           >
-            <Text style={styles.viewCommentText}>View 4 Comments</Text>
+            <Text style={styles.viewCommentText}>{"View " + post.commentValue + " Comments"}</Text>
           </TouchableOpacity>
         </View>
       </View>
