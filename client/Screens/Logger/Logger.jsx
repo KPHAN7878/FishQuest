@@ -6,18 +6,55 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  FlatList,
 } from "react-native";
 import styles, { height, width } from "../../styles";
 import { AnimatedButton } from "../../Components/Button";
+import isCloseToBottom from "../../utils/isCloseToBottom";
 
 import ImageView from "../../Components/ImageView";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
+const RenderOnce = React.memo(({ catch: c, navigation }) => {
+  let tempString = c.imageUri;
+  let finalString = tempString.replace(
+    "fishquest/development",
+    "development/catches"
+  );
+  const valid = false;
+
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#c2e4f2",
+        padding: 10,
+        borderRadius: 30,
+        margin: 10,
+      }}
+    >
+      <ImageView
+        scaleView={0.4}
+        animated={false}
+        setter={() => {
+          navigation.navigate("CatchDetail", { catch: c });
+        }}
+        image={valid ? { uri: finalString } : undefined}
+      />
+      <Text>{new Date(c.date).toLocaleDateString()}</Text>
+      <Text>{c.species}</Text>
+    </View>
+  );
+});
+
 const Logger = ({ navigation }) => {
   const [catches, setCatches] = React.useState([]);
+  const [catchIds, setCatchIds] = React.useState([]);
+
   const [isFetching, setIsFetching] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+
   const [cursor, setCursor] = React.useState(
     new Date().toISOString().slice(0, 19)
   );
@@ -31,21 +68,17 @@ const Logger = ({ navigation }) => {
     setIsFetching(true);
     Client.get("catch/my-catches", {
       params: {
-        limit: 16,
+        limit: 8,
         cursor: useCursor,
       },
     })
       .then((res) => {
-        const newCatches = (
-          refresh
-            ? [...res.data.catches, ...catches]
-            : [...catches, ...res.data.catches]
-        ).filter(
-          ({ catch: value }, index, self) =>
-            index === self.findIndex(({ catch: c }) => c.id === value.id)
+        const newCatches = [...res.data.catches].filter(
+          (c) => !catchIds.includes(c.catch.id)
         );
-
         setCatches(newCatches);
+        setCatchIds([...catchIds, ...newCatches.map((c) => c.catch.id)]);
+
         const last = res.data.catches[res.data.catches.length - 1];
         setMore(res.data.hasMore);
         setCursor(last.catch.date);
@@ -57,6 +90,7 @@ const Logger = ({ navigation }) => {
 
   const onRefresh = () => {
     setIsFetching(true);
+    setRefreshing(true);
     getCatches(true);
   };
 
@@ -70,48 +104,17 @@ const Logger = ({ navigation }) => {
 
   const handleComps = (catches) => {
     Promise.all(
-      catches.map(async ({ catch: c }, idx) => {
-        let tempString = c.imageUri;
-        let finalString = tempString.replace(
-          "fishquest/development",
-          "development/catches"
-        );
-        const valid = await fetch(finalString)
-          .then((res) => {
-            return res.status !== 403;
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-        return (
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#c2e4f2",
-              padding: 10,
-              borderRadius: 30,
-              margin: 10,
-            }}
-            key={idx}
-          >
-            <ImageView
-              scaleView={0.4}
-              animated={false}
-              setter={() => {
-                navigation.navigate("CatchDetail", catches[idx]);
-              }}
-              image={valid ? { uri: finalString } : undefined}
-            />
-            <Text>{new Date(c.date).toLocaleDateString()}</Text>
-            <Text>{c.species}</Text>
-          </View>
-        );
+      catches.map(async ({ catch: c }) => {
+        return <RenderOnce catch={c} key={c.id} navigation={navigation} />;
       })
     )
       .then((newComps) => {
         setIsFetching(false);
-        setComps(newComps);
+        setComps(
+          (refreshing ? newComps : comps).concat(refreshing ? comps : newComps)
+        );
+
+        setRefreshing(false);
       })
       .catch((error) => {
         console.log(error);
@@ -155,17 +158,6 @@ const Logger = ({ navigation }) => {
       </AnimatedButton>
     </View>
   );
-  const isCloseToBottom = ({
-    layoutMeasurement,
-    contentOffset,
-    contentSize,
-  }) => {
-    const paddingToBottom = height;
-    return (
-      layoutMeasurement.height + contentOffset.y >=
-      contentSize.height - paddingToBottom
-    );
-  };
 
   return (
     <View style={myStyles.parentContainer}>
@@ -174,7 +166,7 @@ const Logger = ({ navigation }) => {
           <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching) {
+          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
             getCatches(false);
           }
         }}

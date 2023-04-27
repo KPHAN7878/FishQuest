@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards, Param } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  Param,
+  Query,
+} from "@nestjs/common";
 import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 import { CommentInput, GetCommentsInput } from "./comment.dto";
@@ -16,7 +25,7 @@ export class CommentController {
 
   @Get("get-comments")
   async getComments(
-    @Body() input: GetCommentsInput & Paginated,
+    @Query() input: GetCommentsInput & Paginated,
     @Req() { user: { id: myId } }: Ctx
   ) {
     return await this.commentService.getComments(input, { ...input, myId });
@@ -25,27 +34,26 @@ export class CommentController {
   @Get("get-commentsV2/:string")
   async getCommentsV2(
     //@Body() input: GetCommentsInput & Paginated,
-    @Param('string') input: string,
+    @Param("string") input: string,
     @Req() { user: { id: myId } }: Ctx
   ) {
+    const splitArray = input.split(",");
 
-    const splitArray = input.split(",")
+    console.log("split array: " + input + "\n");
 
-      console.log("split array: " + input + "\n")
+    let testObject = {
+      // limit: 25,
+      // skip: null,
+      // userId: 1,
+      // myId: 1,
+      // type: "following"
+      limit: parseInt(splitArray[0]),
+      skip: null,
+      commentableId: parseInt(splitArray[1]),
+      type: splitArray[2],
+    };
 
-      let testObject = {
-        // limit: 25,
-        // skip: null,
-        // userId: 1,
-        // myId: 1,
-        // type: "following"
-        limit: parseInt(splitArray[0]),
-        skip: null,
-        commentableId: parseInt(splitArray[1]),
-        type: splitArray[2]
-      }
-
-      let input_ = testObject as GetCommentsInput & Paginated
+    let input_ = testObject as GetCommentsInput & Paginated;
     return await this.commentService.getComments(input_, { ...input_, myId });
   }
 }

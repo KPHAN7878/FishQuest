@@ -145,6 +145,7 @@ export class PostService {
     user: UserEntity
   ): Promise<PaginatedPost> {
     const [realLimit, realLimitPlusOne] = paginateLimit(limit);
+    // console.log(cursor);
     const posts = await dataSource.query(
       `
     select p.id, p."likeValue", p."commentValue",
@@ -166,10 +167,10 @@ export class PostService {
     where
     ${
       cursor
-        ? `p."createdAt" < '${cursor}' and p."creatorId" in (
+        ? `p."createdAt" < '${cursor}' and (p."creatorId" in (
           select "userEntityId_1" from
           rfollowing where "userEntityId_2" = '${user.id}'
-    ) or p."creatorId" = ${user.id}`
+    ) or p."creatorId" = ${user.id})`
         : ""
     }
     order by p."createdAt" DESC

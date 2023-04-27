@@ -1,76 +1,102 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React from "react";
 import { StyleSheet, ScrollView, View, RefreshControl } from "react-native";
 import Post from "./Post";
 import { Client } from "../../utils/connection";
-import axios from "axios";
+import isCloseToBottom from "../../utils/isCloseToBottom";
+
+const RenderOnce = React.memo(({ post }) => {
+  return <Post post={post} />;
+});
 
 const Posts = () => {
-  const [postsPostgres, setPosts] = useState();
+  const [posts, setPosts] = React.useState([]);
+  const [postIds, setPostIds] = React.useState([]);
+
+  const [isFetching, setIsFetching] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const getSocialFeed = async () => {
-    let today = new Date();
-    let dd = String(today.getDate()).padStart(2, "0");
-    let mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    let yyyy = today.getFullYear();
-    today = yyyy + "-" + mm + "-" + dd;
-    //await Client.get("profile/feedV2/10,2023-03-21T21:04:30.752Z")
-    await Client.get("profile/feedV2/100," + today + "T21:04:30.752Z")
+  const [cursor, setCursor] = React.useState(
+    new Date().toISOString().slice(0, 19)
+  );
+  const [more, setMore] = React.useState(true);
+  const [postComponents, setPostComponents] = React.useState([]);
+
+  const getSocialFeed = (refresh) => {
+    if (!more && !refresh) return;
+    const useCursor = refresh ? new Date().toISOString().slice(0, 19) : cursor;
+
+    Client.get("profile/feed", {
+      params: {
+        limit: 2,
+        cursor: useCursor,
+      },
+    })
       .then((res) => {
-        setPosts(res.data.posts);
+        const newPosts = [...res.data.posts].filter(
+          (p) => !postIds.includes(p.id)
+        );
+
+        setPosts(newPosts);
+        setPostIds([...postIds, ...newPosts.map((p) => p.id)]);
+
+        const last = res.data.posts[res.data.posts.length - 1];
+        setMore(res.data.hasMore);
+        setCursor(last.createdAt);
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  React.useEffect(() => {
-    getSocialFeed();
-    // console.log("route: " + JSON.stringify(route.params))
-  }, []);
-
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = () => {
+    setIsFetching(true);
     setRefreshing(true);
-    getSocialFeed();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+    getSocialFeed(true);
+  };
+
+  React.useEffect(() => {
+    onRefresh();
   }, []);
 
-  //TEMPORARY DATABASE //////////////////////////////////
-  const posts = [
-    {
-      id: 1,
-      name: "John Doe",
-      userId: 1,
-      profilePic:
-        "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-      img: "https://images.pexels.com/photos/4881619/pexels-photo-4881619.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    },
-    {
-      id: 2,
-      name: "Will Smith",
-      userId: 2,
-      profilePic:
-        "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
-      desc: "Tenetur iste voluptates dolorem rem commodi voluptate pariatur, voluptatum, laboriosam consequatur enim nostrum cumque! Maiores a nam non adipisci minima modi tempore.",
-    },
-  ];
-  ///////////////////////////////////////////////////////
+  React.useEffect(() => {
+    renderPosts(posts);
+  }, [posts]);
+
+  const renderPosts = (posts) => {
+    Promise.all(
+      posts.map(async (p) => {
+        return <RenderOnce post={p} key={p.id} />;
+      })
+    )
+      .then((newPostComponents) => {
+        setIsFetching(false);
+        setPostComponents(
+          (refreshing ? newPostComponents : postComponents).concat(
+            refreshing ? postComponents : newPostComponents
+          )
+        );
+
+        setRefreshing(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <ScrollView
       style={styles.posts}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
       }
+      onScroll={({ nativeEvent }) => {
+        if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+          getSocialFeed(false);
+        }
+      }}
+      scrollEventThrottle={400}
     >
-      {postsPostgres ? (
-        postsPostgres.map((post) => <Post post={post} key={post.id} />)
-      ) : (
-        <View></View>
-      )}
+      {postComponents}
     </ScrollView>
   );
 };

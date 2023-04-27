@@ -22,14 +22,9 @@ const Post = ({ post }) => {
   post.isChild = false;
 
   const [valid, setValid] = React.useState(false);
-  const [liked, setLike] = React.useState();
-  const [likeQauntity, setLikeQauntity] = React.useState();
   const [myLikesArray, setLikesArray] = useState([]);
   const [screenState, setScreenState] = React.useState(0);
-
   const navigation = useNavigation();
-
-  const { user, setUser } = useContext(UserContext);
 
   let tempString = post.catch.imageUri;
   let finalString = tempString.replace(
@@ -38,22 +33,18 @@ const Post = ({ post }) => {
   );
 
   React.useEffect(() => {
-    getLikes();
-  }, [valid]);
-
-  fetch(finalString)
-    .then((res) => {
-      if (res.status === 403) {
-        setValid(false);
-      } else {
-        setValid(true);
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-  // Use like:
+    fetch(finalString)
+      .then((res) => {
+        if (res.status === 403) {
+          setValid(false);
+        } else {
+          setValid(true);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   const likePost = async (postId) => {
     await Client.post("like/post", {
@@ -63,29 +54,6 @@ const Post = ({ post }) => {
         //console.log("USERS: " + JSON.stringify(res))
         console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res));
         getLikes();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const getLikes = async () => {
-    let today = new Date();
-    let dd = String(today.getDate()).padStart(2, "0");
-    let mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    let yyyy = today.getFullYear();
-    today = yyyy + "-" + mm + "-" + dd;
-
-    await Client.get(
-      "profile/likesV2/100," + today + "T21:04:30.752Z," + user.id
-    )
-      .then((res) => {
-        const likesArray = [];
-        res.data.likes.forEach(function (item) {
-          likesArray.push(item.likeContent.catch.id);
-        });
-
-        setLikesArray(likesArray.slice());
       })
       .catch((error) => {
         console.log(error);
@@ -173,7 +141,13 @@ const Post = ({ post }) => {
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={{ marginRight: 10, fontFamily: FontFamily.interMedium, fontWeight: 'bold' }}>
+          <Text
+            style={{
+              marginRight: 10,
+              fontFamily: FontFamily.interMedium,
+              fontWeight: "bold",
+            }}
+          >
             {post.likeValue + " Likes"}
           </Text>
         </View>
@@ -190,7 +164,9 @@ const Post = ({ post }) => {
               navigation.navigate("CommentContainer", { caption: post });
             }}
           >
-            <Text style={styles.viewCommentText}>{"View " + post.commentValue + " Comments"}</Text>
+            <Text style={styles.viewCommentText}>
+              {"View " + post.commentValue + " Comments"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
