@@ -79,7 +79,7 @@ const CommentContainer = ({route, navigation}) => {
     .then((res) => {
       console.log("\n\NOOOOOO!!!\n\n")
       console.log("comments: " + JSON.stringify(res) + "\n\n")
-      setComments(res.data.comments)
+      setComments(res.data.comments.reverse())
       console.log("comment array: " + commentsDB)
       
     })
@@ -92,7 +92,7 @@ const CommentContainer = ({route, navigation}) => {
     .then((res) => {
       console.log("\n\nYAY!!!\n\n")
       console.log("comments: " + JSON.stringify(res) + "\n\n")
-      setComments(res.data.comments)
+      setComments(res.data.comments.reverse())
       console.log("comment array: " + commentsDB)
       
     })
