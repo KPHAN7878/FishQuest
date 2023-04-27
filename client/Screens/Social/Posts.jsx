@@ -41,7 +41,7 @@ const Posts = () => {
 
         const last = res.data.posts[res.data.posts.length - 1];
         setMore(res.data.hasMore);
-        setCursor(last.createdAt);
+        if (last) setCursor(last.createdAt);
       })
       .catch((error) => {
         console.log(error);

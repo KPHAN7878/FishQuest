@@ -131,7 +131,7 @@ const Post = ({ post }) => {
                   fontWeight: "bold",
                 }}
               >
-                {post.likeValue + hasLiked ? 1 : 0}
+                {post.likeValue + (hasLiked ? 1 : 0)}
               </Text>
             </View>
             <View style={styles.item}>

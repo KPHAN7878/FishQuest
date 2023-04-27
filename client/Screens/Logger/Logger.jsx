@@ -81,7 +81,7 @@ const Logger = ({ navigation }) => {
 
         const last = res.data.catches[res.data.catches.length - 1];
         setMore(res.data.hasMore);
-        setCursor(last.catch.date);
+        if (last) setCursor(last.catch.date);
       })
       .catch((error) => {
         console.log(error);
