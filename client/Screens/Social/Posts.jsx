@@ -27,7 +27,7 @@ const Posts = () => {
 
     Client.get("profile/feed", {
       params: {
-        limit: 2,
+        limit: 3,
         cursor: useCursor,
       },
     })

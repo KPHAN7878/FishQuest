@@ -13,7 +13,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { FontFamily } from "../../GlobalStyles";
 import { Client } from "../../utils/connection";
-import { UserContext } from "../../Contexts/UserContext";
 import ImageView from "../../Components/ImageView";
 
 import { useNavigation } from "@react-navigation/native";
@@ -22,8 +21,7 @@ const Post = ({ post }) => {
   post.isChild = false;
 
   const [valid, setValid] = React.useState(false);
-  const [myLikesArray, setLikesArray] = useState([]);
-  const [screenState, setScreenState] = React.useState(0);
+  const [hasLiked, setHasLiked] = React.useState(post.liked);
   const navigation = useNavigation();
 
   let tempString = post.catch.imageUri;
@@ -47,14 +45,11 @@ const Post = ({ post }) => {
   }, []);
 
   const likePost = async (postId) => {
+    setHasLiked(!hasLiked);
     await Client.post("like/post", {
       postId: postId,
     })
-      .then((res) => {
-        //console.log("USERS: " + JSON.stringify(res))
-        console.log("\n\nLIKE RESPONSE: " + JSON.stringify(res));
-        getLikes();
-      })
+      .then((res) => {})
       .catch((error) => {
         console.log(error);
       });
@@ -109,7 +104,6 @@ const Post = ({ post }) => {
         >
           <ImageView
             animated={false}
-            setter={setScreenState}
             image={valid ? { uri: finalString } : undefined}
           />
         </View>
@@ -118,18 +112,27 @@ const Post = ({ post }) => {
           <View style={styles.like_comment}>
             <View style={styles.item}>
               <TouchableOpacity
-                style={styles.like}
                 activeOpacity={0.2}
                 onPress={() => {
                   likePost(post.id);
                 }} //like button
               >
-                {myLikesArray.includes(post.catch.id) ? (
-                  <AntDesign name="like2" size={24} color="red" />
+                {hasLiked ? (
+                  <AntDesign name="like2" size={24} color="green" />
                 ) : (
                   <AntDesign name="like2" size={24} color="black" />
                 )}
               </TouchableOpacity>
+
+              <Text
+                style={{
+                  marginHorizontal: 10,
+                  fontFamily: FontFamily.interMedium,
+                  fontWeight: "bold",
+                }}
+              >
+                {post.likeValue + hasLiked ? 1 : 0}
+              </Text>
             </View>
             <View style={styles.item}>
               <TouchableOpacity
@@ -139,17 +142,18 @@ const Post = ({ post }) => {
               >
                 <FontAwesome name="comment-o" size={24} color="black" />
               </TouchableOpacity>
+
+              <Text
+                style={{
+                  marginHorizontal: 10,
+                  fontFamily: FontFamily.interMedium,
+                  fontWeight: "bold",
+                }}
+              >
+                {post.commentValue}
+              </Text>
             </View>
           </View>
-          <Text
-            style={{
-              marginRight: 10,
-              fontFamily: FontFamily.interMedium,
-              fontWeight: "bold",
-            }}
-          >
-            {post.likeValue + " Likes"}
-          </Text>
         </View>
 
         <View style={styles.captionView}>
@@ -226,6 +230,7 @@ const styles = StyleSheet.create({
   },
   item: {
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     fontSize: 14,
     marginRight: 15,
