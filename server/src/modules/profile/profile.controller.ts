@@ -5,21 +5,18 @@ import {
   Post,
   Req,
   UseGuards,
-  Param,
   Query,
 } from "@nestjs/common";
-import { Ctx, Paginated, PaginatedSkip } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
 
 import { PostService } from "../post/post.service";
-import { GetUsersInput, PaginatedUser } from "./profile.dto";
+import { GetUsersInput } from "./profile.dto";
 import { UserService } from "../user/user.service";
 import { GetCommentsInput } from "../comment/comment.dto";
 import { CommentService } from "../comment/comment.service";
 import { LikeService } from "../like/like.service";
 import { GetLikeInput } from "../like/like.dto";
-import { UserEntity } from "../user/user.entity";
-import { split } from "lodash";
 
 @Controller("profile")
 @UseGuards(UserAuthGuard)
@@ -35,8 +32,8 @@ export class ProfileController {
     @Body("userId") id: number,
     @Req() { user }: Ctx
   ) {
-    console.log("id: " + id);
-    return this.userService.follow(id, user);
+    const res = await this.userService.follow(id, user);
+    return res;
   }
 
   @Get("posts")

@@ -7,59 +7,35 @@ import {
   Button,
   TextInput,
   ScrollView,
-  Pressable,
+  TouchableOpacity,
+  Keyboard,
 } from "react-native";
 import { Client } from "../../utils/connection";
-import { UserContext } from "../../Contexts/UserContext";
+import { InputField } from "../../Components/InputField";
 
 var { height } = Dimensions.get("window");
 var { width } = Dimensions.get("window");
 
 const UserSearch = ({ navigation }) => {
   const [usersList, setUsers] = useState([]);
-  const [followUsersArray, setArray] = useState([]);
-  const [onSwitch, setSwitch] = useState();
+  const [searchUser, setSearchUser] = useState([]);
+  const searchUserRef = React.useRef();
 
-  const searchFunction = async (input) => {
-    console.log("onChangeText: " + input);
+  const searchFunction = async () => {
+    console.log("onChangeText: " + searchUser);
     const getData = setTimeout(() => {
-      if (input.length !== 0) {
+      if (searchUser.length !== 0) {
         Client.get("user/find", {
-          username: input,
+          params: {
+            username: searchUser,
+          },
         })
           .then((res) => {
-            //console.log("USERS: " + JSON.stringify(res))
-            console.log(res.data);
             setUsers(res.data);
-          })
-          .then(async () => {
-            //setArray([]);
-            // const res = await Client.get(
-            //   "profile/get-usersV2/25," + JSON.stringify(user.id) + ",following"
-            // );
-            // const res = await Client.get(
-            //   "profile/get-usersV2/25," + JSON.stringify(user.id) + ",following"
-            //   );
-            //
-            // console.log("RES: " + JSON.stringify(res.data.users) + "\n\n");
-            //
-            // const followArray = [];
-            // res.data.users.forEach(function (item) {
-            //   console.log(
-            //     "usersList Item: " + JSON.stringify(item.user.username) + "\n"
-            //   );
-            //   followArray.push(item.user.username);
-            // });
-            //
-            // setArray(followArray.slice());
-            //
-            // //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
-            // console.log("usersArray: " + JSON.stringify(followUsersArray));
           })
           .catch((error) => {
             console.log(error);
           });
-        // }, 300)
 
         return () => clearTimeout(getData);
       } else {
@@ -67,37 +43,18 @@ const UserSearch = ({ navigation }) => {
         console.log("cleared");
         console.log("cleared users list: " + JSON.stringify(usersList));
       }
-    }, 1000);
+    }, 500);
   };
 
   const followButton = async (userId) => {
-    console.log(userId);
-    await Client.post("profile/follow", {
-      userId: userId,
+    const res = await Client.post("profile/follow", {
+      userId,
     })
-      .then(async () => {
-        //setArray([]);
-        // const res = await Client.get(
-        //   "profile/get-usersV2/25," + JSON.stringify(user.id) + ",following"
-        // );
-        //
-        // console.log("RES: " + JSON.stringify(res.data.users) + "\n\n");
-        //
-        // const followArray = [];
-        // res.data.users.forEach(function (item) {
-        //   console.log(
-        //     "usersList Item: " + JSON.stringify(item.user.username) + "\n"
-        //   );
-        //   followArray.push(item.user.username);
-        // });
-        //
-        // setArray(followArray.slice());
-        //console.log("usersList: " + JSON.stringify(usersList) + "\n\n")
-        // console.log("usersArray: " + JSON.stringify(followUsersArray));
-      })
+      .then()
       .catch((error) => {
         console.log(error);
       });
+    return res.data;
   };
 
   return (
@@ -105,37 +62,47 @@ const UserSearch = ({ navigation }) => {
       <View style={styles.headerBox}>
         <Button
           title="Back"
-          color="#841584"
+          color="rgba(123,104,238,0.8)"
           onPress={() => {
             navigation.goBack();
           }}
         />
       </View>
-      <Text>User Searches</Text>
-      <TextInput
-        placeholder="input here"
-        onChangeText={(input) => searchFunction(input)}
-      />
-      <ScrollView>
+      <View style={{ marginTop: 25 }}>
+        <InputField
+          onChangeText={(text) => {
+            setSearchUser(text);
+            searchFunction();
+          }}
+          onSubmitEditing={() => {
+            Keyboard.dismiss();
+          }}
+          placeholder={"Username"}
+          name={"username"}
+          ref={searchUserRef}
+          pretext={"User search"}
+        />
+      </View>
+      <ScrollView style={{ marginHorizontal: 25 }}>
         {usersList ? (
-          usersList.map((item) => {
+          usersList.map((item, idx) => {
             return (
-              // <Text>
-              //     {JSON.stringify(item.username)}
-              // </Text>
-              <View style={styles.usersView}>
-                <Text style={{ fontWeight: "bold" }}>{item.username}</Text>
-                {/* <Button title="Follow" style={styles.followButton}/> */}
-                <Pressable
+              <View style={styles.usersView} key={idx}>
+                <Text style={{ fontWeight: "bold", textAlign: "left" }}>
+                  {item.username}
+                </Text>
+                <TouchableOpacity
                   style={styles.button}
-                  onPress={() => followButton(item.id)}
+                  onPress={async () => {
+                    const isFollowing = await followButton(item.id);
+                    usersList[idx].following = isFollowing;
+                    setUsers([...usersList]);
+                  }}
                 >
                   <Text style={styles.text}>
-                    {followUsersArray.includes(item.username)
-                      ? "Unfollow"
-                      : "Follow"}
+                    {item.following ? "Unfollow" : "Follow"}
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               </View>
             );
           })
@@ -165,7 +132,6 @@ const styles = StyleSheet.create({
     height: 0.05 * height,
     flexDirection: "row",
     marginBottom: 1,
-    //backgroundColor: 'white',
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -174,15 +140,14 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   button: {
+    textAlign: "right",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 5,
-    paddingHorizontal: 40,
     borderRadius: 10,
     elevation: 3,
-    backgroundColor: "purple",
+    backgroundColor: "rgba(123,104,238, 1.0)",
     alignSelf: "flex-end",
-    marginRight: width * 0.05,
     marginBottom: height * 0.05 * 0.16,
     width: 150,
   },
