@@ -1,20 +1,20 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
   StyleSheet,
   Dimensions,
-  Button,
-  TextInput,
   ScrollView,
   TouchableOpacity,
   Keyboard,
 } from "react-native";
 import { Client } from "../../utils/connection";
 import { InputField } from "../../Components/InputField";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { AnimatedButton } from "../../Components/Button";
 
 var { height } = Dimensions.get("window");
-var { width } = Dimensions.get("window");
 
 const UserSearch = ({ navigation }) => {
   const [usersList, setUsers] = useState([]);
@@ -22,7 +22,6 @@ const UserSearch = ({ navigation }) => {
   const searchUserRef = React.useRef();
 
   const searchFunction = async () => {
-    console.log("onChangeText: " + searchUser);
     const getData = setTimeout(() => {
       if (searchUser.length !== 0) {
         Client.get("user/find", {
@@ -60,13 +59,22 @@ const UserSearch = ({ navigation }) => {
   return (
     <View style={styles.testContainer}>
       <View style={styles.headerBox}>
-        <Button
-          title="Back"
-          color="rgba(123,104,238,0.8)"
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            alignItems: "center",
+            marginVertical: 10,
+            marginHorizontal: 10,
+          }}
           onPress={() => {
             navigation.goBack();
           }}
-        />
+        >
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <FontAwesomeIcon icon={faArrowLeft} size={25} />
+            <Text style={{ fontSize: 20, flex: 1 }}>{"Cancel"}</Text>
+          </View>
+        </TouchableOpacity>
       </View>
       <View style={{ marginTop: 25 }}>
         <InputField
@@ -120,9 +128,10 @@ const styles = StyleSheet.create({
     backgroundColor: "gainsboro",
   },
   headerBox: {
+    display: "flex",
     marginTop: 0,
     paddingTop: 0.06 * height,
-    paddingBottom: 0.01 * height,
+    maxHeight: height * 0.1 + 0.06 * height,
     borderWidth: 0.3,
     borderColor: "#787777",
     backgroundColor: "#2596be",

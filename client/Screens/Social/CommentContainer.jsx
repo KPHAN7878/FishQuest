@@ -4,32 +4,52 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Button,
   ScrollView,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
+  Keyboard,
   Image,
   TouchableOpacity,
 } from "react-native";
 import styles from "../../styles";
-import { useNavigation } from "@react-navigation/native";
+
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  withTiming,
+} from "react-native-reanimated";
 import { FontFamily, Color } from "../../GlobalStyles";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
-import axios from "axios";
 
-const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 const CommentContainer = ({ route, navigation }) => {
-  //const navigation = useNavigation();
   const [text, onChangeText] = React.useState();
   const [commentsDB, setComments] = useState();
   const [isChildBool, setIsChild] = useState();
 
-  const { postDetails } = route.params;
+  const [screenState, setScreenState] = React.useState(0);
+  const animateDetails = useAnimatedStyle(() => {
+    const interpolation = interpolate(screenState, [0, 1], [0, -350]);
+
+    return {
+      transform: [{ translateY: withTiming(interpolation, { duration: 250 }) }],
+    };
+  });
+
+  React.useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardWillHide",
+      () => {
+        setScreenState(0);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const submitComment = async () => {
     console.log("in submit comment function");
@@ -38,9 +58,6 @@ const CommentContainer = ({ route, navigation }) => {
 
     if (!route.params.caption.isChild) {
       await Client.post("comment", {
-        // commentableId: route.params.caption.id,
-        // text: text,
-        // type: 'comment'
         commentableId: route.params.caption.id,
         text: text,
         type: "post",
@@ -54,9 +71,6 @@ const CommentContainer = ({ route, navigation }) => {
         });
     } else {
       await Client.post("comment", {
-        // commentableId: route.params.caption.id,
-        // text: text,
-        // type: 'comment'
         commentableId: route.params.caption.id,
         text: text,
         type: "comment",
@@ -120,9 +134,7 @@ const CommentContainer = ({ route, navigation }) => {
   }, []);
 
   return (
-    // <KeyboardAvoidingView style={{flex:1}} behavior="padding">
     <View>
-      {console.log("COMMENTS: " + JSON.stringify(route))}
       <View style={styles2.headerBox}>
         <Text style={styles2.fishQuest}>Fish Quest</Text>
 
@@ -155,8 +167,9 @@ const CommentContainer = ({ route, navigation }) => {
 
       <ScrollView style={styles2.comments}>
         {commentsDB ? (
-          commentsDB.map((comment) => (
+          commentsDB.map((comment, idx) => (
             <Pressable
+              key={idx}
               onPress={() => {
                 navigation.push("CommentContainer", {
                   caption: { id: comment.id, isChild: true },
@@ -178,14 +191,6 @@ const CommentContainer = ({ route, navigation }) => {
                   </View>
                   <Text style={styles2.date}>1 hour ago</Text>
                 </View>
-                {/* <View key={comment.id} style={styles2.comment2}>
-                  <Image style={styles2.img} source={require("../../assets/profilePic.jpg")} />
-                  <View style={styles2.info}>
-                      <Text style={styles2.userName}>{comment.name}</Text>
-                      <Text style={styles2.desc}>{comment.desc}</Text>
-                  </View>
-                  <Text style={styles2.date}>1 hour ago</Text>
-              </View> */}
                 <View style={styles2.line} />
               </View>
             </Pressable>
@@ -195,28 +200,29 @@ const CommentContainer = ({ route, navigation }) => {
         )}
       </ScrollView>
 
-      <View style={styles2.typeComment}>
+      <Animated.View style={[styles2.typeComment, animateDetails]}>
         <Image
           style={styles2.img}
           source={require("../../assets/profilePic.jpg")}
         />
-        <TextInput
-          style={styles2.input}
-          placeholder="write a comment..."
-          onChangeText={(text) => onChangeText(text)}
-        />
-        {/* <Button style={styles2.send} title="Send" onPress={this.submitComment()}/> */}
-        <Pressable
-          style={styles.formButton}
-          onPress={() => {
-            submitComment();
-          }}
-        >
-          <Text style={styles.buttonText}>{"Submit Post"}</Text>
-        </Pressable>
-      </View>
+        <View style={styles2.input}>
+          <TextInput
+            placeholder="write a comment..."
+            style={{ flex: 4 }}
+            onFocus={() => setScreenState(1)}
+            onChangeText={(text) => onChangeText(text)}
+          />
+          <TouchableOpacity
+            style={[{ flex: 1 }]}
+            onPress={() => {
+              submitComment();
+            }}
+          >
+            <Text style={[{ fontSize: 14 }]}>{"Submit"}</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
     </View>
-    // </KeyboardAvoidingView>
   );
 };
 
@@ -268,11 +274,14 @@ const styles2 = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     marginVertical: 20,
     marginHorizontal: 20,
   },
   input: {
+    flex: 5,
+    display: "flex",
+    flexDirection: "row",
+    marginLeft: 10,
     width: "65%",
     padding: 10,
     borderWidth: 1,
@@ -307,8 +316,8 @@ const styles2 = StyleSheet.create({
     fontSize: 12,
   },
   img: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 50,
     resizeMode: "contain",
   },
