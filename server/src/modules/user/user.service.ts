@@ -10,6 +10,9 @@ import seedrandom from "seedrandom";
 import { TokenEntity } from "../auth/token.entity";
 import { formErrors } from "../../utils/formError";
 import { ProfileService } from "../profile/profile.service";
+import { dataSource } from "../../constants";
+import { formUser } from "../../utils/formEntity";
+import { followingSubquery } from "../../utils/subquery";
 
 // this is used anywhere
 @Injectable()
@@ -196,8 +199,19 @@ export class UserService extends ProfileService {
     this.tokenRepository.delete({ userId, tokenType: "password" });
   }
 
-  async searchUsername(username: string) {
-    const userEntry = this.userRepository.find();
+  async searchUsername(
+    username: string,
+    myId: number
+  ): Promise<(UserEntity & { following: boolean })[]> {
+    const userEntry: (UserEntity & { following: boolean })[] =
+      await dataSource.query(
+        `
+      select u.username, u."profilePicUrl", u.id, ${followingSubquery(myId)}
+      from user_entity u left join rfollowing f on f."userEntityId_1" = u.id
+      where username ilike '${username}%'
+      limit 8
+      `
+      );
     return userEntry;
   }
 }

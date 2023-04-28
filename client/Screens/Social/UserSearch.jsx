@@ -24,7 +24,9 @@ const UserSearch = ({ navigation }) => {
     console.log("onChangeText: " + input);
     const getData = setTimeout(() => {
       if (input.length !== 0) {
-        Client.get("user/" + input)
+        Client.get("user/find", {
+          username: input,
+        })
           .then((res) => {
             //console.log("USERS: " + JSON.stringify(res))
             console.log(res.data);

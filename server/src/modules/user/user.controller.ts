@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   Param,
+  Query,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import {
@@ -89,7 +90,6 @@ export class UserController {
     );
   }
 
-  // Checks if user is logged in
   @UseGuards(UserAuthGuard)
   @Get("status")
   async getAuthStatus(@Req() req: Request) {
@@ -117,17 +117,10 @@ export class UserController {
     return session;
   }
 
-  @Get(":username")
-  async findUsers(@Param("username") username: string) {
-    const allUsers = await this.userService.searchUsername(username);
-    let test = allUsers;
-    console.log("test: " + JSON.stringify(allUsers));
-    const filteredUsers = allUsers.filter(function (x) {
-      return x.username.includes(username);
-    });
-
-    console.log("\n\nfiltered array: " + JSON.stringify(filteredUsers));
-
-    return filteredUsers;
+  @Get("find")
+  @UseGuards(UserAuthGuard)
+  async findUsers(@Query("username") username: string, @Req() { user }: Ctx) {
+    const usersLike = await this.userService.searchUsername(username, user.id);
+    return usersLike;
   }
 }
