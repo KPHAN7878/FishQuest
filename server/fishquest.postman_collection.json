@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"test1\",\n    \"email\": \"celestine.gutmann@ethereal.email\",\n    \"password\": \"Test1234\"\n}",
+							"raw": "{\n    \"username\": \"test01\",\n    \"email\": \"celestine.gutmann@ethereal.email\",\n    \"password\": \"Test1234\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -42,7 +42,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"test1\",\n    \"password\": \"Test1234\"\n}",
+							"raw": "{\n    \"username\": \"ape\",\n    \"password\": \"Spencer01\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -228,6 +228,43 @@
 					"response": []
 				},
 				{
+					"name": "find",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url\n}}/user/find/?username=test",
+							"host": [
+								"{{base_url\n}}"
+							],
+							"path": [
+								"user",
+								"find",
+								""
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "session",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -355,7 +392,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"commentableId\": 3,\n    \"text\": \"hello tew\",\n    \"type\": \"post\"\n}",
+							"raw": "{\n    \"commentableId\": 1,\n    \"text\": \"hello test 2\",\n    \"type\": \"comment\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -376,36 +413,6 @@
 					"response": []
 				},
 				{
-					"name": "comment",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"cursor\": \"2023-03-13T21:04:30.752Z\",\n    \"id\": 2\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url\n}}/profile/likes",
-							"host": [
-								"{{base_url\n}}"
-							],
-							"path": [
-								"profile",
-								"likes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "get-comments",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -415,7 +422,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"skip\": 0,\n    \"commentableId\": 4\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -423,14 +430,31 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/comment/get-comments/",
+							"raw": "{{base_url\n}}/comment/get-comments?limit=10&skip=null&commentableId=3&type=post",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"comment",
-								"get-comments",
-								""
+								"get-comments"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "skip",
+									"value": "null"
+								},
+								{
+									"key": "commentableId",
+									"value": "3"
+								},
+								{
+									"key": "type",
+									"value": "post"
+								}
 							]
 						}
 					},
@@ -510,7 +534,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 5,\n    \"cursor\": \"2023-03-12T21:04:30.752Z\",\n    \"id\": 1\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -518,13 +542,27 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/posts",
+							"raw": "{{base_url\n}}/profile/posts?limit=5&cursor=2023-03-12T21:04:30.752Z&id=1",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"posts"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								},
+								{
+									"key": "cursor",
+									"value": "2023-03-12T21:04:30.752Z"
+								},
+								{
+									"key": "id",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -540,7 +578,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 25,\n    \"skip\": null,\n    \"userId\": 101,\n    \"type\": \"following\"\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -548,13 +586,31 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/get-users",
+							"raw": "{{base_url\n}}/profile/get-users?limit=25&skip=null&userId=2&type=following",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"get-users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "25"
+								},
+								{
+									"key": "skip",
+									"value": "null"
+								},
+								{
+									"key": "userId",
+									"value": "2"
+								},
+								{
+									"key": "type",
+									"value": "following"
+								}
 							]
 						}
 					},
@@ -570,7 +626,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"skip\": null,\n    \"userId\": 20,\n    \"type\": \"followers\"\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -578,13 +634,31 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/get-users",
+							"raw": "{{base_url\n}}/profile/get-users?limit=25&skip=null&userId=1&type=followers",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"get-users"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "25"
+								},
+								{
+									"key": "skip",
+									"value": "null"
+								},
+								{
+									"key": "userId",
+									"value": "1"
+								},
+								{
+									"key": "type",
+									"value": "followers"
+								}
 							]
 						}
 					},
@@ -597,7 +671,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"userId\": 20\n}",
+							"raw": "{\n    \"userId\": 2\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -627,7 +701,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"cursor\": \"2023-03-12T21:04:30.752Z\",\n    \"id\": 101\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -635,13 +709,27 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/likes",
+							"raw": "{{base_url\n}}/profile/likes?limit=10&cursor=2023-05-12T21:04:30.752Z&id=2",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"likes"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "cursor",
+									"value": "2023-05-12T21:04:30.752Z"
+								},
+								{
+									"key": "id",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -657,7 +745,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"cursor\": \"2023-03-12T21:04:30.752Z\",\n    \"id\": 2\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -665,13 +753,27 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/comments",
+							"raw": "{{base_url\n}}/profile/comments?limit=10&cursor=2023-05-12T21:04:30.752Z&id=2",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"comments"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "cursor",
+									"value": "2023-05-12T21:04:30.752Z"
+								},
+								{
+									"key": "id",
+									"value": "2"
+								}
 							]
 						}
 					},
@@ -687,7 +789,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"limit\": 10,\n    \"cursor\": \"2023-03-12T21:04:30.752Z\"\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -695,13 +797,159 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url\n}}/profile/feed",
+							"raw": "{{base_url\n}}/profile/feed?cursor=2023-04-24T21:04:30.752Z&limit=8",
 							"host": [
 								"{{base_url\n}}"
 							],
 							"path": [
 								"profile",
 								"feed"
+							],
+							"query": [
+								{
+									"key": "cursor",
+									"value": "2023-04-24T21:04:30.752Z"
+								},
+								{
+									"key": "limit",
+									"value": "8"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "catch",
+			"item": [
+				{
+					"name": "all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url\n}}/catch/my-catches?cursor=2023-04-24T21:04:30.752Z&limit=5",
+							"host": [
+								"{{base_url\n}}"
+							],
+							"path": [
+								"catch",
+								"my-catches"
+							],
+							"query": [
+								{
+									"key": "cursor",
+									"value": "2023-04-24T21:04:30.752Z"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-info",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"notes\": \"test notes\",\n    \"weight\": 0,\n    \"species\": \"test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url\n}}/catch/add-info",
+							"host": [
+								"{{base_url\n}}"
+							],
+							"path": [
+								"catch",
+								"add-info"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "mission",
+			"item": [
+				{
+					"name": "get-missions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url\n}}/mission",
+							"host": [
+								"{{base_url\n}}"
+							],
+							"path": [
+								"mission"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-exp",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url\n}}/mission/experience",
+							"host": [
+								"{{base_url\n}}"
+							],
+							"path": [
+								"mission",
+								"experience"
 							]
 						}
 					},
@@ -733,7 +981,7 @@
 	"variable": [
 		{
 			"key": "base_url\n",
-			"value": "192.168.1.126:3000",
+			"value": "localhost:3000",
 			"type": "default"
 		}
 	]

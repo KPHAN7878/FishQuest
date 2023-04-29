@@ -55,7 +55,7 @@ export class ProfileController {
 
   @Get("comments")
   async getCommentsById(
-    @Body() input: GetCommentsInput & Paginated,
+    @Query() input: GetCommentsInput & Paginated,
     @Req() { user: { id: myId } }: Ctx
   ) {
     return await this.commentService.getComments(input, { ...input, myId });
