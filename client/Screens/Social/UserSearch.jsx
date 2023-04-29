@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Text,
   View,
+  Image,
   StyleSheet,
   Dimensions,
   ScrollView,
@@ -13,12 +14,14 @@ import { InputField } from "../../Components/InputField";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { AnimatedButton } from "../../Components/Button";
+import { UserContext } from "../../Contexts/UserContext";
 
 var { height } = Dimensions.get("window");
 
 const UserSearch = ({ navigation }) => {
   const [usersList, setUsers] = useState([]);
   const [searchUser, setSearchUser] = useState([]);
+  const { user, setUser } = React.useContext(UserContext);
   const searchUserRef = React.useRef();
 
   const searchFunction = async () => {
@@ -91,26 +94,55 @@ const UserSearch = ({ navigation }) => {
           pretext={"User search"}
         />
       </View>
-      <ScrollView style={{ marginHorizontal: 25 }}>
+      <ScrollView style={{ paddingTop: 25, marginHorizontal: 25 }}>
         {usersList ? (
           usersList.map((item, idx) => {
             return (
               <View style={styles.usersView} key={idx}>
-                <Text style={{ fontWeight: "bold", textAlign: "left" }}>
-                  {item.username}
-                </Text>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={async () => {
-                    const isFollowing = await followButton(item.id);
-                    usersList[idx].following = isFollowing;
-                    setUsers([...usersList]);
+                <Image
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 50,
+                    resizeMode: "contain",
+                  }}
+                  source={require("../../assets/profilePic.jpg")}
+                />
+
+                <Text
+                  style={{
+                    flex: 4,
+                    marginLeft: 25,
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    textAlign: "left",
                   }}
                 >
-                  <Text style={styles.text}>
-                    {item.following ? "Unfollow" : "Follow"}
-                  </Text>
-                </TouchableOpacity>
+                  {item.username}
+                </Text>
+                {item.id === user.id ? (
+                  <TouchableOpacity
+                    style={[styles.button, { backgroundColor: "green" }]}
+                    onPress={() => {
+                      navigation.navigate("Profile");
+                    }}
+                  >
+                    <Text style={styles.text}> You </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={async () => {
+                      const isFollowing = await followButton(item.id);
+                      usersList[idx].following = isFollowing;
+                      setUsers([...usersList]);
+                    }}
+                  >
+                    <Text style={styles.text}>
+                      {item.following ? "Unfollow" : "Follow"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })
@@ -138,17 +170,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   usersView: {
+    marginBottom: 25,
     height: 0.05 * height,
     flexDirection: "row",
-    marginBottom: 1,
     alignItems: "center",
     flexDirection: "row",
+    display: "flex",
     justifyContent: "space-between",
   },
   followButton: {
     alignSelf: "flex-end",
   },
   button: {
+    flex: 2,
     textAlign: "right",
     alignItems: "center",
     justifyContent: "center",

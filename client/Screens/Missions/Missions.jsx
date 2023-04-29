@@ -89,7 +89,12 @@ const Missions = ({ navigation }) => {
         <View style={{ marginTop: 20, flexDirection: "row" }}>
           <Text style={{ textAlign: "left", flex: 1 }}>{`Deadline: ${new Date(
             item.deadline
-          ).toLocaleDateString()}`}</Text>
+          ).toLocaleDateString()} ${new Date(item.deadline).toLocaleTimeString(
+            [],
+            {
+              timeStyle: "short",
+            }
+          )}`}</Text>
         </View>
       </View>
     </View>
@@ -147,36 +152,6 @@ const Missions = ({ navigation }) => {
     </ScrollView>
   );
 };
-
-// <View style={{}}>
-//   {(() => {
-//     if (item.progressPercentage == 1) {
-//       return (
-//         <View style={{ margin: 0 }}>
-//           <Modal
-//             animationType="slide"
-//             transparent={true}
-//             visible={modalVisible}
-//           >
-//             <View style={styles.centeredView}>
-//               <View style={styles.modalView}>
-//                 <Text style={styles.modalText}>
-//                   Congrats! You completed this mission!
-//                 </Text>
-//                 <Pressable
-//                   style={[styles.button, styles.buttonClose]}
-//                   onPress={() => setModalVisible(!modalVisible)}
-//                 >
-//                   <Text style={styles.textStyle}>Continue</Text>
-//                 </Pressable>
-//               </View>
-//             </View>
-//           </Modal>
-//         </View>
-//       );
-//     }
-//   })()}
-// </View>;
 
 const styles = StyleSheet.create({
   container: {

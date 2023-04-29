@@ -337,8 +337,7 @@ const styles2 = StyleSheet.create({
     backgroundColor: "white",
   },
   comment: {
-    marginTop: 25,
-    marginBottom: 0,
+    marginVertical: 25,
     marginLeft: 0,
     marginRight: 0,
     display: "flex",

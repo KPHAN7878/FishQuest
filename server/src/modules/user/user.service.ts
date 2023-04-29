@@ -209,7 +209,7 @@ export class UserService extends ProfileService {
       select u.username, u."profilePicUrl", u.id, ${followingSubquery(myId)}
       from user_entity u left join rfollowing f on f."userEntityId_1" = u.id
       where username ilike '${username}%'
-      limit 8
+      limit 25
       `
       );
     return userEntry;

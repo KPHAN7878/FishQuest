@@ -130,12 +130,15 @@ export class MissionsService {
     return null;
   }
 
-  async updateUser(user: UserEntity, value: number) {
-    const newExp = user.exp + value;
-    const oldLevel = user.level;
+  updateUser(
+    currentLevel: { exp: number; level: number },
+    value: number
+  ): { exp: number; level: number } {
+    const newExp = currentLevel.exp + value;
+    const oldLevel = currentLevel.level;
     const { level: newLevel, exp: remExp } = this.levelUp(oldLevel, newExp);
 
-    this.userR.update({ id: user.id }, { exp: remExp, level: newLevel });
+    return { exp: remExp, level: newLevel };
   }
 
   levelUp(level: number, exp: number) {
@@ -143,6 +146,7 @@ export class MissionsService {
       exp -= Math.min(100 + (level - 1) * 10, 500);
       level += 1;
     }
+
     return { level, exp };
   }
 
@@ -224,13 +228,21 @@ export class MissionsService {
     const completed = completions.filter((mission) => mission.fullCompletion);
 
     if (completed) {
+      let updateLevel: { exp: number; level: number } = {
+        exp: user.exp,
+        level: user.level,
+      };
       completed.forEach(
         (
           val: { throwAway: number; difficulty: Difficulty } & DigestedProgress
         ) => {
-          this.updateUser(user, val.totalXp);
+          const newLevel = this.updateUser(updateLevel, val.totalXp);
+          updateLevel.exp = newLevel.exp;
+          updateLevel.level = newLevel.level;
         }
       );
+
+      this.userR.update({ id: user.id }, updateLevel);
     }
 
     const more = Math.min(
