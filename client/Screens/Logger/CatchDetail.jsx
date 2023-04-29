@@ -10,7 +10,7 @@ import {
 import styles, { height, width } from "../../styles";
 import { AnimatedButton } from "../../Components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowLeft, faFish } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import ImageView from "../../Components/ImageView";
 
 import Animated, {
@@ -23,12 +23,9 @@ const DELAY_AMOUNT = 250;
 
 const CatchDetail = ({ route, navigation }) => {
   const { catch: result } = route.params;
-  console.log(result);
   const [selected, setSelected] = React.useState(true);
   const [screenState, setScreenState] = React.useState(0);
   const [imageView, setImageView] = React.useState();
-
-  const notesRef = React.createRef();
 
   const animateDetails = useAnimatedStyle(() => {
     const interpolation = interpolate(screenState, [0, 1], [0, -100]);
