@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
+import isCloseToBottom from "../../utils/isCloseToBottom";
 import {
+  RefreshControl,
   View,
   Text,
   Pressable,
@@ -10,7 +12,6 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import styles from "../../styles";
 
 import Animated, {
   useAnimatedStyle,
@@ -21,17 +22,32 @@ import { FontFamily, Color } from "../../GlobalStyles";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
+import LikeCommentView from "../../Components/LikeCommentView";
 
 const windowHeight = Dimensions.get("window").height;
+const displaceHeight = 350;
 
 const CommentContainer = ({ route, navigation }) => {
   const [text, onChangeText] = React.useState();
-  const [commentsDB, setComments] = useState();
   const [isChildBool, setIsChild] = useState();
+
+  const [comments, setComments] = React.useState([]);
+  const [commentIds, setCommentIds] = React.useState([]);
+
+  const [isFetching, setIsFetching] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const [more, setMore] = React.useState(true);
+  const [skip, setSkip] = React.useState(null);
+  const [commentComponents, setCommentComponents] = React.useState([]);
 
   const [screenState, setScreenState] = React.useState(0);
   const animateDetails = useAnimatedStyle(() => {
-    const interpolation = interpolate(screenState, [0, 1], [0, -350]);
+    const interpolation = interpolate(
+      screenState,
+      [0, 1],
+      [0, -displaceHeight]
+    );
 
     return {
       transform: [{ translateY: withTiming(interpolation, { duration: 250 }) }],
@@ -51,87 +67,83 @@ const CommentContainer = ({ route, navigation }) => {
     };
   }, []);
 
-  const submitComment = async () => {
-    console.log("in submit comment function");
-    console.log("commentableId: " + route.params.caption.id);
-    console.log("text: " + text);
-
-    if (!route.params.caption.isChild) {
-      await Client.post("comment", {
-        commentableId: route.params.caption.id,
-        text: text,
-        type: "post",
-      })
-        .then((res) => {
-          console.log("\ncreate comment response: " + JSON.stringify(res));
-          getComments();
-        })
-        .catch((error) => {
-          console.log("error comment: " + error);
-        });
-    } else {
-      await Client.post("comment", {
-        commentableId: route.params.caption.id,
-        text: text,
-        type: "comment",
-      })
-        .then((res) => {
-          console.log("\ncreate comment response: " + JSON.stringify(res));
-          getComments();
-        })
-        .catch((error) => {
-          console.log("error comment: " + error);
-        });
-    }
-  };
-
-  const getComments = async () => {
-    if (!route.params.caption.isChild) {
-      await Client.get(
-        "comment/get-commentsV2/100," + route.params.caption.id + ",post"
-      )
-        .then((res) => {
-          console.log("\nNOOOOOO!!!\n\n");
-          console.log("comments: " + JSON.stringify(res) + "\n\n");
-          setComments(res.data.comments.reverse());
-          console.log("comment array: " + commentsDB);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } else {
-      await Client.get(
-        "comment/get-commentsV2/100," + route.params.caption.id + ",comment"
-      )
-        .then((res) => {
-          console.log("\n\nYAY!!!\n\n");
-          console.log("comments: " + JSON.stringify(res) + "\n\n");
-          setComments(res.data.comments.reverse());
-          console.log("comment array: " + commentsDB);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  };
+  React.useEffect(() => {
+    onRefresh();
+  }, []);
 
   React.useEffect(() => {
-    // if (route.params.caption.isChild)
-    // {
-    //   setIsChild(true);
-    // }
+    renderComments(comments);
+  }, [comments]);
 
-    console.log("\n\nUSEFFECT: " + route.params.caption.isChild);
-    const unsubscribe = navigation.addListener("focus", () => {
-      if (route.params.caption.isChild) {
-        setIsChild(true);
-      }
-      console.log("after setchild: " + isChildBool);
-      getComments();
-    });
-    //getComments();
-    // console.log("route: " + JSON.stringify(route.params))
-  }, []);
+  const onRefresh = () => {
+    setIsFetching(true);
+    setRefreshing(true);
+    getComments(true);
+  };
+
+  const renderComments = (comments) => {
+    Promise.all(
+      comments.map(async (c) => {
+        return <RenderOnce comment={c} navigation={navigation} key={c.id} />;
+      })
+    )
+      .then((newCommentsComponents) => {
+        setIsFetching(false);
+        setCommentComponents(
+          (refreshing ? newCommentsComponents : commentComponents).concat(
+            refreshing ? commentComponents : newCommentsComponents
+          )
+        );
+
+        setRefreshing(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const submitComment = async () => {
+    await Client.post("comment", {
+      commentableId: route.params.caption.id,
+      text: text,
+      type: !route.params.caption.isChild ? "post" : "comment",
+    })
+      .then((res) => {
+        getComments();
+      })
+      .catch((error) => {
+        console.log("error comment: " + error);
+      });
+  };
+
+  const getComments = (refresh) => {
+    if (!more && !refresh) return;
+    const useSkip = refresh ? null : skip;
+
+    Client.get("comment/get-comments", {
+      params: {
+        limit: 25,
+        skip: useSkip,
+        commentableId: route.params.caption.id,
+        type: !route.params.caption.isChild ? "post" : "comment",
+      },
+    })
+      .then((res) => {
+        const newComments = [...res.data.comments].filter(
+          (c) => !commentIds.includes(c.id)
+        );
+
+        setComments(newComments);
+        const ids = [...commentIds, ...newComments.map((c) => c.id)];
+        setCommentIds(ids);
+
+        setMore(res.data.hasMore);
+        setSkip(ids.length);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <View>
@@ -165,66 +177,102 @@ const CommentContainer = ({ route, navigation }) => {
         />
       </View>
 
-      <ScrollView style={styles2.comments}>
-        {commentsDB ? (
-          commentsDB.map((comment, idx) => (
-            <Pressable
-              key={idx}
-              onPress={() => {
-                navigation.push("CommentContainer", {
-                  caption: { id: comment.id, isChild: true },
-                });
-              }}
-            >
-              <View>
-                {console.log("commentsDB: " + JSON.stringify(commentsDB))}
-                <View key={comment.id} style={styles2.comment}>
-                  <Image
-                    style={styles2.img}
-                    source={require("../../assets/profilePic.jpg")}
-                  />
-                  <View style={styles2.info}>
-                    <Text style={styles2.userName}>
-                      {comment.creator.username}
-                    </Text>
-                    <Text style={styles2.desc}>{comment.text}</Text>
-                  </View>
-                  <Text style={styles2.date}>1 hour ago</Text>
-                </View>
-                <View style={styles2.line} />
-              </View>
-            </Pressable>
-          ))
-        ) : (
-          <View></View>
-        )}
+      <ScrollView
+        style={styles2.comments}
+        refreshControl={
+          <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+        }
+        onScroll={({ nativeEvent }) => {
+          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+            getComments(false);
+          }
+        }}
+        scrollEventThrottle={400}
+      >
+        {commentComponents}
       </ScrollView>
 
-      <Animated.View style={[styles2.typeComment, animateDetails]}>
-        <Image
-          style={styles2.img}
-          source={require("../../assets/profilePic.jpg")}
-        />
-        <View style={styles2.input}>
-          <TextInput
-            placeholder="write a comment..."
-            style={{ flex: 4 }}
-            onFocus={() => setScreenState(1)}
-            onChangeText={(text) => onChangeText(text)}
+      <Animated.View
+        style={[
+          {
+            flexDirection: "column",
+            display: "flex",
+            width: "100%",
+          },
+          animateDetails,
+        ]}
+      >
+        <View style={styles2.typeComment}>
+          <Image
+            style={styles2.img}
+            source={require("../../assets/profilePic.jpg")}
           />
-          <TouchableOpacity
-            style={[{ flex: 1 }]}
-            onPress={() => {
-              submitComment();
-            }}
-          >
-            <Text style={[{ fontSize: 14 }]}>{"Submit"}</Text>
-          </TouchableOpacity>
+          <View style={styles2.input}>
+            <TextInput
+              placeholder="write a comment..."
+              style={{ flex: 4 }}
+              onFocus={() => setScreenState(1)}
+              onChangeText={(text) => onChangeText(text)}
+            />
+            <TouchableOpacity
+              style={[{ flex: 1 }]}
+              onPress={() => {
+                submitComment();
+              }}
+            >
+              <Text style={[{ fontSize: 14 }]}>{"Submit"}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
+        <View style={{ height: displaceHeight, backgroundColor: "white" }} />
       </Animated.View>
     </View>
   );
 };
+
+const RenderOnce = React.memo(({ comment, navigation }) => {
+  React.useEffect(() => {
+    console.log("RENDER", comment.id);
+  });
+  const goto = () => {
+    navigation.push("CommentContainer", {
+      caption: { id: comment.id, isChild: true },
+    });
+  };
+  const likeComment = async () => {
+    await Client.post("like/comment", {
+      commentId: comment.id,
+    })
+      .then((res) => {})
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  return (
+    <Pressable onPress={goto}>
+      <View>
+        <View key={comment.id} style={styles2.comment}>
+          <Image
+            style={styles2.img}
+            source={require("../../assets/profilePic.jpg")}
+          />
+          <View style={styles2.info}>
+            <Text style={styles2.userName}>{comment.creator.username}</Text>
+            <Text style={styles2.desc}>{comment.text}</Text>
+          </View>
+          <Text style={styles2.date}>1 hour ago</Text>
+        </View>
+        <LikeCommentView
+          onPressLike={likeComment}
+          onPressComment={goto}
+          item={comment}
+        />
+        <View style={styles2.line} />
+      </View>
+    </Pressable>
+  );
+});
 
 const styles2 = StyleSheet.create({
   headerBox: {
@@ -271,11 +319,12 @@ const styles2 = StyleSheet.create({
     marginHorizontal: 20,
   },
   typeComment: {
+    paddingTop: 20,
+    backgroundColor: "white",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
-    marginHorizontal: 20,
+    paddingHorizontal: 20,
   },
   input: {
     flex: 5,

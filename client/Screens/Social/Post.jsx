@@ -9,19 +9,17 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
 import { FontFamily } from "../../GlobalStyles";
 import { Client } from "../../utils/connection";
 import ImageView from "../../Components/ImageView";
 
 import { useNavigation } from "@react-navigation/native";
+import LikeCommentView from "../../Components/LikeCommentView";
 
 const Post = ({ post }) => {
   post.isChild = false;
 
   const [valid, setValid] = React.useState(false);
-  const [hasLiked, setHasLiked] = React.useState(post.liked);
   const navigation = useNavigation();
 
   let tempString = post.catch.imageUri;
@@ -45,7 +43,6 @@ const Post = ({ post }) => {
   }, []);
 
   const likePost = async (postId) => {
-    setHasLiked(!hasLiked);
     await Client.post("like/post", {
       postId: postId,
     })
@@ -108,53 +105,15 @@ const Post = ({ post }) => {
           />
         </View>
 
-        <View style={styles.info}>
-          <View style={styles.like_comment}>
-            <View style={styles.item}>
-              <TouchableOpacity
-                activeOpacity={0.2}
-                onPress={() => {
-                  likePost(post.id);
-                }} //like button
-              >
-                {hasLiked ? (
-                  <AntDesign name="like2" size={24} color="green" />
-                ) : (
-                  <AntDesign name="like2" size={24} color="black" />
-                )}
-              </TouchableOpacity>
-
-              <Text
-                style={{
-                  marginHorizontal: 10,
-                  fontFamily: FontFamily.interMedium,
-                  fontWeight: "bold",
-                }}
-              >
-                {post.likeValue + (hasLiked ? 1 : 0)}
-              </Text>
-            </View>
-            <View style={styles.item}>
-              <TouchableOpacity
-                style={styles.comment}
-                activeOpacity={0.2}
-                onPress={() => {}}
-              >
-                <FontAwesome name="comment-o" size={24} color="black" />
-              </TouchableOpacity>
-
-              <Text
-                style={{
-                  marginHorizontal: 10,
-                  fontFamily: FontFamily.interMedium,
-                  fontWeight: "bold",
-                }}
-              >
-                {post.commentValue}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <LikeCommentView
+          onPressLike={() => {
+            likePost(post.id);
+          }}
+          onPressComment={() => {
+            navigation.navigate("CommentContainer", { caption: post });
+          }}
+          item={post}
+        />
 
         <View style={styles.captionView}>
           <Text style={styles.caption}>{post.text}</Text>
@@ -164,7 +123,6 @@ const Post = ({ post }) => {
           <TouchableOpacity
             activeOpacity={0.2}
             onPress={() => {
-              // navigation.navigate('CommentContainer', {caption: postCaption});
               navigation.navigate("CommentContainer", { caption: post });
             }}
           >
