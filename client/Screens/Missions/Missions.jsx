@@ -100,7 +100,19 @@ const Missions = ({ navigation }) => {
     </View>
   );
 
-  return (
+  return !exp || !items ? (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+      }}
+    >
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, justifyContent: "center" }}
+      />
+    </View>
+  ) : (
     <ScrollView
       style={{
         display: "flex",
@@ -109,46 +121,32 @@ const Missions = ({ navigation }) => {
         backgroundColor: "white",
       }}
     >
-      {!exp || !items ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-          }}
-        >
-          <ActivityIndicator
-            size="large"
-            style={{ flex: 1, justifyContent: "center" }}
+      <View style={styles.container}>
+        <Text style={styles.missions}>Level {exp?.currentLevel ?? ""}</Text>
+        <Text style={styles.xp}>
+          {exp?.currentXp ?? ""}/{exp?.nextLevelXp ?? ""} xp
+        </Text>
+
+        <View style={{ alignItems: "center", marginVertical: 5 }}>
+          <Progress.Bar
+            color={"blue"}
+            progress={exp?.currentXp / exp?.nextLevelXp}
+            width={300}
+            height={10}
           />
         </View>
-      ) : (
-        <View style={styles.container}>
-          <Text style={styles.missions}>Level {exp?.currentLevel ?? ""}</Text>
-          <Text style={styles.xp}>
-            {exp?.currentXp ?? ""}/{exp?.nextLevelXp ?? ""} xp
-          </Text>
-
-          <View style={{ alignItems: "center", marginVertical: 5 }}>
-            <Progress.Bar
-              color={"blue"}
-              progress={exp?.currentXp / exp?.nextLevelXp}
-              width={300}
-              height={10}
-            />
-          </View>
-          {items ? (
-            items.map((item, index) => {
-              return (
-                <View style={styles.missionsList} key={index}>
-                  {renderItem(item)}
-                </View>
-              );
-            })
-          ) : (
-            <></>
-          )}
-        </View>
-      )}
+        {items ? (
+          items.map((item, index) => {
+            return (
+              <View style={styles.missionsList} key={index}>
+                {renderItem(item)}
+              </View>
+            );
+          })
+        ) : (
+          <></>
+        )}
+      </View>
     </ScrollView>
   );
 };

@@ -5,7 +5,7 @@ import { Client } from "../../utils/connection";
 import isCloseToBottom from "../../utils/isCloseToBottom";
 
 const RenderOnce = React.memo(({ post }) => {
-  return <Post post={post} />;
+  return <Post interactable={true} post={post} />;
 });
 
 const Posts = () => {
@@ -84,20 +84,22 @@ const Posts = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.posts}
-      refreshControl={
-        <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
-      }
-      onScroll={({ nativeEvent }) => {
-        if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
-          getSocialFeed(false);
+    <View style={{ justifyContent: "center", alignItems: "center" }}>
+      <ScrollView
+        style={styles.posts}
+        refreshControl={
+          <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
         }
-      }}
-      scrollEventThrottle={400}
-    >
-      {postComponents}
-    </ScrollView>
+        onScroll={({ nativeEvent }) => {
+          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+            getSocialFeed(false);
+          }
+        }}
+        scrollEventThrottle={400}
+      >
+        {postComponents}
+      </ScrollView>
+    </View>
   );
 };
 

@@ -16,8 +16,8 @@ import ImageView from "../../Components/ImageView";
 import { useNavigation } from "@react-navigation/native";
 import LikeCommentView from "../../Components/LikeCommentView";
 
-const Post = ({ post }) => {
-  post.isChild = false;
+const Post = ({ post, interactable }) => {
+  // post.isChild = false;
 
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
@@ -52,13 +52,10 @@ const Post = ({ post }) => {
       });
   };
 
-  const postCaption = post.text;
-
   return (
     <View
       style={{
         width: Dimensions.get("window").width - 40,
-        marginLeft: 20,
         borderRadius: 35,
         backgroundColor: "#c2e4f2",
         marginTop: 30,
@@ -106,11 +103,12 @@ const Post = ({ post }) => {
         </View>
 
         <LikeCommentView
+          disableCommentGoto={!interactable}
           onPressLike={() => {
             likePost(post.id);
           }}
           onPressComment={() => {
-            navigation.navigate("CommentContainer", { caption: post });
+            navigation.navigate("CommentContainer", { item: post });
           }}
           item={post}
         />
@@ -119,18 +117,20 @@ const Post = ({ post }) => {
           <Text style={styles.caption}>{post.text}</Text>
         </View>
 
-        <View style={styles.viewComments}>
-          <TouchableOpacity
-            activeOpacity={0.2}
-            onPress={() => {
-              navigation.navigate("CommentContainer", { caption: post });
-            }}
-          >
-            <Text style={styles.viewCommentText}>
-              {"View " + post.commentValue + " Comments"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {interactable && (
+          <View style={styles.viewComments}>
+            <TouchableOpacity
+              activeOpacity={0.2}
+              onPress={() => {
+                navigation.navigate("CommentContainer", { item: post });
+              }}
+            >
+              <Text style={styles.viewCommentText}>
+                {"View " + post.commentValue + " Comments"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );

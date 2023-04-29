@@ -47,15 +47,21 @@ const LikeCommentView = (props) => {
             {item.likeValue + (hasLiked ? addValue : addValue)}
           </Text>
         </View>
-        <View style={styles.item}>
+        <View style={[styles.item]}>
           <TouchableOpacity
             style={styles.comment}
             activeOpacity={0.2}
             onPress={() => {
-              onPressComment();
+              if (!props.disableCommentGoto) {
+                onPressComment();
+              }
             }}
           >
-            <FontAwesome name="comment-o" size={24} color="black" />
+            <FontAwesome
+              name="comment-o"
+              size={24}
+              color={props.disableCommentGoto ? "gray" : "black"}
+            />
           </TouchableOpacity>
 
           <Text

@@ -1,11 +1,12 @@
 import { Text, View, ActivityIndicator } from "react-native";
-import { useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Client } from "../utils/connection";
 import { height } from "../styles";
 import { UserContext } from "../Contexts/UserContext";
 
 export const StartScreen = ({ navigation }) => {
   const { setUser } = useContext(UserContext);
+  const [retry, setRetry] = React.useState(false);
 
   useEffect(() => {
     console.log("fetching status...");
@@ -16,10 +17,16 @@ export const StartScreen = ({ navigation }) => {
         navigation.navigate("Home");
       })
       .catch((err) => {
-        if (!err.response) return;
+        if (!err.response) {
+          setTimeout(() => {
+            setRetry(!retry);
+            console.log("fetch failed, retry...");
+          }, 3000);
+          return;
+        }
         if (err.response.status === 403) navigation.navigate("Login");
       });
-  }, []);
+  }, [retry]);
 
   return (
     <View

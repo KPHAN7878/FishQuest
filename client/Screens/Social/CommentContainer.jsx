@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import isCloseToBottom from "../../utils/isCloseToBottom";
+import Post from "../Social/Post";
 import {
   RefreshControl,
   View,
@@ -23,13 +24,14 @@ import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
 import LikeCommentView from "../../Components/LikeCommentView";
+import { height, width } from "../../styles";
 
 const windowHeight = Dimensions.get("window").height;
-const displaceHeight = 350;
+const displaceHeight = 300;
 
 const CommentContainer = ({ route, navigation }) => {
+  const { item } = route.params;
   const [text, onChangeText] = React.useState();
-  const [isChildBool, setIsChild] = useState();
 
   const [comments, setComments] = React.useState([]);
   const [commentIds, setCommentIds] = React.useState([]);
@@ -84,7 +86,14 @@ const CommentContainer = ({ route, navigation }) => {
   const renderComments = (comments) => {
     Promise.all(
       comments.map(async (c) => {
-        return <RenderOnce comment={c} navigation={navigation} key={c.id} />;
+        return (
+          <RenderOnce
+            interactable={true}
+            comment={c}
+            navigation={navigation}
+            key={c.id}
+          />
+        );
       })
     )
       .then((newCommentsComponents) => {
@@ -103,10 +112,12 @@ const CommentContainer = ({ route, navigation }) => {
   };
 
   const submitComment = async () => {
+    Keyboard.dismiss();
+    setScreenState(0);
     await Client.post("comment", {
-      commentableId: route.params.caption.id,
+      commentableId: item.id,
       text: text,
-      type: !route.params.caption.isChild ? "post" : "comment",
+      type: !item.isChild ? "post" : "comment",
     })
       .then((res) => {
         getComments();
@@ -114,6 +125,8 @@ const CommentContainer = ({ route, navigation }) => {
       .catch((error) => {
         console.log("error comment: " + error);
       });
+
+    onRefresh();
   };
 
   const getComments = (refresh) => {
@@ -124,8 +137,8 @@ const CommentContainer = ({ route, navigation }) => {
       params: {
         limit: 25,
         skip: useSkip,
-        commentableId: route.params.caption.id,
-        type: !route.params.caption.isChild ? "post" : "comment",
+        commentableId: item.id,
+        type: !item.isChild ? "post" : "comment",
       },
     })
       .then((res) => {
@@ -160,27 +173,15 @@ const CommentContainer = ({ route, navigation }) => {
           <Ionicons name="chevron-back-sharp" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <View>
-        {!isChildBool ? (
-          <Text style={styles2.postCaption}>{route.params.caption.text}</Text>
-        ) : (
-          <View></View>
-        )}
-        <View
-          style={{
-            borderBottomColor: "black",
-            borderBottomWidth: 2,
-            width: "100%",
-            alignSelf: "center",
-            marginTop: 40,
-          }}
-        />
-      </View>
 
       <ScrollView
         style={styles2.comments}
         refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+          <RefreshControl
+            style={{ backgroundColor: "whitesmoke" }}
+            refreshing={isFetching}
+            onRefresh={onRefresh}
+          />
         }
         onScroll={({ nativeEvent }) => {
           if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
@@ -189,7 +190,25 @@ const CommentContainer = ({ route, navigation }) => {
         }}
         scrollEventThrottle={400}
       >
-        {commentComponents}
+        <View
+          style={{
+            paddingHorizontal: 20,
+            marginBottom: 20,
+            backgroundColor: "whitesmoke",
+          }}
+        >
+          {item.isChild ? (
+            <RenderOnce
+              interactable={false}
+              comment={item}
+              navigation={navigation}
+              key={item.id}
+            />
+          ) : (
+            <Post post={item} />
+          )}
+        </View>
+        <View style={{ backgroundColor: "white" }}>{commentComponents}</View>
       </ScrollView>
 
       <Animated.View
@@ -231,13 +250,10 @@ const CommentContainer = ({ route, navigation }) => {
   );
 };
 
-const RenderOnce = React.memo(({ comment, navigation }) => {
-  React.useEffect(() => {
-    console.log("RENDER", comment.id);
-  });
+const RenderOnce = React.memo(({ comment, navigation, interactable }) => {
   const goto = () => {
     navigation.push("CommentContainer", {
-      caption: { id: comment.id, isChild: true },
+      item: { ...comment, isChild: true },
     });
   };
   const likeComment = async () => {
@@ -250,8 +266,12 @@ const RenderOnce = React.memo(({ comment, navigation }) => {
       });
   };
   return (
-    <Pressable onPress={goto}>
-      <View>
+    <Pressable onPress={interactable ? goto : () => {}}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+        }}
+      >
         <View key={comment.id} style={styles2.comment}>
           <Image
             style={styles2.img}
@@ -264,6 +284,7 @@ const RenderOnce = React.memo(({ comment, navigation }) => {
           <Text style={styles2.date}>1 hour ago</Text>
         </View>
         <LikeCommentView
+          disableCommentGoto={!interactable}
           onPressLike={likeComment}
           onPressComment={goto}
           item={comment}
@@ -314,11 +335,13 @@ const styles2 = StyleSheet.create({
     marginHorizontal: 20,
   },
   comments: {
-    height: windowHeight * 0.6,
-    marginVertical: 10,
-    marginHorizontal: 20,
+    height: windowHeight * 0.7,
+    backgroundColor: "white",
   },
   typeComment: {
+    shadowColor: "gray",
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
     paddingTop: 20,
     backgroundColor: "white",
     display: "flex",
