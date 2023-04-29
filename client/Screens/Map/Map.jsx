@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import {
-  Text,
   View,
   StyleSheet,
-  ScrollView,
   Button,
   Image,
   ActivityIndicator,
@@ -11,7 +9,6 @@ import {
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { Client } from "../../utils/connection";
-import CatchDetail from "../Logger/CatchDetail";
 
 const Map = ({ route, navigation }) => {
   const [currentLocation, setLocation] = useState();
@@ -84,7 +81,7 @@ const Map = ({ route, navigation }) => {
                   longitude: item.location[1],
                 }}
                 onPress={() => {
-                  navigation.navigate("CatchDetail", item);
+                  navigation.navigate("CatchDetail", { catch: item });
                 }}
               >
                 <Image

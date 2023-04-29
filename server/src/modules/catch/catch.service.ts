@@ -119,10 +119,21 @@ export class CatchService {
     };
   }
 
-  async getAllMaps(): Promise<{ catches: CatchEntity[]; paginated?: boolean }> {
+  // really should improve this
+  async getAllMaps(): Promise<{ catches: CatchEntity[] }> {
     return {
-      catches: await CatchEntity.find({ relations: ["user", "prediction"] }),
-    }; // {where: ... }
+      catches: (
+        await CatchEntity.find({ relations: ["user", "prediction"] })
+      ).map((c: CatchEntity) => {
+        return {
+          ...c,
+          date: c.createdAt,
+          species: c.prediction.species,
+          prediction: undefined,
+          user: undefined,
+        } as CatchEntity & any;
+      }),
+    };
   }
 
   async additionalInfo(

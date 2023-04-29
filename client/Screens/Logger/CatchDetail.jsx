@@ -23,6 +23,7 @@ const DELAY_AMOUNT = 250;
 
 const CatchDetail = ({ route, navigation }) => {
   const { catch: result } = route.params;
+  console.log(result);
   const [selected, setSelected] = React.useState(true);
   const [screenState, setScreenState] = React.useState(0);
   const [imageView, setImageView] = React.useState();
@@ -133,25 +134,10 @@ const CatchDetail = ({ route, navigation }) => {
           },
         ]}
       >
-        {
-          // <AnimatedButton
-          //   style={myStyles.button}
-          //   next={() => {
-          //     navigation.navigate("CreatePost", result);
-          //   }}
-          // >
-          //
-          //   <View style={{ justifyContent: "center", alignItems: "center" }}>
-          //     <FontAwesomeIcon icon={faFish} size={25} />
-          //     <Text style={{ fontSize: 20, flex: 1 }}>{"Post Catch"}</Text>
-          //   </View>
-          // </AnimatedButton>
-        }
-
         <AnimatedButton
           style={{ ...myStyles.button }}
           next={() => {
-            navigation.navigate("CatchLogger");
+            navigation.goBack();
           }}
         >
           <View style={{ justifyContent: "center", alignItems: "center" }}>

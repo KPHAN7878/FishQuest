@@ -13,7 +13,6 @@ import { Client } from "../../utils/connection";
 import { InputField } from "../../Components/InputField";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { AnimatedButton } from "../../Components/Button";
 import { UserContext } from "../../Contexts/UserContext";
 
 var { height } = Dimensions.get("window");
@@ -21,7 +20,7 @@ var { height } = Dimensions.get("window");
 const UserSearch = ({ navigation }) => {
   const [usersList, setUsers] = useState([]);
   const [searchUser, setSearchUser] = useState([]);
-  const { user, setUser } = React.useContext(UserContext);
+  const { user } = React.useContext(UserContext);
   const searchUserRef = React.useRef();
 
   const searchFunction = async () => {

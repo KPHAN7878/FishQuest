@@ -21,7 +21,21 @@ const RenderOnce = React.memo(({ catch: c, navigation }) => {
     "fishquest/development",
     "development/catches"
   );
-  const valid = false;
+
+  const [valid, setValid] = React.useState(false);
+  React.useEffect(() => {
+    fetch(finalString)
+      .then((res) => {
+        if (res.status === 403) {
+          setValid(false);
+        } else {
+          setValid(true);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
 
   return (
     <View

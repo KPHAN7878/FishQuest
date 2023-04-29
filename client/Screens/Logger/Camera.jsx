@@ -178,7 +178,7 @@ export const CameraView = ({ navigation }) => {
     submitCatch({ data: form }).then(() => {
       setComplete(true);
       setIsLoading(false);
-      // uploadToS3(cache.base64, key);
+      uploadToS3(cache.base64, key);
     });
   };
 
