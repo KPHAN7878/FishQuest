@@ -217,14 +217,14 @@ const Map = ({ route, navigation }) => {
                 </Marker>
               );
             })}
-            <Button
+            {/* <Button
               title="My Location"
               style={{
                 position: "absolute",
                 top: "50%",
                 alignSelf: "flex-end",
               }}
-            />
+            /> */}
           </MapView>
           {infoView}
         </>

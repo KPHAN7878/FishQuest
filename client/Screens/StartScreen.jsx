@@ -36,7 +36,7 @@ export const StartScreen = ({ navigation }) => {
         justifyContent: "center",
       }}
     >
-      <Text>{API_URL}</Text>
+      <Text>{process.env.API_URL}</Text>
       <ActivityIndicator
         size="large"
         style={{ flex: 1, justifyContent: "center" }}
