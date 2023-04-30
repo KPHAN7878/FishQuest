@@ -1,7 +1,7 @@
 node_modules
 package-lock.json
 .expo
-ormconfig.json
+ormconfig.ts
 *.jpg
 *.jpeg
 **/train
