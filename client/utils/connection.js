@@ -4,7 +4,7 @@ import { API_URL, S3_ACCESS_KEY, S3_SECRET } from "@env";
 import AWS from "aws-sdk";
 
 export const Client = axios.create({
-  baseURL: `http://${API_URL}/`,
+  baseURL: `${API_URL}/`,
   withCredentials: true,
   responseType: "json",
 });

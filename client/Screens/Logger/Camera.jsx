@@ -62,7 +62,7 @@ export const CameraView = ({ navigation }) => {
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
     useAxios(
       {
-        url: `http://${API_URL}/catch`,
+        url: `${API_URL}/catch`,
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -176,11 +176,15 @@ export const CameraView = ({ navigation }) => {
     form.append("imageBase64", resizedImg);
     form.append("location", currentLocation);
 
-    submitCatch({ data: form }).then(() => {
-      setComplete(true);
-      setIsLoading(false);
-      uploadToS3(cache.base64, key);
-    });
+    submitCatch({ data: form })
+      .then(() => {
+        setComplete(true);
+        setIsLoading(false);
+        uploadToS3(cache.base64, key);
+      })
+      .catch((err) => {
+        console.log("ERROR MESSAGE", JSON.stringify(err));
+      });
   };
 
   if (!permission) {

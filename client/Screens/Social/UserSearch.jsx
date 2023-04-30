@@ -74,7 +74,7 @@ const UserSearch = ({ navigation }) => {
         >
           <View style={{ justifyContent: "center", alignItems: "center" }}>
             <FontAwesomeIcon icon={faArrowLeft} size={25} />
-            <Text style={{ fontSize: 20, flex: 1 }}>{"Cancel"}</Text>
+            <Text style={{ fontSize: 20, flex: 1 }}>{"Back"}</Text>
           </View>
         </TouchableOpacity>
       </View>

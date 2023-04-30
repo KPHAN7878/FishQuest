@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, ScrollView, View, RefreshControl } from "react-native";
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  RefreshControl,
+  Text,
+} from "react-native";
 import Post from "./Post";
 import { Client } from "../../utils/connection";
 import isCloseToBottom from "../../utils/isCloseToBottom";
@@ -24,6 +30,8 @@ const Posts = () => {
   const getSocialFeed = (refresh) => {
     if (!more && !refresh) return;
     const useCursor = refresh ? new Date().toISOString().slice(0, 19) : cursor;
+
+    console.log("get feed");
 
     Client.get("profile/feed", {
       params: {
@@ -55,10 +63,12 @@ const Posts = () => {
   };
 
   React.useEffect(() => {
+    console.log("on refresh");
     onRefresh();
   }, []);
 
   React.useEffect(() => {
+    console.log("render posts, ", posts.length);
     renderPosts(posts);
   }, [posts]);
 
@@ -97,7 +107,11 @@ const Posts = () => {
         }}
         scrollEventThrottle={400}
       >
-        {postComponents}
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          {postComponents}
+        </View>
       </ScrollView>
     </View>
   );
@@ -107,6 +121,8 @@ const styles = StyleSheet.create({
   posts: {
     display: "flex",
     flexDirection: "column",
+    width: "100%",
+    height: "100%",
   },
 });
 
