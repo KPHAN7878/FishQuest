@@ -154,12 +154,7 @@ const CatchDetail = ({ route, navigation }) => {
   );
 
   const fetchImage = async () => {
-    let tempString = result.imageUri;
-    let finalString = tempString.replace(
-      "fishquest/development",
-      "development/catches"
-    );
-    const valid = await fetch(finalString)
+    const valid = await fetch(result.imageUri)
       .then((res) => {
         return res.status !== 403;
       })
@@ -171,7 +166,7 @@ const CatchDetail = ({ route, navigation }) => {
       <ImageView
         delayAnimationAmount={DELAY_AMOUNT}
         setter={(select) => setSelected(select)}
-        image={valid ? { uri: finalString } : undefined}
+        image={valid ? { uri: result.imageUri } : undefined}
       />
     );
   };

@@ -22,14 +22,8 @@ const Post = ({ post, interactable }) => {
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
 
-  let tempString = post.catch.imageUri;
-  let finalString = tempString.replace(
-    "fishquest/development",
-    "development/catches"
-  );
-
   React.useEffect(() => {
-    fetch(finalString)
+    fetch(post.catch.imageUri)
       .then((res) => {
         if (res.status === 403) {
           setValid(false);
@@ -98,7 +92,7 @@ const Post = ({ post, interactable }) => {
         >
           <ImageView
             animated={false}
-            image={valid ? { uri: finalString } : undefined}
+            image={valid ? { uri: post.catch.imageUri } : undefined}
           />
         </View>
 

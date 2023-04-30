@@ -28,13 +28,14 @@ import * as ImagePicker from "expo-image-picker";
 
 import * as Location from "expo-location";
 
+const S3_REGION = S3.getBucketLocation().service.endpoint.host;
+
 export const CameraView = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const { user } = useContext(UserContext);
   const ref = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-  const location = S3.getBucketLocation().service.endpoint.host;
   const [image, setImage] = useState(null);
   const [currentLocation, setLocation] = useState([1, 2]);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -119,7 +120,7 @@ export const CameraView = ({ navigation }) => {
   );
 
   const uploadToS3 = async (base64Image, Key) => {
-    const Bucket = `${S3_BUCKET}/catches`;
+    const Bucket = `fishquest/${S3_BUCKET}/catches`;
     const params = {
       Body: Buffer.from(
         base64Image.replace(/^data:image\/\w+;base64,/, ""),
@@ -166,7 +167,7 @@ export const CameraView = ({ navigation }) => {
     ).then((val) => `data:image/jpg;base64,${val.base64}`);
 
     const key = `${Date.now()}.${user.username}.jpg`;
-    const imageUri = `https://fishquest.${location}/${S3_BUCKET}/${key}`;
+    const imageUri = `https://fishquest.${S3_REGION}/${S3_BUCKET}/catches/${key}`;
 
     setImage(cache);
 

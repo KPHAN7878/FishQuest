@@ -17,14 +17,10 @@ import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
 const RenderOnce = React.memo(({ catch: c, navigation }) => {
   let tempString = c.imageUri;
-  let finalString = tempString.replace(
-    "fishquest/development",
-    "development/catches"
-  );
 
   const [valid, setValid] = React.useState(false);
   React.useEffect(() => {
-    fetch(finalString)
+    fetch(c.imageUri)
       .then((res) => {
         if (res.status === 403) {
           setValid(false);
@@ -54,7 +50,7 @@ const RenderOnce = React.memo(({ catch: c, navigation }) => {
         setter={() => {
           navigation.navigate("CatchDetail", { catch: c });
         }}
-        image={valid ? { uri: finalString } : undefined}
+        image={valid ? { uri: c.imageUri } : undefined}
       />
       <Text>{new Date(c.date).toLocaleDateString()}</Text>
       <Text>{c.species}</Text>
