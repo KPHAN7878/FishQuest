@@ -105,7 +105,8 @@ const UserSearch = ({ navigation }) => {
                     borderRadius: 50,
                     resizeMode: "contain",
                   }}
-                  source={require("../../assets/profilePic.jpg")}
+                  //source={require("../../assets/profilePic.jpg")}
+                  source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
                 />
 
                 <Text

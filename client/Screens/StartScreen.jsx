@@ -3,6 +3,7 @@ import React, { useContext, useEffect } from "react";
 import { Client } from "../utils/connection";
 import { height } from "../styles";
 import { UserContext } from "../Contexts/UserContext";
+import { API_URL, S3_ACCESS_KEY, S3_SECRET } from "@env";
 
 export const StartScreen = ({ navigation }) => {
   const { setUser } = useContext(UserContext);
@@ -35,6 +36,7 @@ export const StartScreen = ({ navigation }) => {
         justifyContent: "center",
       }}
     >
+      <Text>{API_URL}</Text>
       <ActivityIndicator
         size="large"
         style={{ flex: 1, justifyContent: "center" }}

@@ -34,7 +34,8 @@ const Home = () => {
           }}
         >
           <Image
-            source={require("../../assets/search_icon.png")}
+            // source={require("../../assets/search_icon.png")}
+            source={{uri: "https://cdn2.iconfinder.com/data/icons/ios-7-icons/50/search-512.png"}}
             style={{ height: 35, width: 35 }}
           />
         </Pressable>

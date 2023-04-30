@@ -53,7 +53,8 @@ const Comment = () => {
       <View style={styles.typeComment}>
         <Image
           style={styles.img}
-          source={require("../../assets/profilePic.jpg")}
+          // source={require("../../assets/profilePic.jpg")}
+          source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
         />
         <TextInput style={styles.input} placeholder="write a comment..." />
         <Button style={styles.send} title="Send" onPress={() => {}} />
@@ -63,7 +64,8 @@ const Comment = () => {
         <View key={comment.id} style={styles.comment}>
           <Image
             style={styles.img}
-            source={require("../../assets/profilePic.jpg")}
+            // source={require("../../assets/profilePic.jpg")}
+            source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
           />
           <View style={styles.info}>
             <Text style={styles.userName}>{comment.name}</Text>

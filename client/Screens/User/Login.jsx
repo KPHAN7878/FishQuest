@@ -486,7 +486,8 @@ const Login = ({ navigation }) => {
               <Ellipse cx={width / 2} rx={height} ry={height + 100} />
             </ClipPath>
             <Image
-              href={require("../../assets/Fish.jpg")}
+              //href={require("../../assets/Fish.jpg")}
+              href={{uri: "https://seatechaquariums.com/wp-content/uploads/2015/01/fish-facts.jpg"}}
               width={width + 100}
               height={height + 100}
               preserveAspectRatio="xMidYMid slice"

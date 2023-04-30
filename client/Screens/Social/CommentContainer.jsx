@@ -224,7 +224,8 @@ const CommentContainer = ({ route, navigation }) => {
         <View style={styles2.typeComment}>
           <Image
             style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
+            //source={require("../../assets/profilePic.jpg")}
+            source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
           />
           <View style={styles2.input}>
             <TextInput
@@ -275,7 +276,8 @@ const RenderOnce = React.memo(({ comment, navigation, interactable }) => {
         <View key={comment.id} style={styles2.comment}>
           <Image
             style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
+            //source={require("../../assets/profilePic.jpg")}
+            source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
           />
           <View style={styles2.info}>
             <Text style={styles2.userName}>{comment.creator.username}</Text>

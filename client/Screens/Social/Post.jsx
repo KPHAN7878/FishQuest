@@ -62,7 +62,8 @@ const Post = ({ post, interactable }) => {
             <Image
               style={styles.profilePic}
               resizeMode="cover"
-              source={require("../../assets/profilePic.jpg")}
+              //source={require("../../assets/profilePic.jpg")}
+              source={{uri: "https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"}}
             />
             <View style={styles.details}>
               <TouchableOpacity
