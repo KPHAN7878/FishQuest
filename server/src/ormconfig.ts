@@ -3,12 +3,8 @@ import { entities } from "./constants";
 
 // production ds
 export const connectionSource = new DataSource({
+  url: "postgres://postgres:Spencer900469@database-1.clkq93nyrm67.us-east-1.rds.amazonaws.com/postgres",
   type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: "postgres",
-  password: "DataDolphin973",
-  database: "fishquest",
   migrations: ["dist/migrations/*.js"],
   entities,
 });
