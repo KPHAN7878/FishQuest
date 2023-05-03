@@ -97,6 +97,7 @@ export class LikeService {
     (like_entity l inner join comment_entity c
     on c.id = l."likableId" and l."type" = 'comment'
     inner join user_entity u on u.id = l."userId")
+    inner join user_entity cu on cu."id" = c."userId" 
     `;
 
     const postSelector = `
@@ -119,6 +120,7 @@ export class LikeService {
     and l."type" = 'post'
     right join catch_entity ca on ca."id" = p."catchId"
     inner join user_entity u on u.id = l."userId")
+    inner join user_entity cu on cu."id" = p."userId" 
     `;
 
     const formQuery = (
@@ -132,6 +134,11 @@ export class LikeService {
       'id', u.id,
       'username', u.username,
       'profilePicUrl', u."profilePicUrl"
+    ) likedBy,
+    json_build_object(
+      'id', cu.id,
+      'username', cu.username,
+      'profilePicUrl', cu."profilePicUrl"
     ) creator,
     l.type "likeType",
     l."createdAt" "likedAt",

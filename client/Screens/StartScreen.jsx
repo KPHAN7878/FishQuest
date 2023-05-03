@@ -1,7 +1,6 @@
-import { Text, View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import React, { useContext, useEffect } from "react";
 import { Client } from "../utils/connection";
-import { height } from "../styles";
 import { UserContext } from "../Contexts/UserContext";
 
 export const StartScreen = ({ navigation }) => {
