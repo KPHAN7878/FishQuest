@@ -31,8 +31,6 @@ const Posts = () => {
     if (!more && !refresh) return;
     const useCursor = refresh ? new Date().toISOString().slice(0, 19) : cursor;
 
-    console.log("get feed");
-
     Client.get("profile/feed", {
       params: {
         limit: 3,
@@ -63,12 +61,10 @@ const Posts = () => {
   };
 
   React.useEffect(() => {
-    console.log("on refresh");
     onRefresh();
   }, []);
 
   React.useEffect(() => {
-    console.log("render posts, ", posts.length);
     renderPosts(posts);
   }, [posts]);
 

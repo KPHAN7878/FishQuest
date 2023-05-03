@@ -38,7 +38,7 @@ export class ProfileController {
 
   @Get("posts")
   async posts(
-    @Body() input: Paginated & { id: number },
+    @Query() input: Paginated & { id: number },
     @Req() { user: { id: myId } }: Ctx
   ) {
     return await this.postService.userPosts(input, input.id, myId);

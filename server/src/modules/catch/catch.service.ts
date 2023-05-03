@@ -40,8 +40,6 @@ export class CatchService {
       userId: user.id,
     });
 
-    console.log(prediction);
-
     const catchEntry: CatchEntity = CatchEntity.create({
       location: finalArr,
       imageUri: sub.imageUri,
