@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
+  Pressable,
 } from "react-native";
 import { Client } from "../../utils/connection";
 import { InputField } from "../../Components/InputField";
@@ -108,17 +109,27 @@ const UserSearch = ({ navigation }) => {
                   source={require("../../assets/profilePic.jpg")}
                 />
 
-                <Text
-                  style={{
-                    flex: 4,
-                    marginLeft: 25,
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
-                  {item.username}
-                </Text>
+
+                <Pressable style={{fontWeight: 'bold'}} onPress={() => {
+                  navigation.navigate('OtherUsersProfiles', {
+                    userProfile: item,
+                  });
+                }}>
+                    <Text
+                      style={{
+                        flex: 4,
+                        marginLeft: 25,
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        textAlign: "left",
+                      }}
+                    >
+                      {item.username}
+                    </Text>
+                 </Pressable>
+
+
+
                 {item.id === user.id ? (
                   <TouchableOpacity
                     style={[styles.button, { backgroundColor: "green" }]}

@@ -19,6 +19,8 @@ import LikeCommentView from "../../Components/LikeCommentView";
 const Post = ({ post, interactable }) => {
   // post.isChild = false;
 
+  // console.log("PPPPPPPPPPPPPPPPPPPPPPP: ", post);
+
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
 
@@ -69,7 +71,9 @@ const Post = ({ post, interactable }) => {
                 style={{ textDecoration: "none", color: "inherit" }}
                 activeOpacity={0.2}
                 onPress={() => {
-                  `/users/${post.userId}`;
+                  navigation.navigate('OtherUsersProfiles', {
+                    userProfile: post.creator,
+                  })    ;// `/users/${post.userId}`;
                 }}
               >
                 <Text style={styles.name}>{post.creator.username}</Text>
