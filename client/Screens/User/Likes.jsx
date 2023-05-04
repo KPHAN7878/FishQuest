@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import isCloseToBottom from "../../utils/isCloseToBottom";
 import LikedPost from "./LikedPost";
+import { FontFamily, Color } from "../../GlobalStyles";
 
 import { StackActions, NavigationActions, CommonActions  } from "@react-navigation/native";
 
@@ -81,7 +82,9 @@ export const Likes = ({ navigation}) => {
   const renderPosts = (posts) => {
     Promise.all(
       posts.map(async (p) => {
-        return <RenderOnce post={p} key={p.likeContent.id} />;
+       if(p.likeType == "post"){
+          return <RenderOnce post={p} key={p.likeContent.id} />;
+        }
       })
     )
       .then((newPostComponents) => {
@@ -103,13 +106,21 @@ export const Likes = ({ navigation}) => {
 return (
   
   <View>
-    <View style={styles.backView}>
-        <TouchableOpacity style={styles.back} activeOpacity={0.2} onPress={() => {navigation.goBack();}}>
+    <View style={styles.headerBox}>
+        <Text style={styles.fishQuest}>Fish Quest</Text>
+        <TouchableOpacity
+          style={styles.back}
+          activeOpacity={0.2}
+          onPress={() => {
+            navigation.goBack();
+          }}
+        >
           <Ionicons name="chevron-back-sharp" size={24} color="black" />
         </TouchableOpacity>
     </View>
 
-    <View style={{ justifyContent: "center", alignItems: "center", top: 80, paddingBottom: 200 }}>
+
+    <View style={{ justifyContent: "center", alignItems: "center", top: 0, paddingBottom: 320 }}>
       <ScrollView
         style={styles.posts}
         refreshControl={
@@ -136,7 +147,35 @@ return (
 
 const styles = StyleSheet.create({
   pageLayout: {
-    top: 100
+    top: 50
+  },
+  headerBox: {
+    marginTop: 0,
+    padding: 50,
+    borderWidth: 0.3,
+    borderColor: "#787777",
+    backgroundColor: "#2596be",
+  },
+  fishQuest: {
+    top: 40,
+    left: 121,
+    fontSize: 44,
+    fontFamily: FontFamily.alluraRegular,
+    width: 195,
+    height: 63,
+    textShadowColor: "rgba(0, 0, 0, 0.25)",
+    textShadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    textShadowRadius: 4,
+    textAlign: "left",
+    color: Color.black,
+    position: "absolute",
+  },
+  back: {
+    left: -30,
+
   },
   likeButtonContainer: {
     elevation: 8,
@@ -171,11 +210,9 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontWeight: "bold",
     alignSelf: "center",
-    // left: 150
   },
   btnRight: {
     //  left: 150
-    
   },
   buttonText: {
     top: 30,

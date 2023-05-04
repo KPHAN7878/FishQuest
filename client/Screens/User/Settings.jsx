@@ -26,8 +26,7 @@ export const Settings = ({ navigation, route }) => {
  
 
 return (
-  
-  <View style={{flex: 1,  backgroundColor: "#dff0f7"}}>
+  <View style={{flex: 1}}>
     <View style={styles.backView}>
         <TouchableOpacity style={styles.back} activeOpacity={0.2} onPress={() => {navigation.goBack();}}>
           <Ionicons name="chevron-back-sharp" size={24} color="black" />
@@ -42,24 +41,18 @@ return (
                   <Ionicons name="caret-forward-outline" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity style={styles.commentButtonContainer} onPress={() => {
-                          navigation.navigate("");
+                          navigation.navigate("CommentContainer2");
                         }}>
                 <Text style={styles.likeButtonText}>Comments</Text>
                   <Ionicons name="caret-forward-outline" size={24} color="black" />
       </TouchableOpacity>
 
       <View style={styles.logoutBtn}>
-        <TouchableOpacity style={styles.appButtonContainer} onPress={() => {
-                          navigation.navigate("Settings");
-                        }}>
+        <TouchableOpacity style={styles.appButtonContainer} onPress={logOut}>
                 <Text style={styles.appButtonText}>Logout</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     </View>
-
-
-    </View>
-    
-  
   </View>
 );
 };
@@ -143,11 +136,4 @@ const styles = StyleSheet.create({
 
 
 
-
-
-
 export default Settings;
-
-
-
-

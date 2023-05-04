@@ -75,14 +75,10 @@ const Posts = ( props ) => {
           },
         })
           .then((res) => {
-            console.log("Posts. : ", res.data.posts);
-
             const newPosts = [...res.data.posts].filter(
               (p) => !postIds.includes(p.id)
             );
 
-
-            console.log("\n\nProfile Posts:  ", newPosts);
             setPosts(newPosts);
             setPostIds([...postIds, ...newPosts.map((p) => p.id)]);
 
@@ -93,12 +89,7 @@ const Posts = ( props ) => {
           .catch((error) => {
             console.log(error);
           });
-
-
     }
-
-
-
   };
 
   const onRefresh = () => {

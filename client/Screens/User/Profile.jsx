@@ -3,33 +3,18 @@ import { Text, View, Pressable, Image, StyleSheet, TouchableOpacity, ScrollView 
 import { UserContext } from "../../Contexts/UserContext";
 import { width, height } from "../../styles";
 import { Client } from "../../utils/connection";
-import Posts from "../Social/ProfilePageUserPosts";         //////////////////////////////////////////////////////////////////////////Change the content of the file to the new posts screen
+import Posts from "../Social/ProfilePageUserPosts";  
 import Settings from "./Settings";
 import { StackActions, NavigationActions, CommonActions  } from "@react-navigation/native";
 
 export const Profile = ({ navigation, route }) => {
-  const logOut = async () => {
-    const res = await Client.post("user/logout");
-    navigation.navigate("Login");           //ORIGINAL
-
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      }))
-
-  };
 
   const { user, setUser } = useContext(UserContext);
-
-  // console.log("USERR................................................................: ", user);
   
   if (route.params != undefined) {
      const { username } = route.params;
      setUser(username);
   }
-
-
 
  const [isLoading, setLoading] = useState(true);
  const [followingNumber, setFollowingNumber] = useState(0);
@@ -47,9 +32,6 @@ export const Profile = ({ navigation, route }) => {
     },
   })
    .then((res) => {
-    //  console.log("following: ", res.data.users);
-    //  console.log("\n\n")
-
      setFollowingNumber(Object.keys(res.data.users).length);
    })
    .catch((error) => {
@@ -68,11 +50,7 @@ export const Profile = ({ navigation, route }) => {
     },
   })
    .then((res) => {
-    //  console.log("followers: ", res.data.users);
-    //  console.log("\n\n")
-
     setFollowersNumber(Object.keys(res.data.users).length);
-    setLoading(false);
   })
    .catch((error) => {
      console.log(error);
@@ -82,7 +60,6 @@ export const Profile = ({ navigation, route }) => {
 
 
 // GETTING POSTS
-
  const [cursor, setCursor] = useState(
   new Date().toISOString().slice(0, 19)
   );
@@ -101,7 +78,6 @@ useEffect(() => {
     .then((res) => {
     //  console.log("Posts: ", res.data);
      console.log("\n\n")
-
   })
    .catch((error) => {
      console.log(error.response.data);
@@ -140,11 +116,6 @@ useEffect(() => {
        <Posts/>
      </View>
    </ScrollView>
-
-    
-
-
-
    // </View>
  );
 };
@@ -196,15 +167,7 @@ const styles = StyleSheet.create({
    // textTransform: "uppercase"
  },
  header: {
-   // position: "absolute",
    top: 730,
-   // left: 0,
-   // right: 0,
-   // bottom: 0,
-   // justifyContent: "center",
-   // alignItems: "center",
-   // marginBottom: 10,
-   // marginTop: 100
    display: "flex",
    flexDirection: "column",
    justifyContent: "center",
@@ -230,9 +193,6 @@ const styles = StyleSheet.create({
    marginTop: 40,
    // marginVertical: 200
    marginBottom: 10,
-
-  
-   
  },
  name: {
    fontSize: 20,
@@ -248,53 +208,3 @@ const styles = StyleSheet.create({
 
 
 export default Profile;
-
-
-
-
-// return (
-//   <View
-//     style={{
-//       flex: 1,
-//     }}
-//   >
-//     <Text
-//       style={{
-//         marginTop: height * 0.15,
-//         textAlign: "center",
-//       }}
-//     >
-//       {JSON.stringify(user.username)}
-//     </Text>
-
-//     <Text
-//       style={{
-//         textAlign: "center",
-//       }}
-//     >
-//       {JSON.stringify(user.email)}
-//     </Text>
-
-//     <Text
-//       style={{
-//         textAlign: "center",
-//       }}
-//     >
-//       {"id: " + JSON.stringify(user.id)}
-//     </Text>
-
-//     <Text
-//       style={{
-//         marginTop: height * 0.15,
-//         textAlign: "center",
-//       }}
-//     >
-//       Profile
-//     </Text>
-
-//     <Pressable style={styles.formButton} onPress={logOut}>
-//       <Text style={styles.buttonText}>{"LOG OUT"}</Text>
-//     </Pressable>
-//   </View>
-// );
-// };

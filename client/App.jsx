@@ -20,7 +20,7 @@ import UserSearch from "./Screens/Social/UserSearch";
 import OtherUsersProfiles from "./Screens/User/OtherUsersProfiles";
 import Settings from "./Screens/User/Settings";
 import Likes from "./Screens/User/Likes";
-
+import CommentContainer2 from "./Screens/User/CommentsUser";
 
 const Stack = createNativeStackNavigator();
 
@@ -75,6 +75,9 @@ export default function App() {
           </Stack.Group>
           <Stack.Group>
             <Stack.Screen name="Likes" component={Likes} />
+          </Stack.Group>
+          <Stack.Group>
+            <Stack.Screen name="CommentContainer2" component={CommentContainer2} />
           </Stack.Group>
           <Stack.Screen
             name="SecureToken"

@@ -106,7 +106,7 @@ const LikedPost = ({ post, interactable }) => {
             likePost(post.likeContent.id);
           }}
           onPressComment={() => {
-            navigation.navigate("CommentContainer", { item: post });
+            // navigation.navigate("CommentContainer", { item: post });
           }}
           item={post}
         />
@@ -120,7 +120,7 @@ const LikedPost = ({ post, interactable }) => {
             <TouchableOpacity
               activeOpacity={0.2}
               onPress={() => {
-                navigation.navigate("CommentContainer", { item: post });
+                // navigation.navigate("CommentContainer", { item: post });
               }}
             >
               <Text style={styles.viewCommentText}>

@@ -75,7 +75,7 @@ const Post = ({ post, interactable }) => {
               >
                 <Text style={styles.name}>{post.creator.username}</Text>
               </TouchableOpacity>
-              <Text style={styles.date}>a few seconds ago</Text>
+              <Text style={styles.date}>{(post.createdAt).substring(0,10)}</Text>
             </View>
           </View>
           <TouchableOpacity activeOpacity={0.2} onPress={() => {}}>

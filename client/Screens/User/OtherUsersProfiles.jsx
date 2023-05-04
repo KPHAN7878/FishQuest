@@ -105,14 +105,7 @@ useEffect(() => {
 
 
 
-
-
-
-
-
-
-
-// set the button status (follow/unfollow)
+// set the button status ("follow"/"unfollow")
 useEffect(() => 
 {
     Client.get("profile/get-users", {
@@ -187,7 +180,8 @@ const styles = StyleSheet.create({
   back: {
   },
   scroll:{
-    
+    paddingBottom: 1450
+
   },
   postsView:{
     top: -750,

@@ -110,15 +110,15 @@ const UserSearch = ({ navigation }) => {
                 />
 
 
-                <Pressable style={{fontWeight: 'bold'}} onPress={() => {
+                <TouchableOpacity onPress={() => {
                   navigation.navigate('OtherUsersProfiles', {
                     userProfile: item,
                   });
                 }}>
                     <Text
                       style={{
-                        flex: 4,
-                        marginLeft: 25,
+                        // flex: 4,
+                        marginLeft: 5,
                         fontSize: 16,
                         fontWeight: "bold",
                         textAlign: "left",
@@ -126,7 +126,7 @@ const UserSearch = ({ navigation }) => {
                     >
                       {item.username}
                     </Text>
-                 </Pressable>
+                 </TouchableOpacity>
 
 
 
@@ -184,15 +184,15 @@ const styles = StyleSheet.create({
     height: 0.05 * height,
     flexDirection: "row",
     alignItems: "center",
-    flexDirection: "row",
     display: "flex",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
   },
   followButton: {
     alignSelf: "flex-end",
   },
   button: {
-    flex: 2,
+    // flex: 2,
+    left: 140,
     textAlign: "right",
     alignItems: "center",
     justifyContent: "center",
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(123,104,238, 1.0)",
     alignSelf: "flex-end",
     marginBottom: height * 0.05 * 0.16,
-    width: 150,
+    width: 120,
   },
   text: {
     fontSize: 16,
