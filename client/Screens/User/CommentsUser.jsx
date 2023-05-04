@@ -25,13 +25,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
 import LikeCommentView from "../../Components/LikeCommentView";
 import { height, width } from "../../styles";
+import { UserContext } from "../../Contexts/UserContext";
 
 const windowHeight = Dimensions.get("window").height;
 const displaceHeight = 300;
 
-const CommentContainer = ({ route, navigation }) => {
-  const { item } = route.params;
+const CommentContainer2 = ({ route, navigation }) => {
+
+  console.log("route:  ", route);
+
+
   const [text, onChangeText] = React.useState();
+
+  const { user, setUser } = React.useContext(UserContext);
+
 
   const [comments, setComments] = React.useState([]);
   const [commentIds, setCommentIds] = React.useState([]);
@@ -111,34 +118,15 @@ const CommentContainer = ({ route, navigation }) => {
       });
   };
 
-  const submitComment = async () => {
-    Keyboard.dismiss();
-    setScreenState(0);
-    await Client.post("comment", {
-      commentableId: item.id,
-      text: text,
-      type: !item.isChild ? "post" : "comment",
-    })
-      .then((res) => {
-        getComments();
-      })
-      .catch((error) => {
-        console.log("error comment: " + error);
-      });
-
-    onRefresh();
-  };
-
   const getComments = (refresh) => {
     if (!more && !refresh) return;
     const useSkip = refresh ? null : skip;
 
-    Client.get("comment/get-comments", {
+    Client.get("profile/comments", {
       params: {
-        limit: 25,
-        skip: useSkip,
-        commentableId: item.id,
-        type: !item.isChild ? "post" : "comment",
+        limit: 10,
+        cursor: "2023-05-12T21:04:30.752Z",
+        id: user.id,
       },
     })
       .then((res) => {
@@ -197,7 +185,7 @@ const CommentContainer = ({ route, navigation }) => {
             backgroundColor: "whitesmoke",
           }}
         >
-          {item.isChild ? (
+          {/* {item != undefined && item.isChild ? (
             <RenderOnce
               interactable={false}
               comment={item}
@@ -206,53 +194,17 @@ const CommentContainer = ({ route, navigation }) => {
             />
           ) : (
             <Post post={item} />
-          )}
+          )} */}
         </View>
         <View style={{ backgroundColor: "white" }}>{commentComponents}</View>
       </ScrollView>
-
-      <Animated.View
-        style={[
-          {
-            flexDirection: "column",
-            display: "flex",
-            width: "100%",
-          },
-          animateDetails,
-        ]}
-      >
-        <View style={styles2.typeComment}>
-          <Image
-            style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
-          />
-          <View style={styles2.input}>
-            <TextInput
-              placeholder="write a comment..."
-              style={{ flex: 4 }}
-              onFocus={() => setScreenState(1)}
-              onChangeText={(text) => onChangeText(text)}
-            />
-            <TouchableOpacity
-              style={[{ flex: 1 }]}
-              onPress={() => {
-                submitComment();
-              }}
-            >
-              <Text style={[{ fontSize: 14 }]}>{"Submit"}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={{ height: displaceHeight, backgroundColor: "white" }} />
-      </Animated.View>
     </View>
   );
 };
 
 const RenderOnce = React.memo(({ comment, navigation, interactable }) => {
   const goto = () => {
-    navigation.push("CommentContainer", {
+    navigation.push("CommentContainer2", {
       item: { ...comment, isChild: true },
     });
   };
@@ -335,7 +287,7 @@ const styles2 = StyleSheet.create({
     marginHorizontal: 20,
   },
   comments: {
-    height: windowHeight * 0.7,
+    height: windowHeight * 0.9,
     backgroundColor: "white",
   },
   typeComment: {
@@ -402,4 +354,4 @@ const styles2 = StyleSheet.create({
   },
 });
 
-export default CommentContainer;
+export default CommentContainer2;

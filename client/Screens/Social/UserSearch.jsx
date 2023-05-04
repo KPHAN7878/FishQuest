@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
+  Pressable,
 } from "react-native";
 import { Client } from "../../utils/connection";
 import { InputField } from "../../Components/InputField";
@@ -108,17 +109,27 @@ const UserSearch = ({ navigation }) => {
                   source={require("../../assets/profilePic.jpg")}
                 />
 
-                <Text
-                  style={{
-                    flex: 4,
-                    marginLeft: 25,
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
-                  {item.username}
-                </Text>
+
+                <TouchableOpacity onPress={() => {
+                  navigation.navigate('OtherUsersProfiles', {
+                    userProfile: item,
+                  });
+                }}>
+                    <Text
+                      style={{
+                        // flex: 4,
+                        marginLeft: 5,
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        textAlign: "left",
+                      }}
+                    >
+                      {item.username}
+                    </Text>
+                 </TouchableOpacity>
+
+
+
                 {item.id === user.id ? (
                   <TouchableOpacity
                     style={[styles.button, { backgroundColor: "green" }]}
@@ -173,15 +184,15 @@ const styles = StyleSheet.create({
     height: 0.05 * height,
     flexDirection: "row",
     alignItems: "center",
-    flexDirection: "row",
     display: "flex",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
   },
   followButton: {
     alignSelf: "flex-end",
   },
   button: {
-    flex: 2,
+    // flex: 2,
+    left: 140,
     textAlign: "right",
     alignItems: "center",
     justifyContent: "center",
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(123,104,238, 1.0)",
     alignSelf: "flex-end",
     marginBottom: height * 0.05 * 0.16,
-    width: 150,
+    width: 120,
   },
   text: {
     fontSize: 16,

@@ -16,13 +16,13 @@ import ImageView from "../../Components/ImageView";
 import { useNavigation } from "@react-navigation/native";
 import LikeCommentView from "../../Components/LikeCommentView";
 
-const Post = ({ post, interactable }) => {
+const LikedPost = ({ post, interactable }) => {
 
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    fetch(post.catch.imageUri)
+      fetch(post.likeContent.catch.imageUri)
       .then((res) => {
         if (res.status === 403) {
           setValid(false);
@@ -34,6 +34,9 @@ const Post = ({ post, interactable }) => {
         console.error(error);
       });
   }, []);
+    
+
+
 
   const likePost = async (postId) => {
     await Client.post("like/post", {
@@ -75,7 +78,7 @@ const Post = ({ post, interactable }) => {
               >
                 <Text style={styles.name}>{post.creator.username}</Text>
               </TouchableOpacity>
-              <Text style={styles.date}>{(post.createdAt).substring(0,10)}</Text>
+              <Text style={styles.date}>a few seconds ago</Text>
             </View>
           </View>
           <TouchableOpacity activeOpacity={0.2} onPress={() => {}}>
@@ -93,23 +96,23 @@ const Post = ({ post, interactable }) => {
         >
           <ImageView
             animated={false}
-            image={valid ? { uri: post.catch.imageUri } : undefined}
+            image={valid ? { uri: post.likeContent.catch.imageUri } : undefined}
           />
         </View>
 
         <LikeCommentView
           disableCommentGoto={!interactable}
           onPressLike={() => {
-            likePost(post.id);
+            likePost(post.likeContent.id);
           }}
           onPressComment={() => {
-            navigation.navigate("CommentContainer", { item: post });
+            // navigation.navigate("CommentContainer", { item: post });
           }}
           item={post}
         />
 
         <View style={styles.captionView}>
-          <Text style={styles.caption}>{post.text}</Text>
+          <Text style={styles.caption}>{post.likeContent.text}</Text>
         </View>
 
         {interactable && (
@@ -117,11 +120,11 @@ const Post = ({ post, interactable }) => {
             <TouchableOpacity
               activeOpacity={0.2}
               onPress={() => {
-                navigation.navigate("CommentContainer", { item: post });
+                // navigation.navigate("CommentContainer", { item: post });
               }}
             >
               <Text style={styles.viewCommentText}>
-                {"View " + post.commentValue + " Comments"}
+                {"View " + post.likeContent.commentValue + " Comments"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -225,4 +228,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Post;
+export default LikedPost;

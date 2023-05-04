@@ -17,6 +17,10 @@ import Catches from "./Screens/Logger/Catches";
 import CatchDetail from "./Screens/Logger/CatchDetail";
 import Map from "./Screens/Map/Map";
 import UserSearch from "./Screens/Social/UserSearch";
+import OtherUsersProfiles from "./Screens/User/OtherUsersProfiles";
+import Settings from "./Screens/User/Settings";
+import Likes from "./Screens/User/Likes";
+import CommentContainer2 from "./Screens/User/CommentsUser";
 
 const Stack = createNativeStackNavigator();
 
@@ -62,6 +66,18 @@ export default function App() {
             <Stack.Screen name="CreatePost" component={CreatePost} />
             <Stack.Screen name="Map" component={Map} />
             <Stack.Screen name="CatchDetail" component={CatchDetail} />
+          </Stack.Group>
+          <Stack.Group>
+            <Stack.Screen name="OtherUsersProfiles" component={OtherUsersProfiles} />
+          </Stack.Group>
+          <Stack.Group>
+            <Stack.Screen name="Settings" component={Settings} />
+          </Stack.Group>
+          <Stack.Group>
+            <Stack.Screen name="Likes" component={Likes} />
+          </Stack.Group>
+          <Stack.Group>
+            <Stack.Screen name="CommentContainer2" component={CommentContainer2} />
           </Stack.Group>
           <Stack.Screen
             name="SecureToken"
