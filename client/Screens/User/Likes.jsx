@@ -6,16 +6,16 @@ import { Client } from "../../utils/connection";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import isCloseToBottom from "../../utils/isCloseToBottom";
-import Post from "../Social/Post";
+import LikedPost from "./LikedPost";
 
 import { StackActions, NavigationActions, CommonActions  } from "@react-navigation/native";
 
 
 const RenderOnce = React.memo(({ post }) => {
-    return <Post interactable={true} post={post} />;
+    return <LikedPost interactable={true} post={post} />;
   });
 
-export const Likes = () => {
+export const Likes = ({ navigation}) => {
 
 
   const { user, setUser } = React.useContext(UserContext);
@@ -46,20 +46,9 @@ export const Likes = () => {
           },
         })
           .then((res) => {
-            // console.log("\n\nresss: ", res.data.likes);
-            
-            // const likes = res.data.likes;
-            // likes.forEach(like => {
-            //   const likeContent = like.likeContent;
-            //   console.log(likeContent);
-            // });
-        
-
                 const newPosts = [...res.data.likes].filter(
                 (p) => !postIds.includes(p.id)
                 );
-
-                console.log("\n\nnewPosts:   ", newPosts);
 
                 setPosts(newPosts);
                 setPostIds([...postIds, ...newPosts.map((p) => p.id)]);
@@ -67,19 +56,10 @@ export const Likes = () => {
                 const last = res.data.likes[res.data.likes.length - 1];
                 setMore(res.data.hasMore);
                 if (last) setCursor(last.createdAt);
-
-
-           // }
-
           })
           .catch((error) => {
             console.log(error);
           });
-
-
-    
-
-
   };
 
   const onRefresh = () => {
@@ -101,7 +81,7 @@ export const Likes = () => {
   const renderPosts = (posts) => {
     Promise.all(
       posts.map(async (p) => {
-        return <RenderOnce post={p} key={p.id} />;
+        return <RenderOnce post={p} key={p.likeContent.id} />;
       })
     )
       .then((newPostComponents) => {
@@ -122,14 +102,14 @@ export const Likes = () => {
 
 return (
   
-  <View style={{flex: 1,  backgroundColor: "#dff0f7"}}>
+  <View>
     <View style={styles.backView}>
         <TouchableOpacity style={styles.back} activeOpacity={0.2} onPress={() => {navigation.goBack();}}>
           <Ionicons name="chevron-back-sharp" size={24} color="black" />
         </TouchableOpacity>
     </View>
 
-    <View style={{ justifyContent: "center", alignItems: "center" }}>
+    <View style={{ justifyContent: "center", alignItems: "center", top: 80, paddingBottom: 200 }}>
       <ScrollView
         style={styles.posts}
         refreshControl={
@@ -148,8 +128,7 @@ return (
           {postComponents}
         </View>
       </ScrollView>
-    </View>
-  
+  </View>
   </View>
 );
 };
@@ -203,8 +182,8 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   backView: {
-    top: 50,
-    left: 10,
+    top: 60,
+    left: 30,
   },
   logoutBtn: {
     display: "flex",
@@ -230,8 +209,6 @@ const styles = StyleSheet.create({
   }
 
 });
-
-
 
 
 

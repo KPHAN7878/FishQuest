@@ -44,7 +44,9 @@ const LikeCommentView = (props) => {
               fontWeight: "bold",
             }}
           >
-            {item.likeValue + (hasLiked ? addValue : addValue)}
+            {item.likeContent != undefined && item.likeContent.likeValue + (hasLiked ? addValue : addValue)}
+            {item.likeContent == undefined && item.likeValue + (hasLiked ? addValue : addValue)}
+
           </Text>
         </View>
         <View style={[styles.item]}>
@@ -71,7 +73,9 @@ const LikeCommentView = (props) => {
               fontWeight: "bold",
             }}
           >
-            {item.commentValue}
+            {item.likeContent != undefined && item.likeContent.commentValue}
+            {item.likeContent == undefined && item.commentValue}
+
           </Text>
         </View>
       </View>

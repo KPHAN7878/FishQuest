@@ -136,14 +136,9 @@ useEffect(() => {
        </View>
      </View>
 
-     {/* <Pressable style={styles.formButton} onPress={logOut}>
-           <Text style={styles.buttonText}>{"LOG OUT"}</Text>
-     </Pressable> */}
-
      <View style={styles.postsView}>
        <Posts/>
      </View>
-     {/* <Posts/> */}
    </ScrollView>
 
     
@@ -161,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 50
  },
  scroll:{
-   
+   paddingBottom: 1350
  },
  postsView:{
    top: -750,
