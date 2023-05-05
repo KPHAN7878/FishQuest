@@ -9,8 +9,8 @@ module.exports = function (api) {
         {
           envName: "APP_ENV",
           moduleName: "@env",
-          path: ".env",
-          // path: ".env.production",
+          // path: ".env",
+          path: ".env.production",
           blocklist: null,
           allowlist: null,
           safe: false,

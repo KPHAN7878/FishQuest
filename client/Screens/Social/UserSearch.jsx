@@ -43,7 +43,16 @@ const UserSearch = ({ navigation }) => {
           },
         })
           .then((res) => {
-            setUsers(res.data);
+            const users = res.data.filter((value, index) => {
+              const _value = JSON.stringify(value);
+              return (
+                index ===
+                res.data.findIndex((obj) => {
+                  return JSON.stringify(obj) === _value;
+                })
+              );
+            });
+            setUsers(users);
           })
           .catch((error) => {
             console.log(error);

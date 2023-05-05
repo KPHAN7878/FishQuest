@@ -31,8 +31,6 @@ export const OtherUsersProfiles = ({ navigation, route }) => {
   }, []);
 
   const followButton = async (userId) => {
-    setIsFollowing(!isFollowing);
-
     const res = await Client.post("profile/follow", {
       userId,
     })
@@ -40,6 +38,8 @@ export const OtherUsersProfiles = ({ navigation, route }) => {
       .catch((error) => {
         console.log(error);
       });
+
+    setIsFollowing(!isFollowing);
     return res.data;
   };
 
@@ -51,6 +51,7 @@ export const OtherUsersProfiles = ({ navigation, route }) => {
       },
     })
       .then((res) => {
+        console.log(res.data);
         setFollowingNumber(res.data.following);
         setFollowersNumber(res.data.followers);
         setLoading(false);
@@ -61,25 +62,6 @@ export const OtherUsersProfiles = ({ navigation, route }) => {
   }, [isFollowing]);
 
   // set the button status ("follow"/"unfollow")
-  useEffect(() => {
-    Client.get("profile/get-users", {
-      params: {
-        limit: 25,
-        userId: user.id,
-        type: "following",
-      },
-    })
-      .then(async (res) => {
-        res.data.users.map((userFollowed) => {
-          if (userProfile.id == userFollowed.user.id) {
-            setIsFollowing(true);
-          }
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
 
   if (isLoading) {
     return <Text>Loading...</Text>;
