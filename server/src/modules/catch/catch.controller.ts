@@ -7,20 +7,18 @@ import {
   Get,
   ParseIntPipe,
   Param,
-  UploadedFile,
   Req,
   UseGuards,
   Query,
 } from "@nestjs/common";
 
-import { AdditionalInfo, Catch, Submission } from "./catch.dto";
-import multer, { diskStorage } from "multer";
+import { AdditionalInfo, Submission } from "./catch.dto";
+import multer from "multer";
 import { __prod__, IMG_FILE_LIMIT } from "../../constants";
 import { CatchService } from "./catch.service";
 import { CatchEntity } from "./catch.entity";
-import { Ctx, Paginated, PaginatedCursor } from "../../types";
+import { Ctx, Paginated } from "../../types";
 import { UserAuthGuard } from "../auth/auth.guard";
-import { Request } from "express";
 
 @Controller("catch")
 @UseGuards(new UserAuthGuard())
@@ -62,7 +60,6 @@ export default class CatchController {
     @Body() info: AdditionalInfo,
     @Body() { species }: { species: string }
   ) {
-    console.log(info, species);
     return await this.catchService.additionalInfo(info, species);
   }
 }

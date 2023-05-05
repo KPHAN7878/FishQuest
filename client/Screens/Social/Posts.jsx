@@ -97,7 +97,13 @@ const Posts = () => {
           <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+          if (
+            isCloseToBottom(nativeEvent) &&
+            !isFetching &&
+            !refreshing &&
+            more
+          ) {
+            setIsFetching(true);
             getSocialFeed(false);
           }
         }}

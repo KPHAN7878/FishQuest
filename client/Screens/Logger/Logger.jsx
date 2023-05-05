@@ -176,7 +176,13 @@ const Logger = ({ navigation }) => {
           <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+          if (
+            isCloseToBottom(nativeEvent) &&
+            !isFetching &&
+            !refreshing &&
+            more
+          ) {
+            setIsFetching(true);
             getCatches(false);
           }
         }}

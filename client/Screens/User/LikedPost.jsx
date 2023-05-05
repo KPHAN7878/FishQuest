@@ -17,12 +17,11 @@ import { useNavigation } from "@react-navigation/native";
 import LikeCommentView from "../../Components/LikeCommentView";
 
 const LikedPost = ({ post, interactable }) => {
-
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
 
   React.useEffect(() => {
-      fetch(post.likeContent.catch.imageUri)
+    fetch(post.likeContent.catch.imageUri)
       .then((res) => {
         if (res.status === 403) {
           setValid(false);
@@ -34,9 +33,14 @@ const LikedPost = ({ post, interactable }) => {
         console.error(error);
       });
   }, []);
-    
 
-
+  const postReducer = (post) => {
+    return {
+      ...post,
+      ...post.likeContent,
+      likeContent: undefined,
+    };
+  };
 
   const likePost = async (postId) => {
     await Client.post("like/post", {
@@ -63,17 +67,20 @@ const LikedPost = ({ post, interactable }) => {
           <View style={styles.userInfo}>
             <Image
               style={styles.profilePic}
-              resizeMode="cover"
-              source={require("../../assets/profilePic.jpg")}
+              source={
+                post.creator.profilePicUrl
+                  ? { uri: post.creator.profilePicUrl }
+                  : require("../../assets/profilePic.jpg")
+              }
             />
             <View style={styles.details}>
               <TouchableOpacity
                 style={{ textDecoration: "none", color: "inherit" }}
                 activeOpacity={0.2}
                 onPress={() => {
-                  navigation.navigate('OtherUsersProfiles', {
+                  navigation.navigate("OtherUsersProfiles", {
                     userProfile: post.creator,
-                  })    ;// `/users/${post.userId}`;
+                  });
                 }}
               >
                 <Text style={styles.name}>{post.creator.username}</Text>
@@ -106,7 +113,9 @@ const LikedPost = ({ post, interactable }) => {
             likePost(post.likeContent.id);
           }}
           onPressComment={() => {
-            // navigation.navigate("CommentContainer", { item: post });
+            navigation.navigate("CommentContainer", {
+              item: postReducer(post),
+            });
           }}
           item={post}
         />
@@ -120,7 +129,9 @@ const LikedPost = ({ post, interactable }) => {
             <TouchableOpacity
               activeOpacity={0.2}
               onPress={() => {
-                // navigation.navigate("CommentContainer", { item: post });
+                navigation.navigate("CommentContainer", {
+                  item: postReducer(post),
+                });
               }}
             >
               <Text style={styles.viewCommentText}>

@@ -1,28 +1,30 @@
 import React from "react";
-import { Text, View, Pressable, Image, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { UserContext } from "../../Contexts/UserContext";
-import { width, height } from "../../styles";
 import { Client } from "../../utils/connection";
 import { Ionicons } from "@expo/vector-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import isCloseToBottom from "../../utils/isCloseToBottom";
 import LikedPost from "./LikedPost";
 import { FontFamily, Color } from "../../GlobalStyles";
+import { RenderOnceComment } from "./CommentsUser";
 
-import { StackActions, NavigationActions, CommonActions  } from "@react-navigation/native";
-
-
+import { width } from "../../styles";
 const RenderOnce = React.memo(({ post }) => {
-    return <LikedPost interactable={true} post={post} />;
-  });
+  return <LikedPost interactable={true} post={post} />;
+});
 
-export const Likes = ({ navigation}) => {
-
-
+export const Likes = ({ navigation }) => {
   const { user, setUser } = React.useContext(UserContext);
 
-  const [posts, setPosts] = React.useState([]);
-  const [postIds, setPostIds] = React.useState([]);
+  const [items, setItems] = React.useState([]);
+  const [itemIds, setItemIds] = React.useState([]);
 
   const [isFetching, setIsFetching] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -31,36 +33,41 @@ export const Likes = ({ navigation}) => {
     new Date().toISOString().slice(0, 19)
   );
   const [more, setMore] = React.useState(true);
-  const [postComponents, setPostComponents] = React.useState([]);
+  const [itemComponents, setItemComponents] = React.useState([]);
+  const commentReducer = (c) => {
+    return {
+      ...c,
+      ...c.likeContent,
+      likeContent: undefined,
+    };
+  };
 
   const getSocialFeed = (refresh) => {
     if (!more && !refresh) return;
     const useCursor = refresh ? new Date().toISOString().slice(0, 19) : cursor;
 
-    console.log("get feed");
+    Client.get("profile/likes", {
+      params: {
+        limit: 10,
+        cursor: useCursor,
+        id: user.id,
+      },
+    })
+      .then((res) => {
+        const newItems = [...res.data.likes].filter(
+          (i) => !itemIds.includes(`${i.likeType}${i.id}`)
+        );
 
-        Client.get("profile/likes", {
-          params: {
-            limit: 10,
-            cursor: useCursor,
-            id: user.id
-          },
-        })
-          .then((res) => {
-                const newPosts = [...res.data.likes].filter(
-                (p) => !postIds.includes(p.id)
-                );
+        setItems(newItems);
+        setItemIds([...itemIds, ...newItems.map((p) => p.id)]);
 
-                setPosts(newPosts);
-                setPostIds([...postIds, ...newPosts.map((p) => p.id)]);
-
-                const last = res.data.likes[res.data.likes.length - 1];
-                setMore(res.data.hasMore);
-                if (last) setCursor(last.createdAt);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        const last = res.data.likes[res.data.likes.length - 1];
+        setMore(res.data.hasMore);
+        if (last) setCursor(last.createdAt);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const onRefresh = () => {
@@ -75,23 +82,33 @@ export const Likes = ({ navigation}) => {
   }, []);
 
   React.useEffect(() => {
-    console.log("render posts, ", posts.length);
-    renderPosts(posts);
-  }, [posts]);
+    renderItems(items);
+  }, [items]);
 
-  const renderPosts = (posts) => {
+  const renderItems = (items) => {
     Promise.all(
-      posts.map(async (p) => {
-       if(p.likeType == "post"){
-          return <RenderOnce post={p} key={p.likeContent.id} />;
+      items.map(async (i, idx) => {
+        const key = idx + itemComponents.length;
+        if (i.likeType === "post") {
+          return <RenderOnce post={i} key={key} />;
+        } else if (i.likeType === "comment") {
+          return (
+            <View style={{ width }} key={key}>
+              <RenderOnceComment
+                interactable={true}
+                comment={commentReducer(i)}
+                navigation={navigation}
+              />
+            </View>
+          );
         }
       })
     )
-      .then((newPostComponents) => {
+      .then((newItemComponents) => {
         setIsFetching(false);
-        setPostComponents(
-          (refreshing ? newPostComponents : postComponents).concat(
-            refreshing ? postComponents : newPostComponents
+        setItemComponents(
+          (refreshing ? newItemComponents : itemComponents).concat(
+            refreshing ? itemComponents : newItemComponents
           )
         );
 
@@ -101,12 +118,10 @@ export const Likes = ({ navigation}) => {
         console.log(error);
       });
   };
- 
 
-return (
-  
-  <View>
-    <View style={styles.headerBox}>
+  return (
+    <View>
+      <View style={styles.headerBox}>
         <Text style={styles.fishQuest}>Fish Quest</Text>
         <TouchableOpacity
           style={styles.back}
@@ -117,37 +132,51 @@ return (
         >
           <Ionicons name="chevron-back-sharp" size={24} color="black" />
         </TouchableOpacity>
-    </View>
+      </View>
 
-
-    <View style={{ justifyContent: "center", alignItems: "center", top: 0, paddingBottom: 320 }}>
-      <ScrollView
-        style={styles.posts}
-        refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
-        }
-        onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
-            getSocialFeed(false);
-          }
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          top: 0,
+          paddingBottom: 320,
         }}
-        scrollEventThrottle={400}
       >
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        <ScrollView
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+          }}
+          refreshControl={
+            <RefreshControl refreshing={isFetching} onRefresh={onRefresh} />
+          }
+          onScroll={({ nativeEvent }) => {
+            if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+              getSocialFeed(false);
+            }
+          }}
+          scrollEventThrottle={400}
         >
-          {postComponents}
-        </View>
-      </ScrollView>
-  </View>
-  </View>
-);
+          <View
+            style={{
+              backgroundColor: "white",
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
+            {itemComponents}
+          </View>
+        </ScrollView>
+      </View>
+    </View>
+  );
 };
-
 
 const styles = StyleSheet.create({
   pageLayout: {
-    top: 50
+    top: 50,
   },
   headerBox: {
     marginTop: 0,
@@ -175,7 +204,6 @@ const styles = StyleSheet.create({
   },
   back: {
     left: -30,
-
   },
   likeButtonContainer: {
     elevation: 8,
@@ -189,7 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     // justifyContent: "center",
     alignItems: "center",
-    marginBottom: 0
+    marginBottom: 0,
   },
   commentButtonContainer: {
     elevation: 8,
@@ -197,13 +225,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderLeftColor: "#dff0f7",
     borderRightColor: "#dff0f7",
-    borderTopColor: '#dff0f7',
+    borderTopColor: "#dff0f7",
     borderWidth: 1,
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 0
+    marginBottom: 0,
   },
   likeButtonText: {
     fontSize: 18,
@@ -216,7 +244,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     top: 30,
-    textAlign: "center"
+    textAlign: "center",
   },
   backView: {
     top: 60,
@@ -227,8 +255,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    top: 350
-
+    top: 350,
   },
   appButtonContainer: {
     elevation: 8,
@@ -236,22 +263,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    width: "25%"
+    width: "25%",
   },
   appButtonText: {
     fontSize: 18,
     color: "#fff",
     fontWeight: "bold",
     alignSelf: "center",
-  }
-
+  },
 });
 
-
-
-
 export default Likes;
-
-
-
-

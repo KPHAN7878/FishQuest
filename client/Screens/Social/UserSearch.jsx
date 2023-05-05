@@ -8,13 +8,17 @@ import {
   ScrollView,
   TouchableOpacity,
   Keyboard,
-  Pressable,
+  LogBox,
 } from "react-native";
 import { Client } from "../../utils/connection";
 import { InputField } from "../../Components/InputField";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "../../Contexts/UserContext";
+
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 var { height } = Dimensions.get("window");
 
@@ -23,6 +27,12 @@ const UserSearch = ({ navigation }) => {
   const [searchUser, setSearchUser] = useState([]);
   const { user } = React.useContext(UserContext);
   const searchUserRef = React.useRef();
+
+  const onGoBack = ({ username }) => {
+    setSearchUser(username);
+    searchFunction();
+    console.log(searchUser);
+  };
 
   const searchFunction = async () => {
     const getData = setTimeout(() => {
@@ -99,25 +109,38 @@ const UserSearch = ({ navigation }) => {
           usersList.map((item, idx) => {
             return (
               <View style={styles.usersView} key={idx}>
-                <Image
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 50,
-                    resizeMode: "contain",
+                <TouchableOpacity
+                  style={{ flex: 5 }}
+                  onPress={() => {
+                    navigation.navigate("OtherUsersProfiles", {
+                      userProfile: item,
+                      onGoBack,
+                    });
                   }}
-                  source={require("../../assets/profilePic.jpg")}
-                />
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      display: "flex",
+                    }}
+                  >
+                    <Image
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 50,
+                        resizeMode: "contain",
+                      }}
+                      source={
+                        item.profilePicUrl
+                          ? { uri: item.profilePicUrl }
+                          : require("../../assets/profilePic.jpg")
+                      }
+                    />
 
-
-                <TouchableOpacity onPress={() => {
-                  navigation.navigate('OtherUsersProfiles', {
-                    userProfile: item,
-                  });
-                }}>
                     <Text
                       style={{
-                        // flex: 4,
                         marginLeft: 5,
                         fontSize: 16,
                         fontWeight: "bold",
@@ -126,9 +149,8 @@ const UserSearch = ({ navigation }) => {
                     >
                       {item.username}
                     </Text>
-                 </TouchableOpacity>
-
-
+                  </View>
+                </TouchableOpacity>
 
                 {item.id === user.id ? (
                   <TouchableOpacity
@@ -191,8 +213,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   button: {
-    // flex: 2,
-    left: 140,
     textAlign: "right",
     alignItems: "center",
     justifyContent: "center",
@@ -201,8 +221,8 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: "rgba(123,104,238, 1.0)",
     alignSelf: "flex-end",
+    flex: 3,
     marginBottom: height * 0.05 * 0.16,
-    width: 120,
   },
   text: {
     fontSize: 16,

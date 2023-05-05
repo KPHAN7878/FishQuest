@@ -24,21 +24,13 @@ import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
 import LikeCommentView from "../../Components/LikeCommentView";
-import { height, width } from "../../styles";
 import { UserContext } from "../../Contexts/UserContext";
 
 const windowHeight = Dimensions.get("window").height;
 const displaceHeight = 300;
 
 const CommentContainer2 = ({ route, navigation }) => {
-
-  console.log("route:  ", route);
-
-
-  const [text, onChangeText] = React.useState();
-
   const { user, setUser } = React.useContext(UserContext);
-
 
   const [comments, setComments] = React.useState([]);
   const [commentIds, setCommentIds] = React.useState([]);
@@ -94,7 +86,7 @@ const CommentContainer2 = ({ route, navigation }) => {
     Promise.all(
       comments.map(async (c) => {
         return (
-          <RenderOnce
+          <RenderOnceComment
             interactable={true}
             comment={c}
             navigation={navigation}
@@ -172,7 +164,13 @@ const CommentContainer2 = ({ route, navigation }) => {
           />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+          if (
+            isCloseToBottom(nativeEvent) &&
+            !isFetching &&
+            !refreshing &&
+            more
+          ) {
+            setIsFetching(true);
             getComments(false);
           }
         }}
@@ -184,68 +182,73 @@ const CommentContainer2 = ({ route, navigation }) => {
             marginBottom: 20,
             backgroundColor: "whitesmoke",
           }}
-        >
-          {/* {item != undefined && item.isChild ? (
-            <RenderOnce
-              interactable={false}
-              comment={item}
-              navigation={navigation}
-              key={item.id}
-            />
-          ) : (
-            <Post post={item} />
-          )} */}
-        </View>
+        ></View>
         <View style={{ backgroundColor: "white" }}>{commentComponents}</View>
       </ScrollView>
     </View>
   );
 };
 
-const RenderOnce = React.memo(({ comment, navigation, interactable }) => {
-  const goto = () => {
-    navigation.push("CommentContainer2", {
-      item: { ...comment, isChild: true },
-    });
-  };
-  const likeComment = async () => {
-    await Client.post("like/comment", {
-      commentId: comment.id,
-    })
-      .then((res) => {})
-      .catch((error) => {
-        console.log(error);
+export const RenderOnceComment = React.memo(
+  ({ comment, navigation, interactable }) => {
+    const goto = () => {
+      navigation.push("CommentContainer2", {
+        item: { ...comment, isChild: true },
       });
-  };
-  return (
-    <Pressable onPress={interactable ? goto : () => {}}>
-      <View
-        style={{
-          paddingHorizontal: 20,
-        }}
-      >
-        <View key={comment.id} style={styles2.comment}>
-          <Image
-            style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
-          />
-          <View style={styles2.info}>
-            <Text style={styles2.userName}>{comment.creator.username}</Text>
-            <Text style={styles2.desc}>{comment.text}</Text>
+    };
+    const likeComment = async () => {
+      await Client.post("like/comment", {
+        commentId: comment.id,
+      })
+        .then((res) => {})
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+    return (
+      <Pressable onPress={interactable ? goto : () => {}}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+          }}
+        >
+          <View key={comment.id} style={styles2.comment}>
+            <TouchableOpacity
+              style={{ textDecoration: "none", color: "inherit" }}
+              activeOpacity={0.2}
+              onPress={() => {
+                navigation.navigate("OtherUsersProfiles", {
+                  userProfile: comment.creator,
+                });
+              }}
+            >
+              <Image
+                style={styles2.img}
+                source={
+                  comment.creator.profilePicUrl
+                    ? { uri: comment.creator.profilePicUrl }
+                    : require("../../assets/profilePic.jpg")
+                }
+              />
+            </TouchableOpacity>
+            <View style={styles2.info}>
+              <Text style={styles2.userName}>{comment.creator.username}</Text>
+              <Text style={styles2.desc}>{comment.text}</Text>
+            </View>
+            <Text style={styles2.date}>1 hour ago</Text>
           </View>
-          <Text style={styles2.date}>1 hour ago</Text>
+          <LikeCommentView
+            disableCommentGoto={!interactable}
+            onPressLike={likeComment}
+            onPressComment={goto}
+            item={comment}
+          />
+          <View style={styles2.line} />
         </View>
-        <LikeCommentView
-          disableCommentGoto={!interactable}
-          onPressLike={likeComment}
-          onPressComment={goto}
-          item={comment}
-        />
-        <View style={styles2.line} />
-      </View>
-    </Pressable>
-  );
-});
+      </Pressable>
+    );
+  }
+);
 
 const styles2 = StyleSheet.create({
   headerBox: {

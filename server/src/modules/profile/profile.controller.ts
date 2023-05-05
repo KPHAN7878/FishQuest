@@ -74,6 +74,11 @@ export class ProfileController {
     return await this.postService.myFeed(feedPagination, user);
   }
 
+  @Get("follow-count")
+  async followCount(@Query("userId") userId: number) {
+    return await this.userService.followCount(userId);
+  }
+
   @Post("change-profile-picture")
   changeProfilePic(
     @Req() { user: { id: myId } }: Ctx,

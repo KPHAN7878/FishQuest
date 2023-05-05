@@ -24,13 +24,15 @@ import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client } from "../../utils/connection";
 import LikeCommentView from "../../Components/LikeCommentView";
-import { height, width } from "../../styles";
+import { UserContext } from "../../Contexts/UserContext";
 
 const windowHeight = Dimensions.get("window").height;
 const displaceHeight = 300;
 
 const CommentContainer = ({ route, navigation }) => {
+  const { user, setUser } = React.useContext(UserContext);
   const { item } = route.params;
+
   const [text, onChangeText] = React.useState();
 
   const [comments, setComments] = React.useState([]);
@@ -184,7 +186,13 @@ const CommentContainer = ({ route, navigation }) => {
           />
         }
         onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent) && !isFetching && !refreshing) {
+          if (
+            isCloseToBottom(nativeEvent) &&
+            !isFetching &&
+            !refreshing &&
+            more
+          ) {
+            setIsFetching(true);
             getComments(false);
           }
         }}
@@ -224,7 +232,11 @@ const CommentContainer = ({ route, navigation }) => {
         <View style={styles2.typeComment}>
           <Image
             style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
+            source={
+              user.profilePicUrl
+                ? { uri: user.profilePicUrl }
+                : require("../../assets/profilePic.jpg")
+            }
           />
           <View style={styles2.input}>
             <TextInput
@@ -273,10 +285,24 @@ const RenderOnce = React.memo(({ comment, navigation, interactable }) => {
         }}
       >
         <View key={comment.id} style={styles2.comment}>
-          <Image
-            style={styles2.img}
-            source={require("../../assets/profilePic.jpg")}
-          />
+          <TouchableOpacity
+            style={{ textDecoration: "none", color: "inherit" }}
+            activeOpacity={0.2}
+            onPress={() => {
+              navigation.navigate("OtherUsersProfiles", {
+                userProfile: comment.creator,
+              });
+            }}
+          >
+            <Image
+              style={styles2.img}
+              source={
+                comment.creator.profilePicUrl
+                  ? { uri: comment.creator.profilePicUrl }
+                  : require("../../assets/profilePic.jpg")
+              }
+            />
+          </TouchableOpacity>
           <View style={styles2.info}>
             <Text style={styles2.userName}>{comment.creator.username}</Text>
             <Text style={styles2.desc}>{comment.text}</Text>

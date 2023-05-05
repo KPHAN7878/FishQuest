@@ -62,7 +62,7 @@ export const CameraView = ({ navigation }) => {
   const [{ data: result, loading: _, error: catchError }, submitCatch] =
     useAxios(
       {
-        url: `${API_URL}catch`,
+        url: `${API_URL}/catch`,
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",

@@ -17,8 +17,6 @@ export class ProfileService {
   ) {}
 
   async follow(followId: number, user: UserEntity): Promise<boolean> {
-    console.log("followId: " + followId);
-    console.log("current user: " + JSON.stringify(user));
     if (followId === user.id) {
       return false;
     }
@@ -82,6 +80,21 @@ export class ProfileService {
       users: users.slice(0, realLimit),
       hasMore: users.length === realLimitPlusOne,
     };
+  }
+
+  async followCount(userId: number) {
+    const [follow]: { followers: number; following: number }[] =
+      await dataSource.query(
+        `
+          select
+          (select count(*) as followers from rfollowers 
+          where "userEntityId_2" = '${userId}'),
+          (select count(*) as following from rfollowing 
+          where "userEntityId_2" = '${userId}')
+      `
+      );
+
+    return follow;
   }
 
   //testing update user profile information

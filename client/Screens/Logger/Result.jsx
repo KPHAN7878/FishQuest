@@ -198,7 +198,10 @@ const Result = ({ route, navigation }) => {
       >
         <View style={{ flexDirection: "row" }}>
           <Text style={[myStyles.detailText, { textAlign: "left" }]}>
-            Time: {timeDate.toLocaleTimeString()}
+            Time:{" "}
+            {timeDate.toLocaleTimeString([], {
+              timeStyle: "short",
+            })}
           </Text>
 
           <Text style={[myStyles.detailText, { textAlign: "right" }]}>

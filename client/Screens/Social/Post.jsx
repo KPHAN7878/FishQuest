@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React from "react";
 export const { height, width } = Dimensions.get("window");
 import {
   View,
@@ -17,7 +17,6 @@ import { useNavigation } from "@react-navigation/native";
 import LikeCommentView from "../../Components/LikeCommentView";
 
 const Post = ({ post, interactable }) => {
-
   const [valid, setValid] = React.useState(false);
   const navigation = useNavigation();
 
@@ -57,27 +56,35 @@ const Post = ({ post, interactable }) => {
     >
       <View style={styles.container}>
         <View style={styles.user}>
-          <View style={styles.userInfo}>
-            <Image
-              style={styles.profilePic}
-              resizeMode="cover"
-              source={require("../../assets/profilePic.jpg")}
-            />
-            <View style={styles.details}>
-              <TouchableOpacity
-                style={{ textDecoration: "none", color: "inherit" }}
-                activeOpacity={0.2}
-                onPress={() => {
-                  navigation.navigate('OtherUsersProfiles', {
-                    userProfile: post.creator,
-                  })    ;// `/users/${post.userId}`;
-                }}
-              >
+          <TouchableOpacity
+            style={{ textDecoration: "none", color: "inherit" }}
+            activeOpacity={0.2}
+            onPress={() => {
+              navigation.navigate("OtherUsersProfiles", {
+                userProfile: post.creator,
+              });
+            }}
+          >
+            <View style={styles.userInfo}>
+              <Image
+                style={styles.profilePic}
+                source={
+                  post.creator.profilePicUrl
+                    ? { uri: post.creator.profilePicUrl }
+                    : require("../../assets/profilePic.jpg")
+                }
+              />
+              <View style={styles.details}>
                 <Text style={styles.name}>{post.creator.username}</Text>
-              </TouchableOpacity>
-              <Text style={styles.date}>{(post.createdAt).substring(0,10)}</Text>
+                <Text style={styles.date}>
+                  {post.createdAt.substring(0, 10)}{" "}
+                  {new Date(post.createdAt).toLocaleTimeString([], {
+                    timeStyle: "short",
+                  })}
+                </Text>
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.2} onPress={() => {}}>
             <Ionicons name="ellipsis-horizontal" size={24} color="black" />
           </TouchableOpacity>
