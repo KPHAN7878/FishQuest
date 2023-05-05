@@ -192,7 +192,7 @@ const CommentContainer2 = ({ route, navigation }) => {
 export const RenderOnceComment = React.memo(
   ({ comment, navigation, interactable }) => {
     const goto = () => {
-      navigation.push("CommentContainer2", {
+      navigation.push("CommentContainer", {
         item: { ...comment, isChild: true },
       });
     };
