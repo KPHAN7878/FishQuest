@@ -90,7 +90,7 @@ const CatchDetail = ({ route, navigation }) => {
           borderBottomWidth: 1,
         }}
       >
-        <Text style={myStyles.header}>{`You caught a ${result.species}!`}</Text>
+        <Text style={myStyles.header}>{`${result.species}!`}</Text>
       </View>
 
       <View
