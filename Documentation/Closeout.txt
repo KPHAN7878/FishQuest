@@ -1,0 +1,3 @@
+Blog Post -   https://blog.uta.edu/cseseniordesign/2023/04/19/fishquest/
+Demo Video -  https://www.youtube.com/watch?v=lwrxYItqoUE
+Source Code - https://github.com/KPHAN7878/FishQuest
